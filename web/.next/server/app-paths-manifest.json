@@ -1,0 +1,6 @@
+{
+  "/thumbnails/page": "app/thumbnails/page.js",
+  "/compare/page": "app/compare/page.js",
+  "/page": "app/page.js",
+  "/clustering/page": "app/clustering/page.js"
+}
