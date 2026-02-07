@@ -10,7 +10,10 @@
       "Bash(curl:*)",
       "Bash(python scripts/ingest_dataset.py:*)",
       "Bash(python scripts/run_pipeline.py:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(pip3 install:*)",
+      "Bash(source venv/bin/activate)",
+      "Bash(brew install:*)"
     ]
   }
 }

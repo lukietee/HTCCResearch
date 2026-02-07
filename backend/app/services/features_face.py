@@ -1,12 +1,13 @@
-"""Face feature extraction module using MediaPipe."""
+"""Face feature extraction module using MediaPipe Tasks API."""
 
 from typing import Dict, Any, List, Tuple, Optional
+from pathlib import Path
 import numpy as np
 
 try:
     import mediapipe as mp
-    from mediapipe.python.solutions import face_mesh as mp_face_mesh
-    from mediapipe.python.solutions import face_detection as mp_face_detection
+    from mediapipe.tasks import python as mp_tasks
+    from mediapipe.tasks.python import vision
 
     MEDIAPIPE_AVAILABLE = True
 except ImportError:
@@ -16,6 +17,10 @@ from app.core.config import settings
 from app.utils.images import load_image_rgb, get_image_area
 from app.utils.math import euclidean_distance, safe_divide
 
+# Model paths - relative to backend directory
+MODEL_DIR = Path(__file__).parent.parent.parent / "models"
+FACE_DETECTOR_MODEL = MODEL_DIR / "blaze_face_short_range.tflite"
+FACE_LANDMARKER_MODEL = MODEL_DIR / "face_landmarker.task"
 
 # MediaPipe FaceMesh landmark indices for emotion proxies
 # Reference: https://github.com/google/mediapipe/blob/master/mediapipe/modules/face_geometry/data/canonical_face_model_uv_visualization.png
@@ -64,6 +69,20 @@ def extract_face_features(image_path: str) -> Dict[str, Any]:
             "error": "mediapipe not available",
         }
 
+    # Check if model files exist
+    if not FACE_DETECTOR_MODEL.exists():
+        return {
+            "face_count": 0,
+            "largest_face_area_ratio": 0.0,
+            "avg_face_area_ratio": 0.0,
+            "emotion_proxies": {
+                "smile_score": 0.0,
+                "mouth_open_score": 0.0,
+                "brow_raise_score": 0.0,
+            },
+            "error": f"face detector model not found at {FACE_DETECTOR_MODEL}",
+        }
+
     img = load_image_rgb(image_path, max_size=settings.MAX_IMAGE_SIZE)
     if img is None:
         return {}
@@ -72,7 +91,7 @@ def extract_face_features(image_path: str) -> Dict[str, Any]:
     img_area = img_height * img_width
 
     # First, detect faces to get count and bounding boxes
-    face_boxes = detect_faces(img)
+    face_boxes = detect_faces(img, img_width, img_height)
     face_count = len(face_boxes)
 
     if face_count == 0:
@@ -92,8 +111,8 @@ def extract_face_features(image_path: str) -> Dict[str, Any]:
     largest_face_area_ratio = safe_divide(max(face_areas), img_area)
     avg_face_area_ratio = safe_divide(sum(face_areas) / len(face_areas), img_area)
 
-    # Get emotion proxies from the largest face using FaceMesh
-    emotion_proxies = extract_emotion_proxies(img, face_boxes)
+    # Get emotion proxies from the largest face using FaceLandmarker
+    emotion_proxies = extract_emotion_proxies(image_path)
 
     return {
         "face_count": face_count,
@@ -103,56 +122,58 @@ def extract_face_features(image_path: str) -> Dict[str, Any]:
     }
 
 
-def detect_faces(img: np.ndarray) -> List[Dict]:
+def detect_faces(img: np.ndarray, img_width: int, img_height: int) -> List[Dict]:
     """
-    Detect faces in an image using MediaPipe Face Detection.
+    Detect faces in an image using MediaPipe Face Detection Tasks API.
 
     Args:
         img: RGB image array
+        img_width: Image width in pixels
+        img_height: Image height in pixels
 
     Returns:
         List of face bounding boxes with x, y, width, height
     """
     face_boxes = []
 
-    with mp_face_detection.FaceDetection(
-        model_selection=1,  # 1 for full range (better for various distances)
-        min_detection_confidence=0.5,
-    ) as face_detection:
-        results = face_detection.process(img)
+    try:
+        # Create FaceDetector
+        base_options = mp_tasks.BaseOptions(model_asset_path=str(FACE_DETECTOR_MODEL))
+        options = vision.FaceDetectorOptions(
+            base_options=base_options,
+            min_detection_confidence=0.5,
+        )
 
-        if results.detections:
-            img_height, img_width = img.shape[:2]
+        with vision.FaceDetector.create_from_options(options) as detector:
+            # Create MediaPipe Image from numpy array
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
 
-            for detection in results.detections:
-                bbox = detection.location_data.relative_bounding_box
+            # Detect faces
+            detection_result = detector.detect(mp_image)
 
-                # Convert relative to absolute coordinates
-                x = int(bbox.xmin * img_width)
-                y = int(bbox.ymin * img_height)
-                w = int(bbox.width * img_width)
-                h = int(bbox.height * img_height)
+            for detection in detection_result.detections:
+                bbox = detection.bounding_box
 
                 face_boxes.append({
-                    "x": max(0, x),
-                    "y": max(0, y),
-                    "width": w,
-                    "height": h,
-                    "confidence": detection.score[0] if detection.score else 0.0,
+                    "x": max(0, bbox.origin_x),
+                    "y": max(0, bbox.origin_y),
+                    "width": bbox.width,
+                    "height": bbox.height,
+                    "confidence": detection.categories[0].score if detection.categories else 0.0,
                 })
+    except Exception as e:
+        # Return empty list on error
+        pass
 
     return face_boxes
 
 
-def extract_emotion_proxies(
-    img: np.ndarray, face_boxes: List[Dict]
-) -> Dict[str, float]:
+def extract_emotion_proxies(image_path: str) -> Dict[str, float]:
     """
-    Extract emotion proxy scores using MediaPipe FaceMesh.
+    Extract emotion proxy scores using MediaPipe FaceLandmarker Tasks API.
 
     Args:
-        img: RGB image array
-        face_boxes: List of detected face bounding boxes
+        image_path: Path to the image file
 
     Returns:
         Dictionary with smile_score, mouth_open_score, brow_raise_score
@@ -163,30 +184,39 @@ def extract_emotion_proxies(
         "brow_raise_score": 0.0,
     }
 
-    if not face_boxes:
+    if not FACE_LANDMARKER_MODEL.exists():
         return default_proxies
 
-    # Use full image for FaceMesh (it handles face detection internally)
-    with mp_face_mesh.FaceMesh(
-        static_image_mode=True,
-        max_num_faces=1,
-        refine_landmarks=True,
-        min_detection_confidence=0.5,
-    ) as face_mesh:
-        results = face_mesh.process(img)
+    try:
+        # Create FaceLandmarker
+        base_options = mp_tasks.BaseOptions(model_asset_path=str(FACE_LANDMARKER_MODEL))
+        options = vision.FaceLandmarkerOptions(
+            base_options=base_options,
+            num_faces=1,
+            min_face_detection_confidence=0.5,
+            min_face_presence_confidence=0.5,
+            min_tracking_confidence=0.5,
+        )
 
-        if not results.multi_face_landmarks:
-            return default_proxies
+        with vision.FaceLandmarker.create_from_options(options) as landmarker:
+            # Load image using MediaPipe
+            mp_image = mp.Image.create_from_file(image_path)
+            img_width = mp_image.width
+            img_height = mp_image.height
 
-        landmarks = results.multi_face_landmarks[0].landmark
-        img_height, img_width = img.shape[:2]
+            # Detect face landmarks
+            result = landmarker.detect(mp_image)
 
-        # Convert landmarks to pixel coordinates
-        def get_point(idx: int) -> Tuple[float, float]:
-            lm = landmarks[idx]
-            return (lm.x * img_width, lm.y * img_height)
+            if not result.face_landmarks:
+                return default_proxies
 
-        try:
+            landmarks = result.face_landmarks[0]
+
+            # Convert landmarks to pixel coordinates
+            def get_point(idx: int) -> Tuple[float, float]:
+                lm = landmarks[idx]
+                return (lm.x * img_width, lm.y * img_height)
+
             # Calculate smile score (mouth corner distance / mouth width)
             mouth_left = get_point(LANDMARKS["mouth_left"])
             mouth_right = get_point(LANDMARKS["mouth_right"])
@@ -231,8 +261,8 @@ def extract_emotion_proxies(
                 "brow_raise_score": round(brow_raise_score, 4),
             }
 
-        except (IndexError, KeyError):
-            return default_proxies
+    except Exception:
+        return default_proxies
 
 
 def get_face_stats(features: Dict[str, Any]) -> Dict[str, Any]:

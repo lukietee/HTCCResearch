@@ -1,0 +1,20 @@
+# Thumbnail data
+backend/data/thumbnails/
+
+# OS files
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+backend/.venv/
+backend/venv/
+
+# Node
+web/node_modules/
+
+# Next.js build
+web/.next/
+
+# Database
+*.db
