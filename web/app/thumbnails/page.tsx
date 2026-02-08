@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getThumbnails, getThumbnailImageUrl } from '@/lib/api'
 import type { Thumbnail, ThumbnailListResponse } from '@/lib/types'
-
-const GROUPS = ['', 'mrbeast', 'modern', 'historical']
+import { GROUPS, getGroupColor } from '@/lib/constants'
 const SORT_OPTIONS = [
   { value: 'id', label: 'ID' },
   { value: 'year', label: 'Year' },
@@ -79,8 +78,8 @@ export default function ThumbnailsPage() {
               className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
             >
               <option value="">All Groups</option>
-              {GROUPS.filter(g => g).map((g) => (
-                <option key={g} value={g} className="capitalize">
+              {GROUPS.map((g) => (
+                <option key={g} value={g}>
                   {g}
                 </option>
               ))}
@@ -184,11 +183,10 @@ export default function ThumbnailsPage() {
                     }}
                   />
                   <div className="absolute top-2 left-2">
-                    <span className={`px-2 py-1 text-xs font-medium rounded ${
-                      thumb.group === 'mrbeast' ? 'bg-blue-100 text-blue-800' :
-                      thumb.group === 'modern' ? 'bg-green-100 text-green-800' :
-                      'bg-amber-100 text-amber-800'
-                    }`}>
+                    <span
+                      className="px-2 py-1 text-xs font-medium rounded text-white"
+                      style={{ backgroundColor: getGroupColor(thumb.group) }}
+                    >
                       {thumb.group}
                     </span>
                   </div>

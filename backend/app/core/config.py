@@ -32,7 +32,11 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"]
 
     # Groups
-    VALID_GROUPS: list[str] = ["mrbeast", "modern", "historical"]
+    VALID_GROUPS: list[str] = [
+        "mrbeast",
+        "2015", "2016", "2017", "2018", "2019",
+        "2020", "2021", "2022", "2023", "2024", "2025",
+    ]
 
     class Config:
         env_file = ".env"

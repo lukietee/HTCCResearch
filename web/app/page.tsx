@@ -16,12 +16,7 @@ import {
 import { getOverviewStats, getPipelineStatus } from '@/lib/api'
 import type { OverviewStats, PipelineStatus } from '@/lib/types'
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b']
-const GROUP_COLORS: Record<string, string> = {
-  mrbeast: '#3b82f6',
-  modern: '#10b981',
-  historical: '#f59e0b',
-}
+import { getGroupColor } from '@/lib/constants'
 
 export default function Dashboard() {
   const [overview, setOverview] = useState<OverviewStats | null>(null)
@@ -72,7 +67,7 @@ export default function Dashboard() {
   const groupData = Object.entries(overview.by_group).map(([name, count]) => ({
     name,
     count,
-    fill: GROUP_COLORS[name] || '#6b7280',
+    fill: getGroupColor(name),
   }))
 
   const yearData = Object.entries(overview.by_year)

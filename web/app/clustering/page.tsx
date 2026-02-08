@@ -20,11 +20,7 @@ import {
 } from '@/lib/api'
 import type { ClusterPoint, ClusteringResult } from '@/lib/types'
 
-const GROUP_COLORS: Record<string, string> = {
-  mrbeast: '#3b82f6',
-  modern: '#10b981',
-  historical: '#f59e0b',
-}
+import { getGroupColor } from '@/lib/constants'
 
 const CLUSTER_COLORS = [
   '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6',
@@ -197,29 +193,42 @@ export default function ClusteringPage() {
                   <tr>
                     <th className="text-left py-1 pr-4">Cluster</th>
                     <th className="text-left py-1 pr-4">Total</th>
-                    <th className="text-left py-1 pr-4">MrBeast</th>
-                    <th className="text-left py-1 pr-4">Modern</th>
-                    <th className="text-left py-1 pr-4">Historical</th>
+                    {Object.keys(
+                      Object.values(result.cluster_stats).reduce<Record<string, boolean>>((acc, s) => {
+                        Object.keys(s.groups).forEach(g => { acc[g] = true })
+                        return acc
+                      }, {})
+                    ).sort().map(g => (
+                      <th key={g} className="text-left py-1 pr-4">{g}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(result.cluster_stats).map(([clusterId, stats]) => (
-                    <tr key={clusterId}>
-                      <td className="py-1 pr-4">
-                        <span className="flex items-center">
-                          <span
-                            className="w-3 h-3 rounded-full mr-2"
-                            style={{ backgroundColor: CLUSTER_COLORS[parseInt(clusterId)] }}
-                          />
-                          Cluster {clusterId}
-                        </span>
-                      </td>
-                      <td className="py-1 pr-4">{stats.count}</td>
-                      <td className="py-1 pr-4">{stats.groups.mrbeast || 0}</td>
-                      <td className="py-1 pr-4">{stats.groups.modern || 0}</td>
-                      <td className="py-1 pr-4">{stats.groups.historical || 0}</td>
-                    </tr>
-                  ))}
+                  {Object.entries(result.cluster_stats).map(([clusterId, stats]) => {
+                    const allGroups = Object.keys(
+                      Object.values(result.cluster_stats).reduce<Record<string, boolean>>((acc, s) => {
+                        Object.keys(s.groups).forEach(g => { acc[g] = true })
+                        return acc
+                      }, {})
+                    ).sort()
+                    return (
+                      <tr key={clusterId}>
+                        <td className="py-1 pr-4">
+                          <span className="flex items-center">
+                            <span
+                              className="w-3 h-3 rounded-full mr-2"
+                              style={{ backgroundColor: CLUSTER_COLORS[parseInt(clusterId)] }}
+                            />
+                            Cluster {clusterId}
+                          </span>
+                        </td>
+                        <td className="py-1 pr-4">{stats.count}</td>
+                        {allGroups.map(g => (
+                          <td key={g} className="py-1 pr-4">{stats.groups[g] || 0}</td>
+                        ))}
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -269,7 +278,7 @@ export default function ClusteringPage() {
                     data={groupPoints}
                     fill={
                       colorBy === 'group'
-                        ? GROUP_COLORS[key] || '#6b7280'
+                        ? getGroupColor(key)
                         : CLUSTER_COLORS[index % CLUSTER_COLORS.length]
                     }
                     onClick={(data) => setSelectedPoint(data)}

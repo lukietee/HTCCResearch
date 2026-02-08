@@ -13,6 +13,7 @@ import {
 } from 'recharts'
 import { compareGroups, getDistribution } from '@/lib/api'
 import type { CompareStats, DistributionStats } from '@/lib/types'
+import { GROUPS, getGroupColor } from '@/lib/constants'
 
 const FEATURES = [
   { value: 'color.avg_saturation', label: 'Average Saturation' },
@@ -28,12 +29,6 @@ const FEATURES = [
   { value: 'depth.foreground_ratio', label: 'Foreground Ratio' },
 ]
 
-const GROUP_COLORS: Record<string, string> = {
-  mrbeast: '#3b82f6',
-  modern: '#10b981',
-  historical: '#f59e0b',
-}
-
 export default function ComparePage() {
   const [selectedFeature, setSelectedFeature] = useState(FEATURES[0].value)
   const [compareData, setCompareData] = useState<CompareStats | null>(null)
@@ -46,18 +41,14 @@ export default function ComparePage() {
       setLoading(true)
       setError(null)
       try {
-        const [compare, mrBeast, modern, historical] = await Promise.all([
+        const [compare, ...groupDists] = await Promise.all([
           compareGroups(selectedFeature),
-          getDistribution(selectedFeature, 'mrbeast'),
-          getDistribution(selectedFeature, 'modern'),
-          getDistribution(selectedFeature, 'historical'),
+          ...GROUPS.map(g => getDistribution(selectedFeature, g)),
         ])
         setCompareData(compare)
-        setDistributions({
-          mrbeast: mrBeast,
-          modern: modern,
-          historical: historical,
-        })
+        const distMap: Record<string, DistributionStats> = {}
+        GROUPS.forEach((g, i) => { distMap[g] = groupDists[i] })
+        setDistributions(distMap)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch data')
       } finally {
@@ -75,7 +66,7 @@ export default function ComparePage() {
         group,
         mean: stats.mean,
         median: stats.median,
-        fill: GROUP_COLORS[group] || '#6b7280',
+        fill: getGroupColor(group),
       }))
     : []
 
@@ -184,7 +175,7 @@ export default function ComparePage() {
                           <div className="flex items-center">
                             <div
                               className="w-3 h-3 rounded-full mr-2"
-                              style={{ backgroundColor: GROUP_COLORS[group] }}
+                              style={{ backgroundColor: getGroupColor(group) }}
                             />
                             <span className="capitalize font-medium">{group}</span>
                           </div>
@@ -250,9 +241,9 @@ export default function ComparePage() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="mrbeast" fill={GROUP_COLORS.mrbeast} name="MrBeast" />
-                    <Bar dataKey="modern" fill={GROUP_COLORS.modern} name="Modern" />
-                    <Bar dataKey="historical" fill={GROUP_COLORS.historical} name="Historical" />
+                    {GROUPS.map(g => (
+                      <Bar key={g} dataKey={g} fill={getGroupColor(g)} name={g} />
+                    ))}
                   </BarChart>
                 </ResponsiveContainer>
               </div>
