@@ -71,6 +71,30 @@ export default function ClusteringPage() {
     }
   }
 
+  // Compute axis domains from percentiles so outliers don't compress the view
+  const axisDomains = (() => {
+    if (points.length === 0) return { x: [-5, 5] as [number, number], y: [-5, 5] as [number, number] }
+    const sorted = (arr: number[]) => [...arr].sort((a, b) => a - b)
+    const percentile = (arr: number[], p: number) => {
+      const s = sorted(arr)
+      const i = Math.floor(s.length * p)
+      return s[Math.min(i, s.length - 1)]
+    }
+    const xs = points.map(p => p.x)
+    const ys = points.map(p => p.y)
+    const pad = 0.15 // 15% padding
+    const xMin = percentile(xs, 0.02)
+    const xMax = percentile(xs, 0.98)
+    const yMin = percentile(ys, 0.02)
+    const yMax = percentile(ys, 0.98)
+    const xPad = (xMax - xMin) * pad
+    const yPad = (yMax - yMin) * pad
+    return {
+      x: [xMin - xPad, xMax + xPad] as [number, number],
+      y: [yMin - yPad, yMax + yPad] as [number, number],
+    }
+  })()
+
   // Group points by color criteria
   const groupedPoints: Record<string, ClusterPoint[]> = {}
 
@@ -260,13 +284,15 @@ export default function ClusteringPage() {
                   type="number"
                   dataKey="x"
                   name="PC1"
-                  domain={['auto', 'auto']}
+                  domain={axisDomains.x}
+                  allowDataOverflow
                 />
                 <YAxis
                   type="number"
                   dataKey="y"
                   name="PC2"
-                  domain={['auto', 'auto']}
+                  domain={axisDomains.y}
+                  allowDataOverflow
                 />
                 <ZAxis range={[50, 50]} />
                 <Tooltip content={<CustomTooltip />} />

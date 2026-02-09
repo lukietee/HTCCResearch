@@ -21,3 +21,5 @@ web/.next/
 
 # Claude Code
 .claude/
+
+outputs/
