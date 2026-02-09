@@ -8,20 +8,20 @@ export const GROUPS = [
 /** Year-only groups (excludes mrbeast). */
 export const YEAR_GROUPS = GROUPS.filter(g => g !== 'mrbeast');
 
-/** Color mapping for each group. */
+/** Color mapping for each group -- maximally distinct hues. */
 export const GROUP_COLORS: Record<string, string> = {
-  mrbeast: '#3b82f6',
-  '2015': '#9333ea',
-  '2016': '#a855f7',
-  '2017': '#ec4899',
-  '2018': '#f43f5e',
-  '2019': '#ef4444',
-  '2020': '#f97316',
-  '2021': '#eab308',
-  '2022': '#22c55e',
-  '2023': '#14b8a6',
-  '2024': '#06b6d4',
-  '2025': '#6366f1',
+  mrbeast: '#e6194b',
+  '2015': '#3cb44b',
+  '2016': '#4363d8',
+  '2017': '#f58231',
+  '2018': '#911eb4',
+  '2019': '#42d4f4',
+  '2020': '#f032e6',
+  '2021': '#bfef45',
+  '2022': '#fabed4',
+  '2023': '#469990',
+  '2024': '#dcbeff',
+  '2025': '#000075',
 };
 
 /** Get color for a group, with fallback. */
