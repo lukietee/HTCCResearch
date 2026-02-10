@@ -1,198 +1,105 @@
-# MrBeast Thumbnail Evolution Analyzer
+# The MrBeast Effect: A Computational Analysis of YouTube Thumbnail Evolution (2014–2025)
 
-A complete system for analyzing YouTube thumbnail visual features with a Python backend and Next.js dashboard.
+## Overview
 
-## Project Structure
+This research project investigates how YouTube thumbnail design has evolved over the past decade, with a particular focus on the influence of MrBeast’s distinctive visual style. By applying computational vision techniques to large thumbnail datasets, the study examines whether modern trending thumbnails have converged toward stylistic features popularized by MrBeast.
 
-```
-HTCCResearch/
-├── backend/
-│   ├── app/
-│   │   ├── api/            # FastAPI endpoints
-│   │   ├── core/           # Config and database
-│   │   ├── models/         # SQLAlchemy models
-│   │   ├── services/       # Feature extraction & pipeline
-│   │   └── utils/          # Helper functions
-│   ├── scripts/            # CLI scripts
-│   ├── data/thumbnails/    # Input images
-│   │   ├── mrbeast/
-│   │   ├── modern/
-│   │   └── historical/
-│   └── outputs/            # Generated files
-└── web/                    # Next.js dashboard
-    ├── app/                # Pages
-    └── lib/                # API client & types
-```
+The project is designed as an empirical, data-driven analysis suitable for academic research, including conference submission and reproducibility.
 
-## Prerequisites
+## Research Questions
 
-- Python 3.11+
-- Node.js 18+
-- Tesseract OCR (for text detection)
+* How did MrBeast’s thumbnail style influence broader YouTube thumbnail design?
+* Did visual attributes such as color, composition, facial expressions, or depth change over time?
+* Do modern thumbnails cluster closer to MrBeast thumbnails than historical ones?
+* Which visual features are most strongly associated with high-performing videos?
 
-### Install Tesseract (macOS)
-```bash
-brew install tesseract
-```
+## Datasets
 
-## Setup
+The analysis uses three curated thumbnail datasets:
 
-### Backend Setup
+* **MrBeast thumbnails:** 100 videos from 2018–2025
+* **Modern trending thumbnails:** 100 recent trending videos
+* **Historical trending thumbnails:** 100 trending videos from approximately 10 years ago
 
-```bash
-cd backend
+All images are stored locally and processed uniformly to ensure fair comparison across groups.
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+## Analysis Pipeline
 
-# Install dependencies
-pip install -r requirements.txt
-```
+The computational pipeline extracts visual features using Python-based computer vision tools:
 
-### Frontend Setup
+### Color Analysis
 
-```bash
-cd web
+* Dominant color palette extraction
+* Average saturation and hue distribution
+* Warm vs. cool color temperature
+* Implemented using K-means clustering with PIL, NumPy, and SciPy
 
-# Install dependencies
-npm install
-```
+### Depth and Composition
 
-## Usage
+* Depth map generation to analyze foreground vs. background separation
+* Subject placement and emphasis
+* Implemented using depth estimation APIs and OpenCV
 
-### 1. Add Thumbnail Images
+### Face and Pose Detection
 
-Place your thumbnail images in the appropriate directories:
-- `backend/data/thumbnails/mrbeast/` - MrBeast thumbnails
-- `backend/data/thumbnails/modern/` - Modern trending thumbnails
-- `backend/data/thumbnails/historical/` - Historical thumbnails (~10 years ago)
+* Face detection and landmark extraction
+* Face size and close-up frequency
+* Basic emotional signals (smiling, shocked, angry)
+* Hand visibility and pose orientation
+* Implemented using MediaPipe FaceMesh and Pose
 
-Supported formats: `.jpg`, `.jpeg`, `.png`, `.webp`, `.bmp`, `.gif`
+### Text Detection
 
-### 2. Ingest Images
+* Optical character recognition (OCR) to detect text presence
+* Measurement of text quantity and placement
+* Implemented using PyTesseract and OpenCV
 
-```bash
-cd backend
-source .venv/bin/activate
+## Feature Measurements
 
-# Ingest all groups
-python scripts/ingest_dataset.py --root data/thumbnails
+Potential measurements include:
 
-# Or ingest a specific group
-python scripts/ingest_dataset.py --root data/thumbnails --group mrbeast
-```
+* **Color:** saturation, hue distribution, dominant palettes
+* **Composition:** depth separation, number of people, foreground emphasis
+* **Faces and Poses:** face count, emotional expression, hand visibility
+* **Text:** presence, amount, spatial placement
 
-### 3. Run Feature Extraction
+## Methods
 
-```bash
-# Run pipeline on all thumbnails
-python scripts/run_pipeline.py
+* **Clustering:** K-means clustering across all extracted features to analyze stylistic similarity between groups
+* **Correlation Analysis:** Comparison of visual features with performance metrics such as views or click-through rate (when available)
 
-# Run on specific group
-python scripts/run_pipeline.py --group mrbeast
+## Visualizations
 
-# Check status
-python scripts/run_pipeline.py --status
+The project generates multiple plots and figures, including:
 
-# Force re-extraction
-python scripts/run_pipeline.py --force
+* Cluster visualizations across thumbnail groups
+* Color palette comparisons
+* Depth map visualizations
+* Face, pose, and emotion frequency graphs
+* Text usage distributions
+* Correlation tables of visual features vs. performance
 
-# Extract specific features only
-python scripts/run_pipeline.py --features color text face
-```
+## Expected Outcomes
 
-### 4. Start the API Server
+* Modern thumbnails will exhibit higher saturation, more prominent faces, clearer depth separation, and reduced text
+* Most modern thumbnails will cluster closer to MrBeast’s visual style
+* High-performing thumbnails are expected to favor bright colors, close-up faces, strong emotional cues, and simple compositions
 
-```bash
-cd backend
-source .venv/bin/activate
-uvicorn app.main:app --reload --port 8000
-```
+## Tools and Technologies
 
-API will be available at http://localhost:8000
-- API docs: http://localhost:8000/docs
+* Python
+* OpenCV
+* MediaPipe
+* NumPy / SciPy
+* PIL
+* PyTesseract
+* K-means clustering
 
-### 5. Start the Dashboard
 
-```bash
-cd web
-npm run dev
-```
+## Academic Context
 
-Dashboard will be available at http://localhost:3000
+This project is intended for conference submission and contributes to research on computational media analysis, platform-driven aesthetics, and algorithmic influence on creator behavior.
 
-## Features Extracted
+## References
 
-### Color Features
-- Average saturation and brightness
-- 36-bin hue histogram
-- Dominant color palette (5 colors via K-means)
-- Warm/cool color score
-
-### Text Features (OCR)
-- Text presence detection
-- Text area ratio
-- Text box count
-- Text position distribution (top/middle/bottom)
-
-### Face Features (MediaPipe)
-- Face count
-- Face area ratios
-- Emotion proxies (smile, mouth open, brow raise)
-
-### Pose Features (MediaPipe)
-- People count
-- Visible hands count
-- Pose orientation
-- Body coverage ratio
-
-### Depth Features (MiDaS)
-- Depth contrast
-- Foreground ratio
-- Subject center of mass
-
-## API Endpoints
-
-### Thumbnails
-- `GET /thumbnails` - List with filters
-- `GET /thumbnails/{id}` - Single thumbnail
-- `POST /thumbnails/ingest` - Ingest from disk
-- `POST /thumbnails/pipeline/run` - Run extraction
-- `GET /thumbnails/pipeline/status` - Pipeline status
-
-### Statistics
-- `GET /stats/overview` - Dataset overview
-- `GET /stats/distributions?feature=...` - Feature distribution
-- `GET /stats/compare?feature=...` - Group comparison
-- `GET /stats/correlations?target=views` - Feature correlations
-
-### Clustering
-- `GET /clustering/run?k=3` - Run K-means clustering
-- `GET /clustering/points` - Get 2D projection points
-- `GET /clustering/summary` - Clustering status
-
-## Dashboard Pages
-
-1. **Dashboard** - Overview statistics, group distribution, year timeline
-2. **Compare** - Compare feature distributions across groups
-3. **Thumbnails** - Browse and filter thumbnails with feature details
-4. **Clustering** - 2D scatter plot visualization with cluster analysis
-
-## Development
-
-### Adding New Features
-
-1. Create a new extractor in `backend/app/services/features_*.py`
-2. Add to pipeline in `backend/app/services/pipeline.py`
-3. Update clustering features in `backend/app/services/clustering.py`
-4. Add UI components in `web/app/`
-
-### Database
-
-SQLite database is stored at `backend/thumbnail_analyzer.db`
-
-To reset:
-```bash
-rm backend/thumbnail_analyzer.db
-```
+A full reference list is included in the research proposal and final paper.
