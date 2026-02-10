@@ -72,8 +72,12 @@ export default function ClusteringPage() {
     }
   }
 
-  // All unique groups present in the data
-  const allGroups = [...new Set(points.map(p => p.group))].sort()
+  // All unique groups present in the data, with mrbeast first
+  const allGroups = [...new Set(points.map(p => p.group))].sort((a, b) => {
+    if (a === 'mrbeast') return -1
+    if (b === 'mrbeast') return 1
+    return a.localeCompare(b)
+  })
 
   const toggleGroup = (group: string) => {
     setHiddenGroups(prev => {
