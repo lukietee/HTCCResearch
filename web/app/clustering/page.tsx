@@ -156,7 +156,7 @@ export default function ClusteringPage() {
       </div>
 
       {/* Controls */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-white rounded-lg shadow p-4 space-y-4">
         <div className="flex flex-wrap gap-4 items-end">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -195,6 +195,53 @@ export default function ClusteringPage() {
             {running ? 'Running...' : 'Run Clustering'}
           </button>
         </div>
+
+        {/* Group Toggles */}
+        {allGroups.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Visible Groups
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setHiddenGroups(new Set())}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Show All
+                </button>
+                <span className="text-gray-300">|</span>
+                <button
+                  onClick={() => setHiddenGroups(new Set(allGroups))}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Hide All
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {allGroups.map(group => {
+                const isVisible = !hiddenGroups.has(group)
+                const count = points.filter(p => p.group === group).length
+                return (
+                  <button
+                    key={group}
+                    onClick={() => toggleGroup(group)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-all ${
+                      isVisible
+                        ? 'text-white shadow-sm'
+                        : 'bg-gray-100 text-gray-400 border-gray-200 line-through'
+                    }`}
+                    style={isVisible ? { backgroundColor: getGroupColor(group), borderColor: getGroupColor(group) } : {}}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${isVisible ? 'bg-white' : 'bg-gray-300'}`} />
+                    {group} ({count})
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -276,33 +323,6 @@ export default function ClusteringPage() {
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Group Toggles */}
-      {!loading && points.length > 0 && (
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Toggle Groups</h3>
-          <div className="flex flex-wrap gap-2">
-            {allGroups.map(group => {
-              const isVisible = !hiddenGroups.has(group)
-              const count = points.filter(p => p.group === group).length
-              return (
-                <button
-                  key={group}
-                  onClick={() => toggleGroup(group)}
-                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                    isVisible
-                      ? 'border-transparent text-white shadow-sm'
-                      : 'border-gray-300 text-gray-400 bg-white'
-                  }`}
-                  style={isVisible ? { backgroundColor: getGroupColor(group) } : {}}
-                >
-                  {group} ({count})
-                </button>
-              )
-            })}
           </div>
         </div>
       )}
