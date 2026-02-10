@@ -36,6 +36,7 @@ export default function ClusteringPage() {
   const [selectedPoint, setSelectedPoint] = useState<ClusterPoint | null>(null)
   const [colorBy, setColorBy] = useState<'group' | 'cluster'>('group')
   const [k, setK] = useState(3)
+  const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     async function fetchData() {
@@ -71,17 +72,32 @@ export default function ClusteringPage() {
     }
   }
 
+  // All unique groups present in the data
+  const allGroups = [...new Set(points.map(p => p.group))].sort()
+
+  const toggleGroup = (group: string) => {
+    setHiddenGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(group)) next.delete(group)
+      else next.add(group)
+      return next
+    })
+  }
+
+  // Filter out hidden groups
+  const visiblePoints = points.filter(p => !hiddenGroups.has(p.group))
+
   // Compute axis domains from percentiles so outliers don't compress the view
   const axisDomains = (() => {
-    if (points.length === 0) return { x: [-5, 5] as [number, number], y: [-5, 5] as [number, number] }
+    if (visiblePoints.length === 0) return { x: [-5, 5] as [number, number], y: [-5, 5] as [number, number] }
     const sorted = (arr: number[]) => [...arr].sort((a, b) => a - b)
     const percentile = (arr: number[], p: number) => {
       const s = sorted(arr)
       const i = Math.floor(s.length * p)
       return s[Math.min(i, s.length - 1)]
     }
-    const xs = points.map(p => p.x)
-    const ys = points.map(p => p.y)
+    const xs = visiblePoints.map(p => p.x)
+    const ys = visiblePoints.map(p => p.y)
     const pad = 0.15 // 15% padding
     const xMin = percentile(xs, 0.02)
     const xMax = percentile(xs, 0.98)
@@ -95,17 +111,17 @@ export default function ClusteringPage() {
     }
   })()
 
-  // Group points by color criteria
+  // Group visible points by color criteria
   const groupedPoints: Record<string, ClusterPoint[]> = {}
 
   if (colorBy === 'group') {
-    points.forEach(point => {
+    visiblePoints.forEach(point => {
       const key = point.group
       if (!groupedPoints[key]) groupedPoints[key] = []
       groupedPoints[key].push(point)
     })
   } else {
-    points.forEach(point => {
+    visiblePoints.forEach(point => {
       const key = `Cluster ${point.cluster_id ?? 'N/A'}`
       if (!groupedPoints[key]) groupedPoints[key] = []
       groupedPoints[key].push(point)
@@ -256,6 +272,33 @@ export default function ClusteringPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Group Toggles */}
+      {!loading && points.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Toggle Groups</h3>
+          <div className="flex flex-wrap gap-2">
+            {allGroups.map(group => {
+              const isVisible = !hiddenGroups.has(group)
+              const count = points.filter(p => p.group === group).length
+              return (
+                <button
+                  key={group}
+                  onClick={() => toggleGroup(group)}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                    isVisible
+                      ? 'border-transparent text-white shadow-sm'
+                      : 'border-gray-300 text-gray-400 bg-white'
+                  }`}
+                  style={isVisible ? { backgroundColor: getGroupColor(group) } : {}}
+                >
+                  {group} ({count})
+                </button>
+              )
+            })}
           </div>
         </div>
       )}
