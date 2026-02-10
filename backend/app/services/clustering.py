@@ -23,6 +23,10 @@ CLUSTERING_FEATURES = [
     # Face features
     ("face", "face_count"),
     ("face", "largest_face_area_ratio"),
+    # Emotion features (nested under face.emotion_proxies)
+    ("face", "emotion_proxies.smile_score"),
+    ("face", "emotion_proxies.mouth_open_score"),
+    ("face", "emotion_proxies.brow_raise_score"),
     # Pose features
     ("pose", "hand_visible_count"),
     ("pose", "body_coverage"),

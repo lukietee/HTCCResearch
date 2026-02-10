@@ -111,6 +111,47 @@ export async function getCorrelations(target: 'views' | 'ctr' = 'views'): Promis
   return fetchAPI(`/stats/correlations?target=${target}`);
 }
 
+export async function getMrBeastLikeness(): Promise<{
+  criteria: string[];
+  max_score: number;
+  groups: Record<string, {
+    count: number;
+    mean_score: number;
+    median_score: number;
+    pct_4plus: number;
+    pct_5plus: number;
+    pct_6: number;
+    score_distribution: Record<string, number>;
+  }>;
+}> {
+  return fetchAPI('/stats/mrbeast-likeness');
+}
+
+export async function getChannelEvolution(minYears = 2): Promise<{
+  total_channels: number;
+  channels: Record<string, {
+    num_years: number;
+    years: Record<string, { count: number; mean_score: number; pct_4plus: number }>;
+  }>;
+  trends: Array<{
+    channel: string;
+    slope: number;
+    start_score: number;
+    end_score: number;
+    start_year: string;
+    end_year: string;
+    num_years: number;
+  }>;
+  summary: {
+    converging_toward_mrbeast: number;
+    diverging_from_mrbeast: number;
+    flat: number;
+    avg_slope: number;
+  };
+}> {
+  return fetchAPI(`/stats/channel-evolution?min_years=${minYears}`);
+}
+
 // Clustering endpoints
 export async function runClustering(params?: {
   k?: number;

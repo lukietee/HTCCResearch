@@ -83,6 +83,27 @@ async def get_overview(db: Session = Depends(get_db)):
     )
 
 
+def _resolve_feature_value(features: dict, feature_path: str):
+    """Resolve a dotted feature path like 'face.emotion_proxies.smile_score'."""
+    parts = feature_path.split(".")
+    if len(parts) < 2:
+        return None
+    category = parts[0]
+    if category not in features:
+        return None
+    value = features[category]
+    for part in parts[1:]:
+        if isinstance(value, dict) and part in value:
+            value = value[part]
+        else:
+            return None
+    if isinstance(value, bool):
+        return 1.0 if value else 0.0
+    if isinstance(value, (int, float)):
+        return float(value)
+    return None
+
+
 @router.get("/distributions")
 async def get_distribution(
     db: Session = Depends(get_db),
@@ -91,13 +112,6 @@ async def get_distribution(
     bins: int = Query(20, ge=5, le=100, description="Number of histogram bins"),
 ):
     """Get distribution of a specific feature."""
-    # Parse feature path
-    parts = feature.split(".")
-    if len(parts) != 2:
-        return {"error": "Feature must be in format 'category.feature_name'"}
-
-    category, feature_name = parts
-
     # Query thumbnails
     query = db.query(Thumbnail).filter(Thumbnail.features_extracted == True)
     if group:
@@ -109,12 +123,9 @@ async def get_distribution(
     values = []
     for thumb in thumbnails:
         features = thumb.get_features()
-        if category in features and feature_name in features[category]:
-            value = features[category][feature_name]
-            if isinstance(value, (int, float)):
-                values.append(float(value))
-            elif isinstance(value, bool):
-                values.append(1.0 if value else 0.0)
+        value = _resolve_feature_value(features, feature)
+        if value is not None:
+            values.append(value)
 
     if not values:
         return {
@@ -168,13 +179,6 @@ async def compare_groups(
     """Compare a feature across all groups."""
     import numpy as np
 
-    # Parse feature path
-    parts = feature.split(".")
-    if len(parts) != 2:
-        return {"error": "Feature must be in format 'category.feature_name'"}
-
-    category, feature_name = parts
-
     # Get values per group
     groups_data = {}
 
@@ -187,12 +191,9 @@ async def compare_groups(
         values = []
         for thumb in thumbnails:
             features = thumb.get_features()
-            if category in features and feature_name in features[category]:
-                value = features[category][feature_name]
-                if isinstance(value, (int, float)):
-                    values.append(float(value))
-                elif isinstance(value, bool):
-                    values.append(1.0 if value else 0.0)
+            value = _resolve_feature_value(features, feature)
+            if value is not None:
+                values.append(value)
 
         if values:
             values_np = np.array(values)
@@ -217,6 +218,167 @@ async def compare_groups(
     return {
         "feature": feature,
         "groups": groups_data,
+    }
+
+
+@router.get("/mrbeast-likeness")
+async def mrbeast_likeness(db: Session = Depends(get_db)):
+    """Compute per-group MrBeast-likeness scores using trait thresholds.
+
+    Each thumbnail gets 0-6 points:
+      +1 brightness >= 0.55
+      +1 face_count >= 1
+      +1 text_area <= 0.01
+      +1 smile_score >= 0.3
+      +1 mouth_open_score >= 0.1
+      +1 body_coverage >= 0.2
+    """
+    import numpy as np
+
+    thumbnails = db.query(Thumbnail).filter(
+        Thumbnail.features_extracted == True
+    ).all()
+
+    groups_data = defaultdict(list)
+    for thumb in thumbnails:
+        f = thumb.get_features()
+        score = 0
+        if f.get("color", {}).get("avg_brightness", 0) >= 0.55:
+            score += 1
+        if f.get("face", {}).get("face_count", 0) >= 1:
+            score += 1
+        if f.get("text", {}).get("text_area_ratio", 1) <= 0.01:
+            score += 1
+        if f.get("face", {}).get("emotion_proxies", {}).get("smile_score", 0) >= 0.3:
+            score += 1
+        if f.get("face", {}).get("emotion_proxies", {}).get("mouth_open_score", 0) >= 0.1:
+            score += 1
+        if f.get("pose", {}).get("body_coverage", 0) >= 0.2:
+            score += 1
+        groups_data[thumb.group].append(score)
+
+    result = {}
+    for group, scores in groups_data.items():
+        arr = np.array(scores)
+        result[group] = {
+            "count": len(scores),
+            "mean_score": round(float(np.mean(arr)), 3),
+            "median_score": float(np.median(arr)),
+            "pct_4plus": round(float(np.mean(arr >= 4) * 100), 1),
+            "pct_5plus": round(float(np.mean(arr >= 5) * 100), 1),
+            "pct_6": round(float(np.mean(arr >= 6) * 100), 1),
+            "score_distribution": {
+                str(i): int(np.sum(arr == i)) for i in range(7)
+            },
+        }
+
+    return {
+        "criteria": [
+            "brightness >= 0.55",
+            "face_count >= 1",
+            "text_area <= 0.01",
+            "smile_score >= 0.3",
+            "mouth_open_score >= 0.1",
+            "body_coverage >= 0.2",
+        ],
+        "max_score": 6,
+        "groups": result,
+    }
+
+
+@router.get("/channel-evolution")
+async def channel_evolution(
+    db: Session = Depends(get_db),
+    min_years: int = Query(2, ge=2, description="Minimum number of year groups a channel must appear in"),
+):
+    """Track how channels evolve their MrBeast-likeness score over time.
+
+    Returns per-channel, per-year likeness scores for channels that span
+    multiple year groups.
+    """
+    import numpy as np
+
+    thumbnails = db.query(Thumbnail).filter(
+        Thumbnail.features_extracted == True,
+        Thumbnail.channel != None,
+        Thumbnail.channel != "",
+    ).all()
+
+    # group by channel -> year -> scores
+    channel_year_scores: Dict[str, Dict[str, List]] = defaultdict(lambda: defaultdict(list))
+
+    for thumb in thumbnails:
+        f = thumb.get_features()
+        score = 0
+        if f.get("color", {}).get("avg_brightness", 0) >= 0.55:
+            score += 1
+        if f.get("face", {}).get("face_count", 0) >= 1:
+            score += 1
+        if f.get("text", {}).get("text_area_ratio", 1) <= 0.01:
+            score += 1
+        if f.get("face", {}).get("emotion_proxies", {}).get("smile_score", 0) >= 0.3:
+            score += 1
+        if f.get("face", {}).get("emotion_proxies", {}).get("mouth_open_score", 0) >= 0.1:
+            score += 1
+        if f.get("pose", {}).get("body_coverage", 0) >= 0.2:
+            score += 1
+        channel_year_scores[thumb.channel][thumb.group].append(score)
+
+    # Filter to channels with enough year groups (exclude mrbeast group)
+    channels = {}
+    for ch, year_data in channel_year_scores.items():
+        year_groups = {y: scores for y, scores in year_data.items() if y != "mrbeast"}
+        if len(year_groups) >= min_years:
+            years_summary = {}
+            for y, scores in sorted(year_groups.items()):
+                arr = np.array(scores)
+                years_summary[y] = {
+                    "count": len(scores),
+                    "mean_score": round(float(np.mean(arr)), 3),
+                    "pct_4plus": round(float(np.mean(arr >= 4) * 100), 1),
+                }
+            channels[ch] = {
+                "num_years": len(year_groups),
+                "years": years_summary,
+            }
+
+    # Compute overall trend: for channels with 3+ years, compute slope of mean_score over time
+    trends = []
+    for ch, data in channels.items():
+        years_list = sorted(data["years"].keys())
+        if len(years_list) >= 2:
+            x = [int(y) for y in years_list]
+            y_vals = [data["years"][y]["mean_score"] for y in years_list]
+            # simple linear regression slope
+            x_arr = np.array(x, dtype=float)
+            y_arr = np.array(y_vals, dtype=float)
+            slope = float(np.polyfit(x_arr, y_arr, 1)[0])
+            trends.append({
+                "channel": ch,
+                "slope": round(slope, 4),
+                "start_score": y_vals[0],
+                "end_score": y_vals[-1],
+                "start_year": years_list[0],
+                "end_year": years_list[-1],
+                "num_years": len(years_list),
+            })
+
+    trends.sort(key=lambda t: t["slope"], reverse=True)
+
+    converging = len([t for t in trends if t["slope"] > 0])
+    diverging = len([t for t in trends if t["slope"] < 0])
+    flat = len([t for t in trends if t["slope"] == 0])
+
+    return {
+        "total_channels": len(channels),
+        "channels": channels,
+        "trends": trends,
+        "summary": {
+            "converging_toward_mrbeast": converging,
+            "diverging_from_mrbeast": diverging,
+            "flat": flat,
+            "avg_slope": round(float(np.mean([t["slope"] for t in trends])), 4) if trends else 0,
+        },
     }
 
 
