@@ -7,6 +7,7 @@ import type {
   ClusterPoint,
   ClusteringResult,
   PipelineStatus,
+  MrBeastSimilarityResponse,
 } from './types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -120,11 +121,17 @@ export async function getMrBeastLikeness(): Promise<{
     median_score: number;
     pct_4plus: number;
     pct_5plus: number;
-    pct_6: number;
+    pct_6plus: number;
+    pct_7plus: number;
+    pct_8: number;
     score_distribution: Record<string, number>;
   }>;
 }> {
   return fetchAPI('/stats/mrbeast-likeness');
+}
+
+export async function getMrBeastSimilarity(): Promise<MrBeastSimilarityResponse> {
+  return fetchAPI<MrBeastSimilarityResponse>('/stats/mrbeast-similarity');
 }
 
 export async function getChannelEvolution(minYears = 2): Promise<{

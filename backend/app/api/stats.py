@@ -221,17 +221,41 @@ async def compare_groups(
     }
 
 
+def _compute_likeness_score(f: dict) -> int:
+    """Compute 0-8 MrBeast-likeness score from extracted features."""
+    score = 0
+    if f.get("color", {}).get("avg_brightness", 0) >= 0.60:
+        score += 1
+    if f.get("face", {}).get("face_count", 0) >= 1:
+        score += 1
+    if f.get("text", {}).get("text_area_ratio", 1) <= 0.005:
+        score += 1
+    if f.get("face", {}).get("emotion_proxies", {}).get("smile_score", 0) >= 0.40:
+        score += 1
+    if f.get("face", {}).get("emotion_proxies", {}).get("mouth_open_score", 0) >= 0.15:
+        score += 1
+    if f.get("pose", {}).get("body_coverage", 0) >= 0.30:
+        score += 1
+    if f.get("face", {}).get("emotion_proxies", {}).get("brow_raise_score", 0) >= 0.30:
+        score += 1
+    if f.get("face", {}).get("largest_face_area_ratio", 0) >= 0.06:
+        score += 1
+    return score
+
+
 @router.get("/mrbeast-likeness")
 async def mrbeast_likeness(db: Session = Depends(get_db)):
     """Compute per-group MrBeast-likeness scores using trait thresholds.
 
-    Each thumbnail gets 0-6 points:
-      +1 brightness >= 0.55
+    Each thumbnail gets 0-8 points:
+      +1 brightness >= 0.60
       +1 face_count >= 1
-      +1 text_area <= 0.01
-      +1 smile_score >= 0.3
-      +1 mouth_open_score >= 0.1
-      +1 body_coverage >= 0.2
+      +1 text_area <= 0.005
+      +1 smile_score >= 0.40
+      +1 mouth_open_score >= 0.15
+      +1 body_coverage >= 0.30
+      +1 brow_raise_score >= 0.30
+      +1 largest_face_area_ratio >= 0.06
     """
     import numpy as np
 
@@ -242,19 +266,7 @@ async def mrbeast_likeness(db: Session = Depends(get_db)):
     groups_data = defaultdict(list)
     for thumb in thumbnails:
         f = thumb.get_features()
-        score = 0
-        if f.get("color", {}).get("avg_brightness", 0) >= 0.55:
-            score += 1
-        if f.get("face", {}).get("face_count", 0) >= 1:
-            score += 1
-        if f.get("text", {}).get("text_area_ratio", 1) <= 0.01:
-            score += 1
-        if f.get("face", {}).get("emotion_proxies", {}).get("smile_score", 0) >= 0.3:
-            score += 1
-        if f.get("face", {}).get("emotion_proxies", {}).get("mouth_open_score", 0) >= 0.1:
-            score += 1
-        if f.get("pose", {}).get("body_coverage", 0) >= 0.2:
-            score += 1
+        score = _compute_likeness_score(f)
         groups_data[thumb.group].append(score)
 
     result = {}
@@ -266,22 +278,26 @@ async def mrbeast_likeness(db: Session = Depends(get_db)):
             "median_score": float(np.median(arr)),
             "pct_4plus": round(float(np.mean(arr >= 4) * 100), 1),
             "pct_5plus": round(float(np.mean(arr >= 5) * 100), 1),
-            "pct_6": round(float(np.mean(arr >= 6) * 100), 1),
+            "pct_6plus": round(float(np.mean(arr >= 6) * 100), 1),
+            "pct_7plus": round(float(np.mean(arr >= 7) * 100), 1),
+            "pct_8": round(float(np.mean(arr >= 8) * 100), 1),
             "score_distribution": {
-                str(i): int(np.sum(arr == i)) for i in range(7)
+                str(i): int(np.sum(arr == i)) for i in range(9)
             },
         }
 
     return {
         "criteria": [
-            "brightness >= 0.55",
+            "brightness >= 0.60",
             "face_count >= 1",
-            "text_area <= 0.01",
-            "smile_score >= 0.3",
-            "mouth_open_score >= 0.1",
-            "body_coverage >= 0.2",
+            "text_area <= 0.005",
+            "smile_score >= 0.40",
+            "mouth_open_score >= 0.15",
+            "body_coverage >= 0.30",
+            "brow_raise_score >= 0.30",
+            "largest_face_area_ratio >= 0.06",
         ],
-        "max_score": 6,
+        "max_score": 8,
         "groups": result,
     }
 
@@ -309,19 +325,7 @@ async def channel_evolution(
 
     for thumb in thumbnails:
         f = thumb.get_features()
-        score = 0
-        if f.get("color", {}).get("avg_brightness", 0) >= 0.55:
-            score += 1
-        if f.get("face", {}).get("face_count", 0) >= 1:
-            score += 1
-        if f.get("text", {}).get("text_area_ratio", 1) <= 0.01:
-            score += 1
-        if f.get("face", {}).get("emotion_proxies", {}).get("smile_score", 0) >= 0.3:
-            score += 1
-        if f.get("face", {}).get("emotion_proxies", {}).get("mouth_open_score", 0) >= 0.1:
-            score += 1
-        if f.get("pose", {}).get("body_coverage", 0) >= 0.2:
-            score += 1
+        score = _compute_likeness_score(f)
         channel_year_scores[thumb.channel][thumb.group].append(score)
 
     # Filter to channels with enough year groups (exclude mrbeast group)
@@ -379,6 +383,113 @@ async def channel_evolution(
             "flat": flat,
             "avg_slope": round(float(np.mean([t["slope"] for t in trends])), 4) if trends else 0,
         },
+    }
+
+
+@router.get("/mrbeast-similarity")
+async def mrbeast_similarity(db: Session = Depends(get_db)):
+    """Compute continuous 0-100 MrBeast similarity score per thumbnail.
+
+    Uses z-score distance from MrBeast centroid across the 10 most
+    discriminative features, converted to a percentage via exponential decay.
+    """
+    import numpy as np
+
+    # 10 most discriminative features and their extraction paths
+    FEATURE_DEFS = [
+        ("avg_brightness",         ("color", "avg_brightness")),
+        ("face_count",             ("face", "face_count")),
+        ("largest_face_area_ratio",("face", "largest_face_area_ratio")),
+        ("smile_score",            ("face", "emotion_proxies", "smile_score")),
+        ("mouth_open_score",       ("face", "emotion_proxies", "mouth_open_score")),
+        ("brow_raise_score",       ("face", "emotion_proxies", "brow_raise_score")),
+        ("body_coverage",          ("pose", "body_coverage")),
+        ("text_box_count",         ("text", "text_box_count")),
+        ("text_area_ratio",        ("text", "text_area_ratio")),
+        ("avg_saturation",         ("color", "avg_saturation")),
+    ]
+    FEATURE_NAMES = [name for name, _ in FEATURE_DEFS]
+    NUM_FEATURES = len(FEATURE_NAMES)
+
+    thumbnails = db.query(Thumbnail).filter(
+        Thumbnail.features_extracted == True
+    ).all()
+
+    def _extract_vector(thumb):
+        f = thumb.get_features()
+        values = []
+        for _, path in FEATURE_DEFS:
+            val = f
+            for key in path:
+                if isinstance(val, dict) and key in val:
+                    val = val[key]
+                else:
+                    val = None
+                    break
+            if val is not None and isinstance(val, (int, float)):
+                values.append(float(val))
+            else:
+                values.append(float("nan"))
+        return values
+
+    # Separate MrBeast vs year groups
+    mrbeast_vectors = []
+    group_thumbs: Dict[str, list] = defaultdict(list)
+
+    for thumb in thumbnails:
+        vec = _extract_vector(thumb)
+        group_thumbs[thumb.group].append(vec)
+        if thumb.group == "mrbeast":
+            mrbeast_vectors.append(vec)
+
+    if not mrbeast_vectors:
+        return {"error": "No MrBeast thumbnails found"}
+
+    # MrBeast centroid (mean + std per feature)
+    mb_array = np.array(mrbeast_vectors, dtype=float)
+    mb_mean = np.nanmean(mb_array, axis=0)
+    mb_std = np.nanstd(mb_array, axis=0)
+    mb_std = np.where(mb_std < 1e-6, 1e-6, mb_std)  # avoid /0
+
+    def _similarity(vec):
+        arr = np.array(vec, dtype=float)
+        z = np.abs((arr - mb_mean) / mb_std)
+        valid = ~np.isnan(z)
+        if not np.any(valid):
+            return None
+        avg_z = float(np.mean(z[valid]))
+        return round(100.0 * float(np.exp(-avg_z / 2)), 1)
+
+    # Per-group similarity stats
+    groups_result = {}
+    for group, vecs in group_thumbs.items():
+        scores = [s for s in (_similarity(v) for v in vecs) if s is not None]
+        if scores:
+            arr = np.array(scores)
+            groups_result[group] = {
+                "count": len(scores),
+                "mean_similarity": round(float(np.mean(arr)), 1),
+                "median_similarity": round(float(np.median(arr)), 1),
+                "std_similarity": round(float(np.std(arr)), 1),
+            }
+
+    # Per-feature means by group
+    feature_trends: Dict[str, Dict[str, float]] = {}
+    for i, fname in enumerate(FEATURE_NAMES):
+        feature_trends[fname] = {}
+        for group, vecs in group_thumbs.items():
+            vals = [v[i] for v in vecs if not np.isnan(v[i])]
+            if vals:
+                feature_trends[fname][group] = round(float(np.mean(vals)), 4)
+
+    return {
+        "feature_names": FEATURE_NAMES,
+        "mrbeast_centroid": {
+            name: round(float(mb_mean[i]), 4)
+            for i, name in enumerate(FEATURE_NAMES)
+        },
+        "groups": groups_result,
+        "feature_trends": feature_trends,
     }
 
 

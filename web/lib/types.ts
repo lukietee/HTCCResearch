@@ -147,3 +147,15 @@ export interface PipelineStatus {
   unprocessed: number;
   completion_percentage: number;
 }
+
+export interface MrBeastSimilarityResponse {
+  feature_names: string[];
+  mrbeast_centroid: Record<string, number>;
+  groups: Record<string, {
+    count: number;
+    mean_similarity: number;
+    median_similarity: number;
+    std_similarity: number;
+  }>;
+  feature_trends: Record<string, Record<string, number>>;
+}
