@@ -1,0 +1,47 @@
+{
+  "panel": [
+    {"name": "Dude Perfect", "channel_id": "UCRijo3ddMTht_IHyNSNXpNQ", "category": "entertainment", "active_since": 2009},
+    {"name": "MKBHD", "channel_id": "UCBJycsmduvYEL83R_U4JriQ", "category": "tech", "active_since": 2008},
+    {"name": "Smosh", "channel_id": "UCY30JRSgfhYXA6i6xX1erWg", "category": "comedy", "active_since": 2005},
+    {"name": "Good Mythical Morning", "channel_id": "UC4PooiX37Pld1T8J5SYT-SQ", "category": "entertainment", "active_since": 2012},
+    {"name": "Linus Tech Tips", "channel_id": "UCXuqSBlHAE6Xw-yeJA0Tunw", "category": "tech", "active_since": 2008},
+    {"name": "Markiplier", "channel_id": "UC7_YxT-KID8kRbqZo7MyscQ", "category": "gaming", "active_since": 2012},
+    {"name": "PewDiePie", "channel_id": "UC-lHJZR3Gqxm24_Vd_AJ5Yw", "category": "entertainment", "active_since": 2010},
+    {"name": "Philip DeFranco", "channel_id": "UClFSU9_bUb4Rc6OYfTt5SPw", "category": "news", "active_since": 2006},
+    {"name": "Vsauce", "channel_id": "UC6nSFpj9HTCZ5t-N3Rm3-HA", "category": "science", "active_since": 2010},
+    {"name": "Veritasium", "channel_id": "UCHnyfMqiRRG1u-2MsSQLbXA", "category": "science", "active_since": 2011},
+    {"name": "Casey Neistat", "channel_id": "UCtinbF-Q-fVthA0qrFQTgXQ", "category": "vlog", "active_since": 2010},
+    {"name": "Unbox Therapy", "channel_id": "UCsTcErHg8oDvUnTzoqsYeNw", "category": "tech", "active_since": 2010},
+    {"name": "SmarterEveryDay", "channel_id": "UC6107grRI4m0o2-emgoDnAA", "category": "science", "active_since": 2007},
+    {"name": "VanossGaming", "channel_id": "UCKqH_9mk1waLgBiL2vT5b9g", "category": "gaming", "active_since": 2011},
+    {"name": "Jacksepticeye", "channel_id": "UCYzPXprvl5Y-Sf0g4vkRhLs", "category": "gaming", "active_since": 2012},
+    {"name": "JerryRigEverything", "channel_id": "UCWFKCr40YwOcBFkJoSNQ3AG", "category": "tech", "active_since": 2012},
+    {"name": "SSundee", "channel_id": "UCke6I9N4KfC968-yRcd5YRg", "category": "gaming", "active_since": 2009},
+    {"name": "h3h3Productions", "channel_id": "UCDWIvJwLJsE4LG1Atne2blQ", "category": "commentary", "active_since": 2011},
+    {"name": "Mark Rober", "channel_id": "UCY1kMZp36IQSyNx_9h4mpCg", "category": "science", "active_since": 2011},
+    {"name": "Corridor Crew", "channel_id": "UCSpFnDQr88xCZ80N-X7t0nQ", "category": "filmmaking", "active_since": 2010},
+    {"name": "NikkieTutorials", "channel_id": "UCzTKskwITJ2uR1wTpGSoNKQ", "category": "beauty", "active_since": 2008},
+    {"name": "Typical Gamer", "channel_id": "UCjdQaSJCYS4o2eG93MvIwqg", "category": "gaming", "active_since": 2008},
+    {"name": "Jeffree Star", "channel_id": "UCkvK_5omS-42Ovgah8KRKtg", "category": "beauty", "active_since": 2006},
+    {"name": "David Dobrik", "channel_id": "UCmh5gdwCx6lN7gEC20leNVA", "category": "vlog", "active_since": 2014},
+    {"name": "Binging with Babish", "channel_id": "UCJHA_jMfCvEnv-3kRjTCQXw", "category": "cooking", "active_since": 2006},
+    {"name": "Kurzgesagt", "channel_id": "UCsXVk37bltHxD1rDPwtNM8Q", "category": "science", "active_since": 2013},
+    {"name": "Sidemen", "channel_id": "UCDogdKl7t7NHzQ95aEwkdMw", "category": "entertainment", "active_since": 2013},
+    {"name": "Preston", "channel_id": "UCBo3fRGd1SiixVj-VBMN_Vg", "category": "gaming", "active_since": 2012},
+    {"name": "Unspeakable", "channel_id": "UCwIWAbIeu0xI0ReKWOcw3eg", "category": "entertainment", "active_since": 2012},
+    {"name": "The Slow Mo Guys", "channel_id": "UCUK0HBIBWgM2c4vsPhkYY4w", "category": "science", "active_since": 2010},
+    {"name": "Ryan Trahan", "channel_id": "UCnmGIkw-KdI0W5siakKPKog", "category": "entertainment", "active_since": 2013},
+    {"name": "Ali Abdaal", "channel_id": "UCoOae5nYA7VqaXzerajD0lg", "category": "productivity", "active_since": 2017}
+  ],
+  "mrbeast": {
+    "name": "MrBeast",
+    "channel_id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
+    "eras": {
+      "early": {"years": [2015, 2016], "target": 30},
+      "growth": {"years": [2017, 2018], "target": 40},
+      "mainstream": {"years": [2019, 2020], "target": 50},
+      "peak": {"years": [2021, 2022], "target": 60},
+      "current": {"years": [2023, 2024, 2025], "target": 70}
+    }
+  }
+}

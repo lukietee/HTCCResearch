@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     DEPTH_MAPS_DIR: Path = OUTPUTS_DIR / "depth_maps"
     PALETTES_DIR: Path = OUTPUTS_DIR / "palettes"
 
+    # YouTube API
+    YOUTUBE_API_KEY: str = ""
+    COLLECTION_STATE_FILE: Path = DATA_DIR / "collection_state.json"
+    METADATA_DIR: Path = DATA_DIR / "metadata"
+
     # Image processing
     MAX_IMAGE_SIZE: int = 1280  # Max dimension for processing
     DEPTH_IMAGE_SIZE: int = 384  # Size for MiDaS processing

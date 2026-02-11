@@ -19,6 +19,13 @@ web/.next/
 # Database
 *.db
 
+# Environment files
+.env
+backend/.env
+
+# Collection state
+backend/data/collection_state.json
+
 # Claude Code
 .claude/
 

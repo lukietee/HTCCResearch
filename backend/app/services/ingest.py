@@ -72,11 +72,19 @@ def extract_metadata_from_path(file_path: Path, group: str) -> dict:
                 metadata["year"] = year
                 break
 
-    # Use filename as title (cleaned up)
-    clean_title = re.sub(r"[_\-]+", " ", filename)
-    clean_title = re.sub(r"\s+", " ", clean_title).strip()
-    if clean_title:
-        metadata["title"] = clean_title
+    # Try to parse channel name from {ChannelName}_{NN}_{Title}.jpg format
+    # e.g., "MKBHD_03_Best Phones 2024.jpg" -> channel="MKBHD", title="Best Phones 2024"
+    channel_pattern = r"^(.+?)_(\d{2})_(.+)$"
+    channel_match = re.match(channel_pattern, filename)
+    if channel_match:
+        metadata["channel"] = channel_match.group(1).replace("_", " ")
+        metadata["title"] = channel_match.group(3).strip()
+    else:
+        # Fallback: use filename as title (cleaned up)
+        clean_title = re.sub(r"[_\-]+", " ", filename)
+        clean_title = re.sub(r"\s+", " ", clean_title).strip()
+        if clean_title:
+            metadata["title"] = clean_title
 
     return metadata
 
