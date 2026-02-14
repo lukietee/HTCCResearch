@@ -31,7 +31,13 @@
     {"name": "Unspeakable", "channel_id": "UCwIWAbIeu0xI0ReKWOcw3eg", "category": "entertainment", "active_since": 2012},
     {"name": "The Slow Mo Guys", "channel_id": "UCUK0HBIBWgM2c4vsPhkYY4w", "category": "science", "active_since": 2010},
     {"name": "Ryan Trahan", "channel_id": "UCnmGIkw-KdI0W5siakKPKog", "category": "entertainment", "active_since": 2013},
-    {"name": "Ali Abdaal", "channel_id": "UCoOae5nYA7VqaXzerajD0lg", "category": "productivity", "active_since": 2017}
+    {"name": "Ali Abdaal", "channel_id": "UCoOae5nYA7VqaXzerajD0lg", "category": "productivity", "active_since": 2017},
+    {"name": "Airrack", "channel_id": "UCyps-v4WNjWDnYRKmZ4BUGw", "category": "entertainment", "active_since": 2015},
+    {"name": "ZHC", "channel_id": "UClQubH2NeMmGLTLgNdLBwXg", "category": "art", "active_since": 2016},
+    {"name": "FaZe Rug", "channel_id": "UCilwZiBBfI9X6yiZRzWty8Q", "category": "entertainment", "active_since": 2012},
+    {"name": "Aphmau", "channel_id": "UCzYfz8uibvnB7Yc1LjePi4g", "category": "gaming", "active_since": 2012},
+    {"name": "MrBallen", "channel_id": "UCtPrkXdtCM5DACLufB9jbsA", "category": "storytelling", "active_since": 2020},
+    {"name": "JiDion", "channel_id": "UCvj3hNvwrEgTRkeut7_cBAQ", "category": "entertainment", "active_since": 2018}
   ],
   "mrbeast": {
     "name": "MrBeast",

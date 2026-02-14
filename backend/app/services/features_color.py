@@ -73,8 +73,9 @@ def calculate_hue_histogram(
         Normalized histogram as list of floats
     """
     # OpenCV hue is 0-179, scale bins accordingly
-    hist, _ = np.histogram(hue_channel, bins=bins, range=(0, 180))
-    hist = hist.astype(float)
+    # Use cv2.calcHist to avoid numpy 2.x histogram broadcasting bug
+    hist = cv2.calcHist([hue_channel], [0], None, [bins], [0, 180])
+    hist = hist.flatten().astype(float)
 
     # Normalize
     total = hist.sum()

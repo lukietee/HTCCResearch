@@ -1,6 +1,7 @@
 # Thumbnail data
 backend/data/thumbnails/
 
+backend/data/
 # OS files
 .DS_Store
 
