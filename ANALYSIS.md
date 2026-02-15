@@ -8,29 +8,85 @@ MrBeast's thumbnail style (high brightness, large faces, expressive emotions, bo
 
 **Panel restructured** from 38 mixed-category channels to **22 entertainment-focused channels** + MrBeast reference set. Removed 24 non-entertainment (tech, science, education, news, filmmaking, cooking, beauty, productivity, storytelling) and unusable channels whose divergence reflected genre differences rather than creative choices.
 
-| Group | Thumbnails | Notes |
-|-------|-----------|-------|
-| MrBeast (ref) | 102 | Reference set across all eras (2015–2025) |
-| 2015 | 434 | Panel + initial dataset channels |
-| 2016 | 413 | |
-| 2017 | 493 | |
-| 2018 | 461 | |
-| 2019 | 390 | |
-| 2020 | 347 | |
-| 2021 | 334 | |
-| 2022 | 440 | |
-| 2023 | 464 | |
-| 2024 | 172 | Panel channels only (API-collected) |
-| 2025 | 196 | Panel channels only (API-collected) |
-| **Total** | **4,246** | |
+### Thumbnails on Disk (as of Feb 15, 2026)
+
+| Group | Files on Disk | In DB | Notes |
+|-------|--------------|-------|-------|
+| MrBeast (ref) | 100 | 102 | Reference set across all eras (2015–2025) |
+| 2015 | 512 | 434 | Panel + initial dataset channels |
+| 2016 | 516 | 413 | |
+| 2017 | 600 | 493 | |
+| 2018 | 578 | 461 | |
+| 2019 | 508 | 390 | |
+| 2020 | 467 | 347 | |
+| 2021 | 445 | 334 | |
+| 2022 | 549 | 440 | |
+| 2023 | 555 | 464 | |
+| 2024 | 260 | 172 | Panel channels (API-collected) |
+| 2025 | 279 | 196 | Panel channels (API-collected) |
+| **Total** | **5,369** | **4,246** | **1,123 pending ingestion** |
+
+### Database Pipeline Status
+
+| Metric | Count |
+|--------|-------|
+| Total DB records | 4,246 |
+| With features extracted | 4,246 (100%) |
+| With cluster assignment | 2,700 (63.6%) |
+| Pending ingestion (on disk, not in DB) | ~1,123 |
 
 ### Panel Channels (22)
 
-**Kept (14):** Dude Perfect, Smosh, Good Mythical Morning, Markiplier, PewDiePie, VanossGaming, David Dobrik, Sidemen, Unspeakable, Ryan Trahan, Airrack, ZHC, FaZe Rug, JiDion
+**Original 14:** Dude Perfect, Smosh, Good Mythical Morning, Markiplier, PewDiePie, VanossGaming, David Dobrik, Sidemen, Unspeakable, Ryan Trahan, Airrack, ZHC, FaZe Rug, JiDion
 
-**Added (8):** Logan Paul, KSI, LazarBeam, IShowSpeed, Danny Duncan, Jelly, Cody Ko, Matt Stonie
+**Added 8 (collected Feb 15):** Logan Paul, KSI, LazarBeam, IShowSpeed, Danny Duncan, Jelly, Cody Ko, Matt Stonie
 
-**Pending collection:** 8 new channels await YouTube API quota (exhausted). Run `python scripts/collect_youtube.py panel --years 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025` when quota resets. Script is resumable.
+### Per-Channel Collection Status
+
+#### Fully collected (all applicable years via API)
+
+| Channel | Active Since | Thumbnails | Years |
+|---------|-------------|------------|-------|
+| Danny Duncan | 2014 | 165 | 2015–2025 (11/11) |
+| Jelly | 2014 | 165 | 2015–2025 (11/11) |
+| LazarBeam | 2015 | 158 | 2015–2025 (11/11) |
+| Matt Stonie | 2012 | 153 | 2015–2025 (11/11) |
+| KSI | 2009 | 129 | 2015–2025 (11/11) |
+| Cody Ko | 2014 | 130 | 2015–2024 (10/11, no 2025 content) |
+| Logan Paul | 2015 | 120 | 2016–2025 (10/11, no 2015 content) |
+| ZHC | 2016 | 118 | 2016–2025 (10/10) |
+| IShowSpeed | 2016 | 117 | 2017–2025 (9/10, no 2016 content) |
+| FaZe Rug | 2012 | 105 | 2015–2020, 2024–2025 (7/11, gap 2021–2023) |
+| Airrack | 2015 | 100 | 2019–2025 (7/11, no content pre-2019) |
+
+#### Partially collected (2024–2025 only, need 2015–2023 historical data)
+
+| Channel | Active Since | Thumbnails | Years Missing |
+|---------|-------------|------------|---------------|
+| Dude Perfect | 2009 | 30 | 2015–2023 (9 years) |
+| Smosh | 2005 | 30 | 2015–2023 (9 years) |
+| Good Mythical Morning | 2012 | 30 | 2015–2023 (9 years) |
+| Markiplier | 2012 | 30 | 2015–2023 (9 years) |
+| PewDiePie | 2010 | 30 | 2015–2023 (9 years) |
+| VanossGaming | 2011 | 30 | 2015–2023 (9 years) |
+| Sidemen | 2013 | 30 | 2015–2023 (9 years) |
+| Unspeakable | 2012 | 30 | 2015–2023 (9 years) |
+| Ryan Trahan | 2013 | 30 | 2015–2023 (9 years) |
+| David Dobrik | 2014 | 13 | 2015–2023 (9 years) |
+| JiDion | 2018 | 9 | 2018–2023 (6 years) |
+
+### Non-Panel Channels (supplementary data, 2024–2025 only)
+
+20 additional channels collected for supplementary analysis. Not part of evolution panel.
+
+MKBHD (30), Linus Tech Tips (30), Vsauce (30), Veritasium (30), Mark Rober (30), Corridor Crew (30), Kurzgesagt (30), Ali Abdaal (30), Aphmau (30), MrBallen (30), Philip DeFranco (30), Unbox Therapy (30), SSundee (30), Binging with Babish (30), The Slow Mo Guys (27), SmarterEveryDay (18), Casey Neistat (13), Typical Gamer (6), h3h3Productions (4), Jeffree Star (3)
+
+### MrBeast Reference Set
+
+- **On disk:** 100 thumbnails (pre-collected, no API metadata)
+- **API era collection:** Not yet run
+- **Defined eras:** early (2015–16, target 30), growth (2017–18, target 40), mainstream (2019–20, target 50), peak (2021–22, target 60), current (2023–25, target 70)
+- **Total API target:** 250 thumbnails
 
 ---
 
@@ -170,16 +226,85 @@ Restricting the panel to entertainment channels removes the noise from genre-spe
 ### Caveats
 
 - **Composition effect:** 2015–2023 data includes non-panel channels from the initial dataset, while 2024–2025 is 100% panel. The jump may partly reflect cleaner data rather than stronger convergence.
-- **8 new channels not yet collected** (LazarBeam, Danny Duncan, Jelly, Cody Ko, Matt Stonie + backfill for Logan Paul, KSI, IShowSpeed). These will strengthen the 2015–2023 panel coverage when API quota resets.
+- **11 original panel channels still missing historical data** (Dude Perfect, Smosh, GMM, Markiplier, PewDiePie, VanossGaming, Sidemen, Unspeakable, Ryan Trahan, David Dobrik, JiDion). These only have 2024–2025; need 2015–2023 to complete evolution trendlines.
 - **Binary scoring simplifies nuance.** The 0–8 score treats all criteria equally, but some (face presence) may matter more than others (text area) for visual impact.
+- **1,123 recently collected thumbnails not yet ingested.** The 8 new channels (collected Feb 15) and some earlier API collections are on disk but not in the DB. Findings above reflect only the 4,246 ingested records.
 
 ---
 
 ## Data Gaps & Next Steps
 
-1. **Collect 8 new channels** — API quota resets daily. Run: `python scripts/collect_youtube.py panel --years 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025`
-2. **Re-run with --force after collection** — `python scripts/run_pipeline.py --force` to ensure all thumbnails have fresh features
-3. **Clean non-panel channels from initial dataset** — 89 non-panel channels remain in years 2015–2023 from the initial scraped data. Consider removing them for a pure panel-only analysis.
-4. **Statistical testing** — Confidence intervals on year-over-year likeness differences
-5. **Clustering** — K-means on full dataset to identify natural "MrBeast-like" cluster and track its growth
-6. **Per-channel detail pages** — Thumbnail galleries showing visual evolution for key convergers (KSI, FaZe Rug, ZHC)
+### Immediate (before next analysis)
+
+1. **Ingest new thumbnails into DB** — 1,123 files on disk not yet in database
+   ```bash
+   cd backend && source .venv/bin/activate
+   python scripts/ingest_dataset.py
+   ```
+
+2. **Run feature extraction** on newly ingested records
+   ```bash
+   python scripts/run_pipeline.py --status   # check what needs processing
+   python scripts/run_pipeline.py             # extract all missing features
+   ```
+
+3. **Re-run clustering** with expanded dataset
+   ```bash
+   curl -X POST http://localhost:8000/clustering/run
+   ```
+
+### Next collection session (requires API quota)
+
+4. **Collect historical years for 11 remaining panel channels** — These only have 2024–2025 data. Need 2015–2023 for complete evolution analysis.
+   ```bash
+   python scripts/collect_youtube.py panel \
+     --channels "Dude Perfect" "Smosh" "Good Mythical Morning" "Markiplier" \
+     "PewDiePie" "VanossGaming" "Sidemen" "Unspeakable" "Ryan Trahan" \
+     "David Dobrik" "JiDion" \
+     --years 2015 2016 2017 2018 2019 2020 2021 2022 2023
+   ```
+   **Quota estimate:** ~99 search calls = ~9,999 quota units (1 full day). Script is resumable if quota runs out mid-run.
+
+5. **Fill FaZe Rug gap (2021–2023)** — Currently missing 3 years mid-timeline
+   ```bash
+   python scripts/collect_youtube.py panel --channels "FaZe Rug" --years 2021 2022 2023
+   ```
+   **Quota estimate:** ~303 units.
+
+6. **Collect MrBeast reference set via API** — Structured era-based collection with full metadata
+   ```bash
+   python scripts/collect_youtube.py mrbeast
+   ```
+   **Quota estimate:** ~1,010 units.
+
+### Analysis phase (after all data collected)
+
+7. **Re-run full pipeline** — Ingest → features → clustering on complete dataset (~6,500+ thumbnails expected)
+
+8. **Recompute findings tables** — All key findings (Section 3) should be recalculated with the expanded dataset. The 2015–2023 numbers will change significantly once 11 more channels contribute panel data to those years.
+
+9. **Statistical testing:**
+   - Paired t-tests or Wilcoxon signed-rank on early vs late similarity scores per channel
+   - ANOVA across year groups for key features (brightness, face size, text ratio)
+   - Correlation between convergence timing and channel growth metrics (views)
+   - Confidence intervals on year-over-year likeness differences
+
+10. **Clean non-panel channels from initial dataset** — ~20 non-panel channels remain in 2015–2023 year groups from the initial scraped data. Consider filtering them out for a pure panel-only analysis to eliminate composition effects.
+
+11. **Generate publication-ready visualizations:**
+    - Heatmap of similarity scores (channels x years)
+    - Aggregate trendline: mean panel similarity by year
+    - Before/after thumbnail galleries for strongest convergers (KSI, FaZe Rug, ZHC)
+    - Feature distribution shifts over time (violin or ridgeline plots)
+    - Per-channel evolution timelines with slope annotations
+
+12. **Write findings section** — Document whether data supports the convergence hypothesis with statistical backing
+
+### API Quota Budget (remaining work)
+
+| Task | API Calls | Quota Units | Days |
+|------|-----------|-------------|------|
+| 11 channels x 9 years | ~99 search + video | ~9,999 | 1 |
+| FaZe Rug gap (3 years) | 3 search + video | ~303 | <1 |
+| MrBeast era collection | ~10 search + video | ~1,010 | <1 |
+| **Total** | **~112** | **~11,312** | **~2 days** |
