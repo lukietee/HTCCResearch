@@ -25,7 +25,7 @@ import type { MrBeastSimilarityResponse } from '@/lib/types'
 
 type LikenessData = Awaited<ReturnType<typeof getMrBeastLikeness>>
 
-const YEAR_ORDER = ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023']
+const YEAR_ORDER = ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025']
 
 // Human-readable labels for feature names
 const FEATURE_LABELS: Record<string, string> = {
@@ -51,7 +51,7 @@ export default function LikenessPage() {
   const [simData, setSimData] = useState<MrBeastSimilarityResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedYear, setSelectedYear] = useState('2023')
+  const [selectedYear, setSelectedYear] = useState('2025')
 
   useEffect(() => {
     Promise.all([getMrBeastLikeness(), getMrBeastSimilarity()])

@@ -189,10 +189,10 @@ export default function EvolutionPage() {
           <LineChart data={lineData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
-            <YAxis domain={[0, 6]} label={{ value: 'Likeness Score', angle: -90, position: 'insideLeft' }} />
+            <YAxis domain={[0, 8]} label={{ value: 'Likeness Score', angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
-            <ReferenceLine y={5.12} stroke="#e6194b" strokeDasharray="5 5" label="MrBeast avg" />
+            <ReferenceLine y={6.13} stroke="#e6194b" strokeDasharray="5 5" label="MrBeast avg (6.13)" />
             {Array.from(selectedChannels).map((ch, i) => (
               <Line
                 key={ch}
