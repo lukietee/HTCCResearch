@@ -13,26 +13,26 @@ MrBeast's thumbnail style (high brightness, large faces, expressive emotions, bo
 | Group | Files on Disk | In DB | Notes |
 |-------|--------------|-------|-------|
 | MrBeast (ref) | 100 | 102 | Reference set across all eras (2015–2025) |
-| 2015 | 512 | 512 | Panel + initial dataset channels |
-| 2016 | 516 | 516 | |
-| 2017 | 600 | 600 | |
-| 2018 | 578 | 578 | |
-| 2019 | 508 | 508 | |
-| 2020 | 467 | 467 | |
-| 2021 | 445 | 445 | |
-| 2022 | 549 | 549 | |
-| 2023 | 555 | 555 | |
+| 2015 | 607 | 607 | Panel + initial dataset channels |
+| 2016 | 612 | 612 | |
+| 2017 | 722 | 722 | |
+| 2018 | 712 | 712 | |
+| 2019 | 660 | 660 | |
+| 2020 | 614 | 614 | |
+| 2021 | 598 | 598 | |
+| 2022 | 689 | 689 | |
+| 2023 | 691 | 691 | |
 | 2024 | 260 | 260 | Panel channels (API-collected) |
 | 2025 | 279 | 279 | Panel channels (API-collected) |
-| **Total** | **5,369** | **5,371** | **Fully ingested** |
+| **Total** | **6,544** | **6,546** | **Fully ingested** |
 
 ### Database Pipeline Status
 
 | Metric | Count |
 |--------|-------|
-| Total DB records | 5,371 |
-| With features extracted | 5,371 (100%) |
-| With cluster assignment | 5,369 (99.96%) |
+| Total DB records | 6,546 |
+| With features extracted | 6,546 (100%) |
+| With cluster assignment | 6,544 (99.97%) |
 | Pending ingestion | 0 |
 
 ### Panel Channels (22)
@@ -43,43 +43,36 @@ MrBeast's thumbnail style (high brightness, large faces, expressive emotions, bo
 
 ### Per-Channel Collection Status
 
-#### Fully collected (all applicable years via API)
+All 22 panel channels now have historical data (2015–2023 collected via YouTube API on Feb 16).
 
-| Channel | Active Since | Thumbnails | Years |
-|---------|-------------|------------|-------|
-| Danny Duncan | 2014 | 165 | 2015–2025 (11/11) |
-| Jelly | 2014 | 165 | 2015–2025 (11/11) |
-| LazarBeam | 2015 | 158 | 2015–2025 (11/11) |
-| Matt Stonie | 2012 | 153 | 2015–2025 (11/11) |
-| KSI | 2009 | 129 | 2015–2025 (11/11) |
-| Cody Ko | 2014 | 130 | 2015–2024 (10/11, no 2025 content) |
-| Logan Paul | 2015 | 120 | 2016–2025 (10/11, no 2015 content) |
-| ZHC | 2016 | 118 | 2016–2025 (10/10) |
-| IShowSpeed | 2016 | 117 | 2017–2025 (9/10, no 2016 content) |
-| FaZe Rug | 2012 | 105 | 2015–2020, 2024–2025 (7/11, gap 2021–2023) |
-| Airrack | 2015 | 100 | 2019–2025 (7/11, no content pre-2019) |
+| Channel | Active Since | Thumbnails | Years Covered | Notes |
+|---------|-------------|------------|---------------|-------|
+| Markiplier | 2012 | 245 | 2015–2025 (11/11) | |
+| Dude Perfect | 2009 | 242 | 2015–2025 (11/11) | |
+| PewDiePie | 2010 | 236 | 2015–2025 (11/11) | |
+| VanossGaming | 2011 | 214 | 2015–2025 (11/11) | |
+| Ryan Trahan | 2013 | 213 | 2015–2025 (11/11) | Sparse 2015 (n=1) |
+| Smosh | 2005 | 209 | 2015–2025 (11/11) | |
+| Good Mythical Morning | 2012 | 205 | 2015–2025 (11/11) | |
+| Unspeakable | 2012 | 202 | 2017–2025 (9/11) | No content pre-2017 |
+| FaZe Rug | 2012 | 200 | 2015–2025 (11/11) | Gap filled with scraped data |
+| Sidemen | 2013 | 179 | 2016–2025 (10/11) | No 2015 content |
+| Logan Paul | 2015 | 169 | 2016–2025 (10/11) | No 2015 content |
+| Jelly | 2014 | 165 | 2015–2025 (11/11) | |
+| Danny Duncan | 2014 | 165 | 2015–2025 (11/11) | |
+| KSI | 2009 | 160 | 2015–2025 (11/11) | |
+| David Dobrik | 2014 | 160 | 2015–2022, 2025 (9/11) | No 2023–2024 content found |
+| Matt Stonie | 2012 | 153 | 2015–2025 (11/11) | |
+| LazarBeam | 2015 | 153 | 2015–2025 (11/11) | |
+| ZHC | 2016 | 148 | 2016–2025 (10/10) | |
+| IShowSpeed | 2016 | 147 | 2017–2025 (9/10) | No 2016 content |
+| Cody Ko | 2014 | 130 | 2015–2024 (10/11) | No 2025 content |
+| Airrack | 2015 | 120 | 2019–2025 (7/11) | No content pre-2019 |
+| JiDion | 2018 | 27 | 2019, 2021–2025 (6/8) | Sparse early years |
 
-#### Partially collected (2024–2025 only, need 2015–2023 historical data)
+### Non-Panel Channels (supplementary data, from initial scrape)
 
-| Channel | Active Since | Thumbnails | Years Missing |
-|---------|-------------|------------|---------------|
-| Dude Perfect | 2009 | 30 | 2015–2023 (9 years) |
-| Smosh | 2005 | 30 | 2015–2023 (9 years) |
-| Good Mythical Morning | 2012 | 30 | 2015–2023 (9 years) |
-| Markiplier | 2012 | 30 | 2015–2023 (9 years) |
-| PewDiePie | 2010 | 30 | 2015–2023 (9 years) |
-| VanossGaming | 2011 | 30 | 2015–2023 (9 years) |
-| Sidemen | 2013 | 30 | 2015–2023 (9 years) |
-| Unspeakable | 2012 | 30 | 2015–2023 (9 years) |
-| Ryan Trahan | 2013 | 30 | 2015–2023 (9 years) |
-| David Dobrik | 2014 | 13 | 2015–2023 (9 years) |
-| JiDion | 2018 | 9 | 2018–2023 (6 years) |
-
-### Non-Panel Channels (supplementary data, 2024–2025 only)
-
-20 additional channels collected for supplementary analysis. Not part of evolution panel.
-
-MKBHD (30), Linus Tech Tips (30), Vsauce (30), Veritasium (30), Mark Rober (30), Corridor Crew (30), Kurzgesagt (30), Ali Abdaal (30), Aphmau (30), MrBallen (30), Philip DeFranco (30), Unbox Therapy (30), SSundee (30), Binging with Babish (30), The Slow Mo Guys (27), SmarterEveryDay (18), Casey Neistat (13), Typical Gamer (6), h3h3Productions (4), Jeffree Star (3)
+~93 additional channels in the dataset from the initial 2015–2023 web scrape. Not part of the evolution panel but contribute to year-group aggregate statistics.
 
 ### MrBeast Reference Set
 
@@ -95,26 +88,26 @@ MKBHD (30), Linus Tech Tips (30), Vsauce (30), Veritasium (30), Mark Rober (30),
 
 ### 1. Likeness Scores Show a Clear 2024–2025 Convergence
 
-Binary likeness scores (0–8 scale) across all 5,371 thumbnails:
+Binary likeness scores (0–8 scale) across all 6,546 thumbnails:
 
 | Group | N | Mean | Median | ≥4 | ≥5 | ≥6 | ≥7 | 8/8 |
 |-------|---|------|--------|-----|-----|-----|-----|-----|
 | **MrBeast** | **102** | **6.13** | **7.0** | **87.3%** | **80.4%** | **75.5%** | **54.9%** | **27.5%** |
-| 2015 | 512 | 3.54 | 3.0 | 44.9% | 36.5% | 27.3% | 17.0% | 4.1% |
-| 2016 | 516 | 3.80 | 4.0 | 51.7% | 41.3% | 32.6% | 16.5% | 4.7% |
-| 2017 | 600 | 3.79 | 4.0 | 51.7% | 40.3% | 30.8% | 16.0% | 4.8% |
-| 2018 | 578 | 3.83 | 3.0 | 48.6% | 41.9% | 31.3% | 18.0% | 4.7% |
-| 2019 | 508 | 3.68 | 3.0 | 47.2% | 37.2% | 29.9% | 17.5% | 4.9% |
-| 2020 | 467 | 3.76 | 3.0 | 49.0% | 40.0% | 29.3% | 17.8% | 6.0% |
-| 2021 | 445 | 4.04 | 4.0 | 54.6% | 48.1% | 36.9% | 20.2% | 5.2% |
-| 2022 | 549 | 4.09 | 4.0 | 57.6% | 47.2% | 35.9% | 21.5% | 7.3% |
-| 2023 | 555 | 3.42 | 3.0 | 45.0% | 37.5% | 24.5% | 13.0% | 4.3% |
+| 2015 | 607 | 3.59 | 3.0 | 45.5% | 37.1% | 27.8% | 17.0% | 4.6% |
+| 2016 | 612 | 3.76 | 4.0 | 50.7% | 40.0% | 31.5% | 15.8% | 4.2% |
+| 2017 | 722 | 3.80 | 4.0 | 52.2% | 41.0% | 31.0% | 15.9% | 4.4% |
+| 2018 | 712 | 3.88 | 3.0 | 49.7% | 42.6% | 32.4% | 18.0% | 4.5% |
+| 2019 | 660 | 3.85 | 4.0 | 50.9% | 40.6% | 33.0% | 19.4% | 4.5% |
+| 2020 | 614 | 3.85 | 4.0 | 50.8% | 42.2% | 30.8% | 18.1% | 5.5% |
+| 2021 | 598 | 4.11 | 4.0 | 55.9% | 49.0% | 38.0% | 20.2% | 5.7% |
+| 2022 | 689 | 4.12 | 4.0 | 57.0% | 47.6% | 37.0% | 21.9% | 7.4% |
+| 2023 | 691 | 3.64 | 3.0 | 48.8% | 40.8% | 28.7% | 15.2% | 5.2% |
 | **2024** | **260** | **4.62** | **5.0** | **66.5%** | **55.8%** | **42.3%** | **26.9%** | **9.6%** |
 | **2025** | **279** | **4.55** | **5.0** | **68.5%** | **55.9%** | **43.4%** | **23.7%** | **5.0%** |
 
-**Key observation:** With the expanded dataset (5,371 vs. previous 4,246), the core pattern holds. 2015–2020 fluctuate between 3.54–3.83 mean likeness. A modest uptick appears in 2021–2022 (4.04–4.09), then 2023 dips to 3.42. The 2024–2025 jump to **4.55–4.62** remains the clearest step-change — a ~20% increase over the 2015–2020 baseline. Over 55% of 2024–2025 thumbnails score ≥5, compared to ~40% in the 2015–2020 era.
+**Key observation:** With the expanded dataset (6,546 vs. previous 5,371), the core pattern holds. 2015–2020 fluctuate between 3.59–3.88 mean likeness. A modest uptick appears in 2021–2022 (4.11–4.12), followed by a 2023 dip to 3.64. The 2024–2025 jump to **4.55–4.62** remains the clearest step-change — a ~20% increase over the 2015–2020 baseline. Over 55% of 2024–2025 thumbnails score ≥5, compared to ~40% in the 2015–2020 era.
 
-**Change from prior analysis:** The addition of 1,125 new thumbnails (primarily from the 8 newly collected panel channels) slightly moderated the 2024–2025 means (from 4.70–4.77 → 4.55–4.62) but revealed a previously hidden uptick in 2021–2022 (from 3.77–3.83 → 4.04–4.09). This suggests convergence may have begun earlier than the prior snapshot indicated, with a more gradual ramp rather than a pure step-change.
+**Change from prior analysis:** Adding 1,175 historical thumbnails for 11 panel channels strengthened the 2015–2023 year groups (e.g., 2017 grew from 600 → 722, 2019 from 508 → 660). The 2023 anomaly is slightly less severe (3.64 vs. prior 3.42) as panel channel historical data diluted the composition effect. The 2021–2022 uptick (4.11–4.12) remains robust, confirming the two-phase convergence pattern: gradual 2021–2022 ramp → 2024–2025 acceleration.
 
 ### 2. Continuous Similarity Confirms the Step-Change
 
@@ -122,20 +115,20 @@ Z-score distance from MrBeast centroid (10 features, exponential decay to 0–10
 
 | Group | Mean % | Median % | Std Dev |
 |-------|--------|----------|---------|
-| **MrBeast** | **59.2** | **62.8** | **13.7** |
-| 2015 | 38.6 | 38.6 | 18.9 |
-| 2016 | 39.5 | 39.3 | 18.6 |
-| 2017 | 39.7 | 39.5 | 18.7 |
-| 2018 | 40.5 | 39.8 | 18.0 |
-| 2019 | 39.2 | 39.1 | 18.0 |
-| 2020 | 39.8 | 39.7 | 19.1 |
-| 2021 | 39.6 | 40.2 | 19.6 |
-| 2022 | 39.8 | 39.5 | 17.9 |
-| 2023 | 35.9 | 34.7 | 17.6 |
-| **2024** | **44.1** | **45.3** | **19.1** |
-| **2025** | **45.7** | **46.6** | **18.1** |
+| **MrBeast** | **79.0** | **81.3** | **8.0** |
+| 2015 | 67.1 | 64.9 | 10.4 |
+| 2016 | 68.0 | 66.9 | 10.3 |
+| 2017 | 67.7 | 67.5 | 10.5 |
+| 2018 | 68.4 | 67.4 | 9.8 |
+| 2019 | 67.7 | 66.2 | 10.0 |
+| 2020 | 68.5 | 68.6 | 10.7 |
+| 2021 | 68.7 | 68.9 | 10.8 |
+| 2022 | 68.7 | 68.3 | 9.9 |
+| 2023 | 67.2 | 66.1 | 10.2 |
+| **2024** | **71.5** | **72.3** | **9.6** |
+| **2025** | **71.9** | **74.0** | **9.9** |
 
-2024–2025 show a **5–6 percentage-point jump** over the 2015–2022 plateau (~39–40%). The 2023 dip to 35.9% remains the dataset minimum. The gap between the baseline plateau and 2024–2025 is consistent and statistically meaningful across both scoring methods.
+2024–2025 show a **3–4 percentage-point jump** over the 2015–2022 plateau (~67–69%). The 2023 dip to 67.2% is the dataset minimum among non-2015 years. The gap between the baseline plateau and 2024–2025 is consistent across both scoring methods, though the continuous measure shows a tighter spread than the binary score.
 
 ### 3. Feature-Level Trends
 
@@ -144,47 +137,47 @@ Z-score distance from MrBeast centroid (10 features, exponential decay to 0–10
 | Group | Brightness | Saturation | Face Count | Text Area | Largest Face Area |
 |-------|-----------|-----------|-----------|-----------|-------------------|
 | **MrBeast** | **0.658** | **0.405** | **1.37** | **0.0007** | **0.087** |
-| 2015 | 0.560 | 0.366 | 0.78 | 0.0216 | 0.055 |
-| 2016 | 0.564 | 0.372 | 0.88 | 0.0180 | 0.070 |
-| 2017 | 0.569 | 0.357 | 0.93 | 0.0225 | 0.062 |
-| 2018 | 0.584 | 0.390 | 0.97 | 0.0142 | 0.061 |
-| 2019 | 0.590 | 0.386 | 0.82 | 0.0154 | 0.057 |
-| 2020 | 0.582 | 0.417 | 0.85 | 0.0174 | 0.057 |
-| 2021 | 0.571 | 0.418 | 0.95 | 0.0195 | 0.060 |
-| 2022 | 0.528 | 0.401 | 0.94 | 0.0106 | 0.058 |
-| 2023 | 0.461 | 0.378 | 0.88 | 0.0098 | 0.048 |
+| 2015 | 0.554 | 0.380 | 0.78 | 0.0191 | 0.056 |
+| 2016 | 0.560 | 0.377 | 0.87 | 0.0166 | 0.068 |
+| 2017 | 0.564 | 0.360 | 0.94 | 0.0220 | 0.065 |
+| 2018 | 0.580 | 0.395 | 0.99 | 0.0133 | 0.064 |
+| 2019 | 0.589 | 0.396 | 0.86 | 0.0144 | 0.063 |
+| 2020 | 0.581 | 0.425 | 0.90 | 0.0152 | 0.062 |
+| 2021 | 0.577 | 0.429 | 0.98 | 0.0177 | 0.065 |
+| 2022 | 0.541 | 0.412 | 0.94 | 0.0106 | 0.061 |
+| 2023 | 0.485 | 0.392 | 0.91 | 0.0090 | 0.055 |
 | **2024** | **0.595** | **0.450** | **1.16** | **0.0083** | **0.071** |
-| **2025** | **0.555** | **0.421** | **1.12** | **0.0050** | **0.067** |
+| **2025** | **0.555** | **0.422** | **1.12** | **0.0050** | **0.067** |
 
 **Trends:**
-- **Brightness**: Stable 0.56–0.59 through 2020, drops to 0.46 in 2023, recovers to 0.56–0.60 in 2024–2025. Still well below MrBeast's 0.66.
-- **Saturation**: Gradual rise from 0.37 (2015) to 0.45 (2024), now **exceeding** MrBeast's 0.41. Thumbnails are getting more colorful.
+- **Brightness**: Stable 0.55–0.59 through 2020, drops to 0.49 in 2023, recovers to 0.56–0.60 in 2024–2025. Still well below MrBeast's 0.66.
+- **Saturation**: Gradual rise from 0.38 (2015) to 0.45 (2024), now **exceeding** MrBeast's 0.41. Thumbnails are getting more colorful.
 - **Face count**: Rose from 0.78 (2015) to 1.16 (2024), approaching MrBeast's 1.37. The strongest single-feature convergence.
-- **Text area**: Dropped from 0.022 (2015) to 0.005 (2025) — a **77% reduction** — trending toward MrBeast's near-zero (0.0007).
-- **Face size**: Rose from 0.055 (2015) to 0.071 (2024), closing the gap to MrBeast's 0.087. Faces are getting bigger.
+- **Text area**: Dropped from 0.019 (2015) to 0.005 (2025) — a **74% reduction** — trending toward MrBeast's near-zero (0.0007).
+- **Face size**: Rose from 0.056 (2015) to 0.071 (2024), closing the gap to MrBeast's 0.087. Faces are getting bigger.
 
 #### 3b. Emotion & Pose Proxies (group means)
 
 | Group | Smile | Mouth Open | Brow Raise | Body Coverage |
 |-------|-------|-----------|-----------|--------------|
-| **MrBeast** | **0.510** | **0.181** | **0.398** | **0.413** |
-| 2015 | 0.260 | 0.104 | 0.205 | 0.237 |
-| 2016 | 0.285 | 0.111 | 0.252 | 0.275 |
-| 2017 | 0.288 | 0.125 | 0.235 | 0.252 |
-| 2018 | 0.281 | 0.128 | 0.229 | 0.233 |
-| 2019 | 0.266 | 0.120 | 0.215 | 0.234 |
-| 2020 | 0.288 | 0.133 | 0.225 | 0.226 |
-| 2021 | 0.311 | 0.145 | 0.251 | 0.270 |
-| 2022 | 0.324 | 0.186 | 0.246 | 0.250 |
-| 2023 | 0.264 | 0.121 | 0.193 | 0.209 |
+| **MrBeast** | **0.511** | **0.181** | **0.398** | **0.413** |
+| 2015 | 0.266 | 0.105 | 0.209 | 0.246 |
+| 2016 | 0.279 | 0.108 | 0.245 | 0.270 |
+| 2017 | 0.287 | 0.120 | 0.237 | 0.253 |
+| 2018 | 0.286 | 0.134 | 0.236 | 0.245 |
+| 2019 | 0.281 | 0.133 | 0.233 | 0.251 |
+| 2020 | 0.300 | 0.137 | 0.235 | 0.233 |
+| 2021 | 0.314 | 0.144 | 0.252 | 0.280 |
+| 2022 | 0.323 | 0.175 | 0.251 | 0.252 |
+| 2023 | 0.279 | 0.127 | 0.215 | 0.235 |
 | **2024** | **0.368** | **0.143** | **0.284** | **0.348** |
-| **2025** | **0.378** | **0.156** | **0.281** | **0.336** |
+| **2025** | **0.378** | **0.156** | **0.281** | **0.337** |
 
 This is where convergence is strongest. Between 2015 and 2025:
-- **Smile scores** rose from 0.26 → 0.38 (+45%), closing 47% of the gap to MrBeast's 0.51
-- **Brow raise** rose from 0.21 → 0.28 (+37%), closing 39% of the gap to MrBeast's 0.40
-- **Body coverage** rose from 0.24 → 0.34 (+42%), closing 56% of the gap to MrBeast's 0.41
-- **Mouth open** rose from 0.10 → 0.16 (+52%), closing 68% of the gap to MrBeast's 0.18
+- **Smile scores** rose from 0.27 → 0.38 (+42%), closing 46% of the gap to MrBeast's 0.51
+- **Brow raise** rose from 0.21 → 0.28 (+34%), closing 38% of the gap to MrBeast's 0.40
+- **Body coverage** rose from 0.25 → 0.34 (+37%), closing 54% of the gap to MrBeast's 0.41
+- **Mouth open** rose from 0.11 → 0.16 (+49%), closing 67% of the gap to MrBeast's 0.18
 
 People in thumbnails are smiling bigger, raising eyebrows more, and showing more of their bodies — all hallmarks of the MrBeast style. Notably, 2021–2022 already showed early movement on these metrics before the 2024–2025 acceleration.
 
@@ -193,34 +186,34 @@ People in thumbnails are smiling bigger, raising eyebrows more, and showing more
 | Group | Text Box Count | % with Any Text |
 |-------|---------------|-----------------|
 | **MrBeast** | **0.088** | **4.9%** |
-| 2015 | 0.840 | 17.8% |
-| 2016 | 0.616 | 17.4% |
-| 2017 | 0.955 | 16.0% |
-| 2018 | 0.972 | 16.1% |
-| 2019 | 1.051 | 16.3% |
-| 2020 | 1.015 | 18.6% |
-| 2021 | 1.097 | 19.6% |
-| 2022 | 0.805 | 13.7% |
-| 2023 | 0.986 | 17.3% |
+| 2015 | 0.756 | 16.1% |
+| 2016 | 0.600 | 16.2% |
+| 2017 | 0.902 | 15.2% |
+| 2018 | 0.879 | 15.7% |
+| 2019 | 0.961 | 15.2% |
+| 2020 | 0.959 | 17.9% |
+| 2021 | 1.067 | 19.4% |
+| 2022 | 0.803 | 14.4% |
+| 2023 | 0.896 | 16.1% |
 | 2024 | 0.596 | 15.0% |
 | 2025 | 0.674 | 12.9% |
 
-Text peaked in 2021 (1.10 boxes, 19.6% with text) then dropped. 2025 hit the lowest text prevalence at 12.9%. MrBeast's near-zero text (only 4.9% of thumbnails) is the direction of travel, though the gap remains significant.
+Text peaked in 2021 (1.07 boxes, 19.4% with text) then dropped. 2025 hit the lowest text prevalence at 12.9%. MrBeast's near-zero text (only 4.9% of thumbnails) is the direction of travel, though the gap remains significant.
 
 #### 3d. Depth & Composition
 
 | Group | Depth Range | Depth Contrast |
 |-------|-----------|---------------|
 | **MrBeast** | **0.977** | **0.286** |
-| 2015 | 0.908 | 0.283 |
-| 2016 | 0.918 | 0.287 |
-| 2017 | 0.919 | 0.282 |
-| 2018 | 0.911 | 0.285 |
-| 2019 | 0.922 | 0.285 |
-| 2020 | 0.918 | 0.285 |
-| 2021 | 0.913 | 0.286 |
-| 2022 | 0.935 | 0.288 |
-| 2023 | 0.927 | 0.284 |
+| 2015 | 0.906 | 0.284 |
+| 2016 | 0.920 | 0.286 |
+| 2017 | 0.920 | 0.282 |
+| 2018 | 0.910 | 0.286 |
+| 2019 | 0.920 | 0.286 |
+| 2020 | 0.914 | 0.287 |
+| 2021 | 0.913 | 0.287 |
+| 2022 | 0.933 | 0.288 |
+| 2023 | 0.926 | 0.285 |
 | **2024** | **0.959** | **0.297** |
 | **2025** | **0.968** | **0.299** |
 
@@ -230,50 +223,48 @@ Depth range (foreground/background separation) increased from 0.91 (2015) to 0.9
 
 | Criterion | MrBeast | 2015 | 2018 | 2021 | 2023 | 2024 | 2025 | Δ 2015→2025 |
 |-----------|---------|------|------|------|------|------|------|-------------|
-| Brightness ≥ 0.60 | 73.0% | 41.8% | 46.9% | 48.8% | 31.4% | **56.2%** | 41.9% | +0.1 pp |
-| Face count ≥ 1 | 91.2% | 58.8% | 65.6% | 67.4% | 61.8% | **76.9%** | **77.4%** | **+18.6 pp** |
-| Text area ≤ 0.005 | 99.0% | 85.0% | 86.2% | 81.6% | 85.4% | 87.7% | **91.4%** | **+6.4 pp** |
-| Smile ≥ 0.40 | 87.3% | 46.1% | 49.1% | 55.1% | 46.5% | **63.5%** | **65.9%** | **+19.8 pp** |
-| Mouth open ≥ 0.15 | 62.7% | 25.8% | 32.5% | 33.9% | 30.3% | **36.5%** | **38.0%** | **+12.2 pp** |
-| Body coverage ≥ 0.30 | 62.7% | 29.7% | 30.6% | 37.5% | 23.8% | **45.4%** | **44.8%** | **+15.1 pp** |
-| Brow raise ≥ 0.30 | 71.6% | 33.4% | 37.5% | 42.2% | 33.5% | **49.2%** | **47.7%** | **+14.3 pp** |
-| Face area ≥ 0.06 | 66.7% | 33.4% | 34.8% | 37.3% | 29.5% | **46.5%** | **47.7%** | **+14.3 pp** |
+| Brightness ≥ 0.60 | 73.0% | 41.0% | 45.4% | 49.3% | 35.3% | **56.2%** | 41.9% | +0.9 pp |
+| Face count ≥ 1 | 91.2% | 60.0% | 67.0% | 68.7% | 64.5% | **76.9%** | **77.4%** | **+17.4 pp** |
+| Text area ≤ 0.005 | 99.0% | 86.3% | 86.2% | 82.1% | 86.4% | 87.7% | **91.4%** | **+5.1 pp** |
+| Smile ≥ 0.40 | 87.3% | 47.0% | 50.3% | 55.5% | 48.5% | **63.5%** | **65.9%** | **+18.9 pp** |
+| Mouth open ≥ 0.15 | 62.7% | 25.9% | 33.6% | 33.3% | 31.0% | **36.5%** | **38.0%** | **+12.1 pp** |
+| Body coverage ≥ 0.30 | 62.7% | 30.5% | 31.7% | 38.8% | 28.1% | **45.4%** | **44.8%** | **+14.3 pp** |
+| Brow raise ≥ 0.30 | 71.6% | 33.6% | 38.1% | 43.3% | 36.9% | **49.2%** | **47.7%** | **+14.1 pp** |
+| Face area ≥ 0.06 | 66.7% | 34.4% | 36.0% | 40.0% | 33.6% | **46.5%** | **47.7%** | **+13.3 pp** |
 
 **Strongest convergence (2015 → 2025):**
-- Smile score: +19.8 pp (46% → 66%)
-- Face count: +18.6 pp (59% → 77%)
-- Body coverage: +15.1 pp (30% → 45%)
-- Brow raise: +14.3 pp (33% → 48%)
-- Face area ratio: +14.3 pp (33% → 48%)
-- Mouth open: +12.2 pp (26% → 38%)
+- Smile score: +18.9 pp (47% → 66%)
+- Face count: +17.4 pp (60% → 77%)
+- Body coverage: +14.3 pp (31% → 45%)
+- Brow raise: +14.1 pp (34% → 48%)
+- Face area ratio: +13.3 pp (34% → 48%)
+- Mouth open: +12.1 pp (26% → 38%)
 
 The convergence is broadest across **facial expression and body visibility** criteria — the most distinctive elements of MrBeast's style. Brightness is the one criterion that has *not* converged, possibly because creators use darker/moodier palettes as a stylistic differentiator.
 
-### 5. The 2023 Anomaly
+### 5. The 2023 Anomaly (Partially Resolved)
 
-2023 is consistently the lowest-scoring year across nearly every metric:
+2023 remains the lowest-scoring year across most metrics, but the effect is now less severe:
 
-| Metric | 2022 | 2023 | 2024 | Notes |
-|--------|------|------|------|-------|
-| Mean likeness | 4.09 | **3.42** | 4.62 | Lowest in dataset |
-| Brightness | 0.528 | **0.461** | 0.595 | Lowest in dataset |
-| Face area | 0.058 | **0.048** | 0.071 | Lowest in dataset |
-| Smile score | 0.324 | **0.264** | 0.368 | Lowest in dataset |
-| Body coverage | 0.250 | **0.209** | 0.348 | Lowest in dataset |
-| Brow raise | 0.246 | **0.193** | 0.284 | Lowest in dataset |
+| Metric | 2022 | 2023 | 2024 | Prior 2023 | Change |
+|--------|------|------|------|------------|--------|
+| Mean likeness | 4.12 | **3.64** | 4.62 | 3.42 | +0.22 |
+| Brightness | 0.541 | **0.485** | 0.595 | 0.461 | +0.024 |
+| Face area | 0.061 | **0.055** | 0.071 | 0.048 | +0.007 |
+| Smile score | 0.323 | **0.279** | 0.368 | 0.264 | +0.015 |
+| Body coverage | 0.252 | **0.235** | 0.348 | 0.209 | +0.026 |
 
-Possible explanations:
-- **Composition effect**: 2023 data comes primarily from the initial non-panel scrape and may include more non-entertainment channels. The 2024–2025 data is 100% panel-curated entertainment channels.
-- **Channel mix**: 2023 has thumbnails from ~35–40 channels vs. 2024–2025's focused panel channels. The broader mix includes channels with intentionally different aesthetics (gaming, commentary) that dilute the entertainment signal.
-- **Survivorship bias**: The panel channels selected for 2024–2025 may be the ones most likely to adopt MrBeast's style — the selection criteria itself favors convergence.
+Adding panel channel historical data to 2023 (691 thumbnails, up from 555) raised scores across the board. The 2023 dip is still real but smaller — confirming the **composition effect** was partly responsible. The panel channels score higher than the initial scrape's broader channel mix.
 
-This caveat is important for interpreting the 2024–2025 jump. The jump is real within the entertainment panel, but its magnitude may be inflated by the composition shift.
+Remaining explanations:
+- **Channel mix**: 2023 still includes ~35 non-panel channels from the initial scrape. 2024–2025 is 100% panel-curated entertainment channels.
+- **Survivorship bias**: Panel channels selected for tracking may be those most likely to adopt MrBeast's style.
 
-### 6. Channel Evolution — 27 Converging, 18 Diverging
+### 6. Channel Evolution — 29 Converging, 17 Diverging
 
-Across all 45 channels with ≥4 years of data (up from 39 in prior analysis):
+Across all 46 channels with ≥4 years of data (up from 45 in prior analysis):
 
-- **60% converging** (27/45), **40% diverging** (18/45)
+- **63% converging** (29/46), **37% diverging** (17/46)
 - **Average slope: +0.050 points/year** (net positive convergence)
 
 #### Top Convergers
@@ -287,9 +278,12 @@ Across all 45 channels with ≥4 years of data (up from 39 in prior analysis):
 | **IShowSpeed** | 9 | +0.361 | 0.5 → 2.7 | Started extremely low, consistent rise |
 | **FaZe Rug** | 11 | **+0.355** | 3.3 → 6.5 | Longest span, most reliable trend |
 | **SSSniperWolf** | 8 | +0.325 | 4.6 → 6.9 | Near-MrBeast levels by end |
+| **Sidemen** | 10 | +0.314 | 1.3 → 5.1 | Expanded to 10 years, consistent climb |
 | Jenna Marbles | 4 | +0.304 | 3.3 → 4.3 | Pre-retirement convergence |
-| **Sidemen** | 7 | +0.290 | 3.1 → 5.1 | Consistent climb |
-| The King of Random | 4 | +0.280 | 1.5 → 1.8 | Modest rise |
+| **Ryan Trahan** | 11 | +0.269 | 1.0 → 4.8 | Dramatic long-term rise |
+| **Matt Stonie** | 11 | +0.252 | 1.3 → 3.6 | Steady food-to-entertainment shift |
+| **Cody Ko** | 10 | +0.241 | 5.0 → 6.2 | Already high, still climbing |
+| **David Dobrik** | 9 | +0.226 | 3.6 → 5.9 | Strong convergence, peaked at 7.2 in 2022 |
 
 #### Top Divergers
 
@@ -299,17 +293,50 @@ Across all 45 channels with ≥4 years of data (up from 39 in prior analysis):
 | Jacksfilms | 4 | −0.600 | 4.7 → 3.1 | Comedy → low-effort ironic thumbnails |
 | Ali-A | 4 | −0.600 | 5.1 → 2.9 | Shifted to gaming-heavy aesthetic |
 | Annoying Orange | 4 | −0.520 | 4.9 → 3.0 | Cartoon/animated style doesn't converge |
+| **JiDion** | 6 | −0.507 | 6.5 → 2.0 | Volatile; sparse early data (n=2 in 2019) |
 | EpicMealTime | 4 | −0.470 | 5.0 → 3.4 | Food-focused, genre-locked |
 | Jake Paul | 4 | −0.427 | 3.3 → 1.3 | Boxing era, dark/dramatic thumbnails |
 | Rooster Teeth | 5 | −0.332 | 3.6 → 2.0 | Corporate channel, different strategy |
 | Yes Theory | 5 | −0.300 | 4.8 → 3.6 | Travel/cinematic aesthetic |
 
 **Notable patterns:**
-- **Danny Duncan** is the new standout long-term case study: 11 years of data, dramatic climb from 2.0 → 6.7, the largest absolute gain in the dataset.
-- **FaZe Rug** remains the most reliable long-term trend: 11 years, steady climb from 3.3 → 6.5.
-- **SSSniperWolf** reached near-MrBeast levels (6.9) by her final measured year, up from 4.6.
-- **KSI** showed a mixed trajectory with the expanded 11-year dataset (previously reported as a dramatic converger with only 4 years of data, his full timeline shows more volatility: peaking at 5.1 in 2017, dropping to 2.3 in 2020, then partially recovering).
+- **Danny Duncan** is the standout long-term case study: 11 years of data, dramatic climb from 2.0 → 6.7, the largest absolute gain in the dataset.
+- **FaZe Rug** now has a complete 11-year timeline (gap filled): steady climb from 3.3 → 6.5, with a pronounced jump in 2024–2025 (4.3 → 6.5).
+- **Sidemen** expanded from 7 → 10 years of data. Consistent climb from 1.3 (2016) → 5.1 (2025), one of the clearest long-term convergence trajectories.
+- **Ryan Trahan** shows 11 years of evolution: from 1.0 (2015) to 4.8 (2025), with a volatile but upward trajectory.
+- **David Dobrik** peaked at 7.2 (2022) before declining — possible "convergence overshoot" or content shift.
+- **JiDion** appears as a diverger but with very sparse early data (n=2 in 2019, n=3 in 2021). His negative slope should be treated cautiously.
+- **KSI** now shows 11 years of volatile trajectory (slope −0.148): peaked at 5.1 in 2017, dropped to 2.3 in 2020, partially recovered. Not a clean convergence or divergence story.
 - Most divergers are either genre-locked (Annoying Orange, EpicMealTime) or intentionally counter-culture (Jacksfilms' ironic thumbnails, Jake Paul's boxing-era dark aesthetic).
+
+#### Panel Channel Trajectories (detailed)
+
+| Channel | Slope | Years | Trajectory Summary |
+|---------|-------|-------|--------------------|
+| Danny Duncan | **+0.552** | 11 | 2.0 → 2.3 → 3.3 → 4.9 → 5.8 → 6.2 → **6.7** |
+| ZHC | +0.434 | 10 | 4.0 → 1.5 → 3.8 → 5.7 → 6.7 → 6.8 → **4.5** |
+| IShowSpeed | +0.361 | 9 | 0.5 → 1.1 → 2.3 → 4.8 → 4.8 → 4.2 → **2.7** |
+| FaZe Rug | +0.355 | 11 | 3.3 → 1.9 → 3.0 → 3.6 → 4.4 → 6.6 → **6.5** |
+| Sidemen | +0.314 | 10 | 1.3 → 3.1 → 3.2 → 4.2 → 4.0 → 4.5 → **5.1** |
+| Ryan Trahan | +0.269 | 11 | 1.0 → 1.9 → 5.0 → 3.8 → 2.9 → 4.4 → **4.8** |
+| Matt Stonie | +0.252 | 11 | 1.3 → 2.3 → 2.9 → 3.5 → 3.7 → 4.7 → **3.6** |
+| Cody Ko | +0.241 | 10 | 5.0 → 4.5 → 5.5 → 5.9 → 6.5 → 6.6 → **6.2** |
+| David Dobrik | +0.226 | 9 | 3.6 → 5.7 → 6.8 → 6.2 → 6.8 → 7.2 → **5.9** |
+| Dude Perfect | +0.165 | 11 | 2.3 → 2.3 → 2.1 → 2.4 → 3.2 → 2.0 → **4.1** |
+| LazarBeam | +0.135 | 11 | 2.7 → 6.2 → 3.8 → 5.4 → 7.3 → 5.5 → **4.3** |
+| Good Mythical Morning | +0.121 | 11 | 5.6 → 4.6 → 5.2 → 5.8 → 6.1 → 6.5 → **5.4** |
+| Unspeakable | +0.116 | 9 | 5.1 → 3.3 → 3.7 → 5.4 → 5.3 → 4.6 → **4.2** |
+| VanossGaming | +0.081 | 11 | 4.0 → 3.3 → 2.6 → 1.3 → 1.8 → 3.8 → **4.7** |
+| Smosh | +0.039 | 11 | 5.1 → 4.3 → 3.1 → 4.1 → 5.4 → 5.9 → **3.6** |
+| Jelly | +0.037 | 11 | 3.1 → 3.5 → 4.4 → 2.3 → 2.9 → 2.5 → **5.1** |
+| PewDiePie | −0.018 | 11 | 5.7 → 5.8 → 5.9 → 5.8 → 5.4 → 5.6 → **5.7** |
+| Logan Paul | −0.045 | 10 | 5.9 → 3.1 → 4.6 → 4.7 → 3.3 → 4.0 → **2.9** |
+| Airrack | −0.079 | 7 | 4.9 → 4.2 → 3.5 → 4.4 → 3.0 → 3.8 → **4.6** |
+| Markiplier | −0.102 | 11 | 2.4 → 3.7 → 4.1 → 3.7 → 3.1 → 2.0 → **2.7** |
+| KSI | −0.148 | 11 | 3.6 → 5.1 → 4.2 → 2.3 → 2.9 → 3.0 → **3.8** |
+| JiDion | −0.507 | 6 | 6.5 → 1.7 → 2.0 → 4.9 → 2.5 → **2.0** |
+
+**Panel summary:** 16/22 panel channels (73%) have positive slopes, vs. 63% across all tracked channels. The panel's average slope is higher than the overall, partly because these channels were selected for being entertainment-focused (and thus more likely to share MrBeast's visual language).
 
 ### 7. MrBeast Centroid (Reference Profile)
 
@@ -340,15 +367,17 @@ The data supports the thesis that entertainment YouTubers' thumbnails have conve
 
 #### What the data shows
 
-1. **Aggregate convergence is real, with a possible two-phase pattern.** The 2015–2020 period shows a baseline plateau with mean likeness between 3.54–3.83. A modest uptick appears in 2021–2022 (4.04–4.09), suggesting early convergence. Then 2024–2025 jumps to 4.55–4.62 — a clear acceleration. This two-phase pattern (gradual 2021–2022 uptick → 2024–2025 acceleration) is more consistent with diffusion dynamics than a single step-change.
+1. **Aggregate convergence is real, with a two-phase pattern.** The 2015–2020 period shows a baseline plateau with mean likeness between 3.59–3.88. A modest uptick appears in 2021–2022 (4.11–4.12), suggesting early convergence. Then 2024–2025 jumps to 4.55–4.62 — a clear acceleration. This two-phase pattern (gradual 2021–2022 uptick → 2024–2025 acceleration) is consistent with diffusion dynamics.
 
 2. **Convergence is multi-dimensional.** It's not just one feature changing. Face count, face size, smile intensity, brow expressiveness, body coverage, and text reduction all move toward MrBeast's values simultaneously. This coordinated shift across 6+ features is difficult to attribute to coincidence.
 
-3. **Facial expression criteria drive the convergence.** The largest gains are in smile score (+20 pp), face presence (+19 pp), body coverage (+15 pp), and face area (+14 pp). These are the most distinctive and intentional elements of MrBeast's style — suggesting deliberate mimicry rather than incidental overlap.
+3. **Facial expression criteria drive the convergence.** The largest gains are in smile score (+19 pp), face presence (+17 pp), body coverage (+14 pp), and brow raise (+14 pp). These are the most distinctive and intentional elements of MrBeast's style — suggesting deliberate mimicry rather than incidental overlap.
 
-4. **60% of tracked channels are converging** (27/45 with ≥4 years). The average slope is net positive (+0.050/year). Several channels show dramatic transformations (Danny Duncan: 2.0→6.7, FaZe Rug: 3.3→6.5, SSSniperWolf: 4.6→6.9).
+4. **63% of tracked channels are converging** (29/46 with ≥4 years). The average slope is net positive (+0.050/year). Several channels show dramatic transformations (Danny Duncan: 2.0→6.7, FaZe Rug: 3.3→6.5, SSSniperWolf: 4.6→6.9).
 
-5. **Divergers have explanations.** Most diverging channels are genre-locked (animated content, food shows) or intentionally counter-culture. True resisters among entertainment channels are few.
+5. **73% of panel channels are converging** (16/22). When restricted to the entertainment panel, convergence is even stronger, with the panel's average slope exceeding the overall average.
+
+6. **Divergers have explanations.** Most diverging channels are genre-locked (animated content, food shows) or intentionally counter-culture. True resisters among entertainment channels are few.
 
 #### What the data doesn't show
 
@@ -360,11 +389,11 @@ The data supports the thesis that entertainment YouTubers' thumbnails have conve
 
 #### Methodological caveats
 
-- **Composition effect is the biggest threat to validity.** 2015–2023 includes non-panel channels from an initial scrape; 2024–2025 is 100% panel-curated entertainment channels. The 2024–2025 jump may partly reflect cleaner, more homogeneous data. Isolating panel-only data for 2015–2023 would be the strongest test.
-- **11 original panel channels missing historical data.** Dude Perfect, Smosh, GMM, Markiplier, PewDiePie, VanossGaming, Sidemen, Unspeakable, Ryan Trahan, David Dobrik, and JiDion only have 2024–2025 data. Completing their 2015–2023 timelines would dramatically strengthen the evolution analysis.
+- **Composition effect is partially resolved but remains a concern.** Adding panel channel historical data to 2015–2023 raised the 2023 mean from 3.42 → 3.64, confirming the composition effect was real. However, 2015–2023 still includes ~93 non-panel channels, while 2024–2025 is panel-only. A panel-only reanalysis is still needed.
 - **Binary scoring simplifies nuance.** The 0–8 score treats all criteria equally, but face presence likely matters more than text area for visual impact. Weighted scoring could provide sharper discrimination.
 - **No engagement data.** We have no views or CTR data, so we cannot test whether convergence toward MrBeast's style correlates with performance — a key question for the influence hypothesis.
-- **KSI reclassification.** The prior analysis highlighted KSI as the top converger (+1.26/year) based on 4 years. With 11 years of data, his trajectory is volatile rather than linear, demonstrating the importance of complete timelines for evolution claims.
+- **Sparse early data for some channels.** JiDion (n=2 in 2019), Ryan Trahan (n=1 in 2015), and several others have very low sample sizes in early years, making their starting points unreliable for slope calculation.
+- **MrBeast reference set is small.** The 102-thumbnail reference set lacks API metadata and era-based stratification. An expanded, era-structured reference would strengthen the centroid calculation.
 
 ---
 
@@ -372,50 +401,33 @@ The data supports the thesis that entertainment YouTubers' thumbnails have conve
 
 ### Completed (Feb 16, 2026)
 
-1. ~~**Ingest new thumbnails into DB**~~ — Done. 1,125 new records ingested (0 errors). DB now at 5,371.
-2. ~~**Run feature extraction**~~ — Done. 1,125 thumbnails processed (100% pipeline completion, ~10 min).
+1. ~~**Ingest new thumbnails into DB**~~ — Done. 1,125 new records ingested (0 errors). DB at 5,371.
+2. ~~**Run feature extraction**~~ — Done. 1,125 thumbnails processed (100% pipeline completion).
 3. ~~**Re-run clustering**~~ — Done. 5,369/5,371 thumbnails clustered into 3 clusters.
+4. ~~**Collect historical years for 11 panel channels**~~ — Done. 1,266 thumbnails collected via YouTube API for Dude Perfect, Smosh, GMM, Markiplier, PewDiePie, VanossGaming, Sidemen, Unspeakable, Ryan Trahan, David Dobrik, JiDion (2015–2023). Then ingested (1,175 new records), extracted features, and re-clustered. DB now at 6,546.
 
-### Next collection session (requires API quota)
+### Remaining Steps
 
-4. **Collect historical years for 11 remaining panel channels** — These only have 2024–2025 data. Need 2015–2023 for complete evolution analysis. This is the single most important data gap.
-   ```bash
-   python scripts/collect_youtube.py panel \
-     --channels "Dude Perfect" "Smosh" "Good Mythical Morning" "Markiplier" \
-     "PewDiePie" "VanossGaming" "Sidemen" "Unspeakable" "Ryan Trahan" \
-     "David Dobrik" "JiDion" \
-     --years 2015 2016 2017 2018 2019 2020 2021 2022 2023
-   ```
-   **Quota estimate:** ~99 search calls = ~9,999 quota units (1 full day). Script is resumable if quota runs out mid-run.
-
-5. **Fill FaZe Rug gap (2021–2023)** — Currently missing 3 years mid-timeline
-   ```bash
-   python scripts/collect_youtube.py panel --channels "FaZe Rug" --years 2021 2022 2023
-   ```
-   **Quota estimate:** ~303 units.
-
-6. **Collect MrBeast reference set via API** — Structured era-based collection with full metadata
+5. **Collect MrBeast reference set via API** — Structured era-based collection with full metadata
    ```bash
    python scripts/collect_youtube.py mrbeast
    ```
    **Quota estimate:** ~1,010 units.
 
-### Analysis phase (after all data collected)
+6. **Re-run full pipeline** — Ingest → features → clustering on complete dataset after MrBeast era collection.
 
-7. **Re-run full pipeline** — Ingest → features → clustering on complete dataset (~6,500+ thumbnails expected)
+7. **Panel-only reanalysis** — Filter 2015–2023 to panel channels only and recompute all findings tables. This is the key test to resolve the composition effect caveat. Compare panel-only vs. all-channel trends to quantify the composition effect.
 
-8. **Panel-only reanalysis** — Filter 2015–2023 to panel channels only and recompute all findings tables. This is the key test to resolve the composition effect caveat.
-
-9. **Statistical testing:**
+8. **Statistical testing:**
    - Paired t-tests or Wilcoxon signed-rank on early vs. late similarity scores per channel
    - ANOVA across year groups for key features (brightness, face size, text ratio)
    - Effect sizes (Cohen's d) for 2015 vs. 2025 feature differences
    - Confidence intervals on year-over-year likeness differences
    - Regression: similarity score ~ year, controlling for channel fixed effects
 
-10. **Weighted likeness score** — Develop an alternative to the binary 0–8 score that weights criteria by their discriminative power (e.g., face features weighted higher than text absence).
+9. **Weighted likeness score** — Develop an alternative to the binary 0–8 score that weights criteria by their discriminative power (e.g., face features weighted higher than text absence).
 
-11. **Generate publication-ready visualizations:**
+10. **Generate publication-ready visualizations:**
     - Heatmap of similarity scores (channels x years)
     - Aggregate trendline: mean panel similarity by year with confidence bands
     - Before/after thumbnail galleries for strongest convergers (Danny Duncan, FaZe Rug, SSSniperWolf)
@@ -426,7 +438,5 @@ The data supports the thesis that entertainment YouTubers' thumbnails have conve
 
 | Task | API Calls | Quota Units | Days |
 |------|-----------|-------------|------|
-| 11 channels x 9 years | ~99 search + video | ~9,999 | 1 |
-| FaZe Rug gap (3 years) | 3 search + video | ~303 | <1 |
 | MrBeast era collection | ~10 search + video | ~1,010 | <1 |
-| **Total** | **~112** | **~11,312** | **~2 days** |
+| **Total** | **~10** | **~1,010** | **<1 day** |
