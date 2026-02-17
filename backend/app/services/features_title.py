@@ -25,6 +25,21 @@ CHALLENGE_WORDS = {
     "loser", "winner",
 }
 
+# Money-related words (lowercased)
+MONEY_WORDS = {
+    "money", "dollar", "dollars", "paid", "bought", "spent",
+    "gave", "worth", "cost", "free", "expensive", "cheap",
+    "richest", "poorest", "millionaire", "billionaire",
+    "afford", "budget", "price", "cash", "salary", "paycheck",
+}
+
+# Money context words — when paired with a large number, suggest dollar amounts
+# (catches filename-derived titles where $ was stripped)
+_MONEY_CONTEXT_WORDS = {
+    "win", "won", "gave", "paid", "spent", "bought", "worth",
+    "cost", "vs", "bet", "lost", "donated", "tipped",
+}
+
 # Numeric prefix pattern: "001 ", "094 ", etc.
 _NUMERIC_PREFIX_RE = re.compile(r"^\d{1,4}\s+")
 
@@ -102,6 +117,7 @@ def extract_title_features(title: str, channel: Optional[str] = None) -> Dict[st
             "has_number": False,
             "number_count": 0,
             "has_large_number": False,
+            "has_money_reference": False,
             "first_person": False,
             "has_superlative": False,
             "has_challenge_framing": False,
@@ -133,15 +149,29 @@ def extract_title_features(title: str, channel: Optional[str] = None) -> Dict[st
         except ValueError:
             continue
 
+    # Lowercase words for keyword matching (used by money, superlative, challenge)
+    words_lower = [w.lower().strip(".,!?\"'()[]") for w in words]
+    words_lower_set = set(words_lower)
+
+    # Money reference detection
+    # 1. Explicit $Number pattern
+    has_dollar_sign = bool(re.search(r"\$[\d,]+", cleaned))
+    # 2. Money-related words
+    has_money_word = bool(MONEY_WORDS & words_lower_set)
+    # 3. For filename-derived titles: large number + money context word
+    has_money_context = False
+    if is_filename_derived and has_large_number:
+        has_money_context = bool(_MONEY_CONTEXT_WORDS & words_lower_set)
+    has_money_reference = has_dollar_sign or has_money_word or has_money_context
+
     # First person: starts with "I " (case-sensitive)
     first_person = cleaned.startswith("I ") or cleaned.startswith("I'")
 
     # Superlative / extreme words
-    words_lower = [w.lower().strip(".,!?\"'()[]") for w in words]
-    has_superlative = bool(SUPERLATIVE_WORDS & set(words_lower))
+    has_superlative = bool(SUPERLATIVE_WORDS & words_lower_set)
 
     # Challenge framing
-    has_challenge_framing = bool(CHALLENGE_WORDS & set(words_lower))
+    has_challenge_framing = bool(CHALLENGE_WORDS & words_lower_set)
 
     # Uppercase ratio (only among alpha characters)
     alpha_chars = [c for c in cleaned if c.isalpha()]
@@ -168,6 +198,7 @@ def extract_title_features(title: str, channel: Optional[str] = None) -> Dict[st
         "has_number": has_number,
         "number_count": number_count,
         "has_large_number": has_large_number,
+        "has_money_reference": has_money_reference,
         "first_person": first_person,
         "has_superlative": has_superlative,
         "has_challenge_framing": has_challenge_framing,

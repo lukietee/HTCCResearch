@@ -244,7 +244,7 @@ def _compute_likeness_score(f: dict) -> int:
 
 
 def _compute_title_likeness_score(f: dict) -> int:
-    """Compute 0-8 MrBeast title-likeness score from extracted features."""
+    """Compute 0-9 MrBeast title-likeness score from extracted features."""
     title = f.get("title", {})
     if not title:
         return 0
@@ -256,6 +256,8 @@ def _compute_title_likeness_score(f: dict) -> int:
     if title.get("has_number", False):
         score += 1
     if title.get("has_large_number", False):
+        score += 1
+    if title.get("has_money_reference", False):
         score += 1
     if title.get("first_person", False):
         score += 1
@@ -430,11 +432,12 @@ async def channel_evolution(
 async def title_likeness(db: Session = Depends(get_db)):
     """Compute per-group MrBeast title-likeness scores using trait thresholds.
 
-    Each title gets 0-8 points:
+    Each title gets 0-9 points:
       +1 word_count <= 8
       +1 char_count <= 50
       +1 has_number
       +1 has_large_number
+      +1 has_money_reference
       +1 first_person
       +1 has_superlative
       +1 has_challenge_framing
@@ -465,7 +468,7 @@ async def title_likeness(db: Session = Depends(get_db)):
             "pct_7plus": round(float(np.mean(arr >= 7) * 100), 1),
             "pct_8": round(float(np.mean(arr >= 8) * 100), 1),
             "score_distribution": {
-                str(i): int(np.sum(arr == i)) for i in range(9)
+                str(i): int(np.sum(arr == i)) for i in range(10)
             },
         }
 
@@ -475,12 +478,13 @@ async def title_likeness(db: Session = Depends(get_db)):
             "char_count <= 50",
             "has_number",
             "has_large_number",
+            "has_money_reference",
             "first_person",
             "has_superlative",
             "has_challenge_framing",
             "avg_word_length <= 5.0",
         ],
-        "max_score": 8,
+        "max_score": 9,
         "groups": result,
     }
 
@@ -489,7 +493,7 @@ async def title_likeness(db: Session = Depends(get_db)):
 async def combined_likeness(db: Session = Depends(get_db)):
     """Compute per-group combined thumbnail + title likeness scores.
 
-    Returns thumbnail (0-8), title (0-8), and combined (0-16) scores.
+    Returns thumbnail (0-8), title (0-9), and combined (0-17) scores.
     """
     import numpy as np
 
@@ -526,7 +530,7 @@ async def combined_likeness(db: Session = Depends(get_db)):
         }
 
     return {
-        "max_score": 16,
+        "max_score": 17,
         "groups": result,
     }
 

@@ -411,7 +411,7 @@ export default function LikenessPage() {
                 <LineChart data={titleChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="group" />
-                  <YAxis domain={[0, 8]} label={{ value: `Score (0-${titleData.max_score})`, angle: -90, position: 'insideLeft' }} />
+                  <YAxis domain={[0, titleData.max_score]} label={{ value: `Score (0-${titleData.max_score})`, angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   {mbTitleScore && (
                     <ReferenceLine
@@ -475,7 +475,7 @@ export default function LikenessPage() {
               <LineChart data={combinedChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="group" />
-                <YAxis domain={[0, 16]} label={{ value: `Score (0-${combinedData.max_score})`, angle: -90, position: 'insideLeft' }} />
+                <YAxis domain={[0, combinedData.max_score]} label={{ value: `Score (0-${combinedData.max_score})`, angle: -90, position: 'insideLeft' }} />
                 <Tooltip />
                 <Legend />
                 {mbCombined && (

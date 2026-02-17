@@ -345,7 +345,7 @@ Title features were extracted from all 6,546 records using pure string analysis 
 
 #### 7a. Title Likeness Scoring Criteria
 
-Each title gets 0–8 points:
+Each title gets 0–9 points:
 
 | Criterion | MrBeast Rationale |
 |-----------|-------------------|
@@ -353,45 +353,49 @@ Each title gets 0–8 points:
 | `char_count <= 50` | MrBeast avg ~32 chars, concise |
 | `has_number` | 76.5% of MrBeast titles contain numbers |
 | `has_large_number` | "$1,000,000", "100,000 People" — 52% |
+| `has_money_reference` | "$500,000", "gave", "paid", "won" — 29.4% |
 | `first_person` | "I ..." pattern — 20.6% of MrBeast titles |
 | `has_superlative` | "World's Largest", "Most Expensive" — 16.7% |
 | `has_challenge_framing` | "Survive", "vs", "Win" — 54.9% |
 | `avg_word_length <= 5.0` | Simple vocabulary, accessible to young audiences |
 
+The `has_money_reference` criterion detects dollar signs (`$50,000`), money-related words (paid, bought, spent, gave, worth, cost, etc.), and — for filename-derived titles where `$` was stripped — large numbers paired with money-context words (win, gave, vs, bet). This last heuristic is important because MrBeast's reference set is filename-derived: `$500,000` became `500000`, so without the context-word fallback, MrBeast's money prevalence would be severely undercounted.
+
 #### 7b. Title Likeness Scores by Group
 
-| Group | N | Mean | Median | ≥4 | ≥5 | ≥6 |
-|-------|---|------|--------|-----|-----|-----|
-| **MrBeast** | **102** | **4.93** | **5.0** | **88.2%** | **70.6%** | **36.3%** |
-| 2015 | 607 | 2.91 | 3.0 | 21.4% | 4.3% | 0.2% |
-| 2016 | 612 | 2.89 | 3.0 | 25.3% | 5.7% | 0.0% |
-| 2017 | 722 | 2.94 | 3.0 | 25.6% | 6.5% | 0.6% |
-| 2018 | 712 | 2.98 | 3.0 | 26.3% | 7.3% | 1.0% |
-| 2019 | 660 | 3.25 | 3.0 | 36.5% | 13.2% | 3.8% |
-| 2020 | 614 | 3.06 | 3.0 | 31.8% | 9.3% | 2.0% |
-| 2021 | 598 | 3.28 | 3.0 | 36.8% | 16.6% | 3.0% |
-| 2022 | 689 | 3.28 | 3.0 | 38.8% | 14.9% | 3.2% |
-| 2023 | 691 | 3.23 | 3.0 | 35.0% | 12.2% | 3.5% |
-| **2024** | **260** | **3.24** | **3.0** | **40.0%** | **15.4%** | **3.5%** |
-| **2025** | **279** | **3.25** | **3.0** | **40.5%** | **12.5%** | **4.3%** |
+| Group | N | Mean (0–9) | Median | ≥5 | ≥6 | ≥7 |
+|-------|---|------------|--------|-----|-----|-----|
+| **MrBeast** | **102** | **5.23** | **5.0** | **70.6%** | **45.1%** | **18.6%** |
+| 2015 | 607 | 2.94 | 3.0 | 5.1% | 0.2% | 0.0% |
+| 2016 | 612 | 2.90 | 3.0 | 5.9% | 0.2% | 0.0% |
+| 2017 | 722 | 2.98 | 3.0 | 7.5% | 2.1% | 0.4% |
+| 2018 | 712 | 3.02 | 3.0 | 7.9% | 1.5% | 0.4% |
+| 2019 | 660 | 3.31 | 3.0 | 15.0% | 5.2% | 2.4% |
+| 2020 | 614 | 3.13 | 3.0 | 11.4% | 3.1% | 0.8% |
+| 2021 | 598 | 3.37 | 3.0 | 18.2% | 6.5% | 2.3% |
+| 2022 | 689 | 3.36 | 3.0 | 17.0% | 6.7% | 1.2% |
+| 2023 | 691 | 3.29 | 3.0 | 13.7% | 5.6% | 1.4% |
+| **2024** | **260** | **3.34** | **3.0** | **18.1%** | **7.3%** | **1.5%** |
+| **2025** | **279** | **3.37** | **3.0** | **16.5%** | **6.1%** | **2.5%** |
 
-**Key observation:** Title convergence is **weaker and more gradual** than thumbnail convergence. Mean scores rise from 2.91 (2015) to 3.25 (2025) — an 11.7% increase vs. the 27% increase seen in thumbnail scores over the same period. There is no dramatic 2024–2025 step-change for titles the way there is for thumbnails. Instead, title convergence is steady and incremental, with 2019 (3.25) marking the first notable jump. The ≥4 threshold tells the same story: 21.4% (2015) → 40.5% (2025), nearly doubling but never approaching MrBeast's 88.2%.
+**Key observation:** Title convergence is **weaker and more gradual** than thumbnail convergence. Mean scores rise from 2.94 (2015) to 3.37 (2025) — a 14.6% increase vs. the 27% increase seen in thumbnail scores over the same period. There is no dramatic 2024–2025 step-change for titles the way there is for thumbnails. Instead, title convergence is steady and incremental, with 2019 (3.31) marking the first notable jump. The ≥5 threshold shows the story more sharply: 5.1% (2015) → 16.5% (2025), more than tripling but still far from MrBeast's 70.6%.
 
-The gap between MrBeast (4.93) and the field (3.25) is still large — titles have closed only ~17% of the distance, vs. ~40% for thumbnails.
+The gap between MrBeast (5.23) and the field (3.37) remains large — titles have closed only ~19% of the distance, vs. ~40% for thumbnails.
 
 #### 7c. Per-Criterion Title Feature Trends
 
-| Group | Avg Words | Avg Chars | % Number | % Large# | % 1st Person | % Superlative | % Challenge | Avg Word Len |
-|-------|-----------|-----------|----------|----------|-------------|---------------|-------------|--------------|
-| **MrBeast** | **6.1** | **32.1** | **76.5%** | **52.0%** | **20.6%** | **16.7%** | **54.9%** | **4.51** |
-| 2015 | 6.0 | 34.1 | 31.0% | 3.5% | 2.1% | 9.7% | 11.4% | 5.03 |
-| 2018 | 6.8 | 37.9 | 29.8% | 4.1% | 5.1% | 11.9% | 17.1% | 4.88 |
-| 2021 | 6.1 | 33.9 | 28.3% | 9.0% | 13.5% | 12.9% | 12.7% | 4.84 |
-| 2023 | 6.2 | 34.0 | 24.3% | 6.7% | 16.4% | 15.5% | 9.8% | 4.78 |
-| **2025** | **6.7** | **36.8** | **32.6%** | **9.3%** | **25.4%** | **12.2%** | **13.3%** | **4.75** |
+| Group | Avg Words | Avg Chars | % Number | % Large# | % Money Ref | % 1st Person | % Superlative | % Challenge | Avg Word Len |
+|-------|-----------|-----------|----------|----------|-------------|-------------|---------------|-------------|--------------|
+| **MrBeast** | **6.1** | **32.1** | **76.5%** | **52.0%** | **29.4%** | **20.6%** | **16.7%** | **54.9%** | **4.51** |
+| 2015 | 6.0 | 34.1 | 31.0% | 3.5% | 2.3% | 2.1% | 9.7% | 11.4% | 5.03 |
+| 2018 | 6.8 | 37.9 | 29.8% | 4.1% | 3.8% | 5.1% | 11.9% | 17.1% | 4.88 |
+| 2021 | 6.1 | 33.9 | 28.3% | 9.0% | 9.2% | 13.5% | 12.9% | 12.7% | 4.84 |
+| 2023 | 6.2 | 34.0 | 24.3% | 6.7% | 6.5% | 16.4% | 15.5% | 9.8% | 4.78 |
+| **2025** | **6.7** | **36.8** | **32.6%** | **9.3%** | **11.8%** | **25.4%** | **12.2%** | **13.3%** | **4.75** |
 
 **Strongest converging title traits (2015 → 2025):**
 - **First person ("I ...")**: 2.1% → 25.4% — a **12x increase**, now exceeding MrBeast's 20.6%. This is the single strongest title convergence signal. The "I did X" framing that MrBeast popularized is now ubiquitous.
+- **Money references**: 2.3% → 11.8% — a **5x increase**. Titles increasingly feature dollar amounts, "gave", "spent", "paid", "worth" etc. Still well below MrBeast's 29.4%, but the trajectory is clear and accelerating (was 6.5% as recently as 2020). Examples: "$20,000 vs $200 WINTER HOLIDAY", "GIVING BEST FRIEND $450,000 SUPER CAR!", "Spend $100,000 on Youtubers FORFEIT EDITION".
 - **Large numbers (≥1,000)**: 3.5% → 9.3% — nearly tripled, though still far from MrBeast's 52%.
 - **Word length**: 5.03 → 4.75 — vocabulary is getting simpler.
 - **Superlatives**: 9.7% → 12.2% — modest increase toward MrBeast's 16.7%.
@@ -401,28 +405,28 @@ The gap between MrBeast (4.93) and the field (3.25) is still large — titles ha
 - **Challenge framing**: 11.4% → 13.3% — barely moved, far from MrBeast's 54.9%. "vs", "Survive", "Win" vocabulary remains distinctively MrBeast.
 - **Word/char count**: Titles are actually getting *slightly longer* (6.0 → 6.7 words, 34.1 → 36.8 chars), moving *away* from MrBeast's conciseness (6.1 words, 32.1 chars).
 
-**Interpretation:** Titles are converging on *some* MrBeast patterns (first-person framing, large numbers, simpler words) but not on his most distinctive traits (numeric hooks, challenge framing, extreme conciseness). This makes sense — first-person framing is a cheap, genre-neutral adoption, while "challenge/competition" framing requires the content to match. Titles converge where they can without changing the underlying content.
+**Interpretation:** Titles are converging on *some* MrBeast patterns (first-person framing, money references, large numbers, simpler words) but not on his most distinctive traits (numeric hooks, challenge framing, extreme conciseness). This makes sense — first-person framing and dollar amounts are cheap, genre-neutral adoptions, while "challenge/competition" framing requires the content to match. Titles converge where they can without changing the underlying content. The money reference trend is particularly notable because it shows creators increasingly framing content around stakes and scale — even if they don't go as far as MrBeast's "$1,000,000" extremes.
 
-#### 7d. Combined Likeness Scores (Thumbnail + Title, 0–16)
+#### 7d. Combined Likeness Scores (Thumbnail + Title, 0–17)
 
-| Group | N | Thumb (0–8) | Title (0–8) | Combined (0–16) | ≥8 | ≥10 | ≥12 |
+| Group | N | Thumb (0–8) | Title (0–9) | Combined (0–17) | ≥8 | ≥10 | ≥12 |
 |-------|---|-------------|-------------|-----------------|-----|------|------|
-| **MrBeast** | **102** | **6.13** | **4.93** | **11.06** | **91.2%** | **78.4%** | **54.9%** |
-| 2015 | 607 | 3.59 | 2.91 | 6.50 | 35.1% | 17.0% | 1.8% |
-| 2016 | 612 | 3.76 | 2.89 | 6.65 | 39.5% | 16.7% | 2.6% |
-| 2017 | 722 | 3.80 | 2.94 | 6.74 | 39.1% | 17.5% | 1.9% |
-| 2018 | 712 | 3.88 | 2.98 | 6.86 | 40.4% | 19.9% | 2.5% |
-| 2019 | 660 | 3.85 | 3.25 | 7.09 | 44.5% | 20.6% | 4.2% |
-| 2020 | 614 | 3.85 | 3.06 | 6.91 | 42.5% | 21.0% | 4.1% |
-| 2021 | 598 | 4.11 | 3.28 | 7.39 | 50.3% | 24.1% | 6.5% |
-| 2022 | 689 | 4.13 | 3.28 | 7.40 | 50.5% | 25.4% | 6.2% |
-| 2023 | 691 | 3.64 | 3.23 | 6.87 | 43.1% | 18.4% | 4.9% |
-| **2024** | **260** | **4.62** | **3.24** | **7.86** | **56.9%** | **31.9%** | **9.6%** |
-| **2025** | **279** | **4.55** | **3.25** | **7.80** | **57.3%** | **24.7%** | **7.2%** |
+| **MrBeast** | **102** | **6.13** | **5.23** | **11.35** | **93.1%** | **80.4%** | **56.9%** |
+| 2015 | 607 | 3.59 | 2.94 | 6.52 | 35.6% | 17.1% | 2.1% |
+| 2016 | 612 | 3.76 | 2.90 | 6.66 | 39.5% | 17.0% | 2.6% |
+| 2017 | 722 | 3.80 | 2.98 | 6.78 | 39.8% | 17.9% | 1.9% |
+| 2018 | 712 | 3.88 | 3.02 | 6.90 | 41.2% | 20.5% | 2.5% |
+| 2019 | 660 | 3.85 | 3.31 | 7.16 | 45.9% | 21.8% | 4.2% |
+| 2020 | 614 | 3.85 | 3.13 | 6.98 | 43.3% | 22.1% | 5.0% |
+| 2021 | 598 | 4.11 | 3.37 | 7.48 | 50.7% | 25.4% | 7.7% |
+| 2022 | 689 | 4.13 | 3.36 | 7.48 | 51.5% | 26.0% | 7.3% |
+| 2023 | 691 | 3.64 | 3.29 | 6.94 | 44.1% | 18.5% | 5.4% |
+| **2024** | **260** | **4.62** | **3.34** | **7.96** | **57.7%** | **33.1%** | **10.8%** |
+| **2025** | **279** | **4.55** | **3.37** | **7.92** | **58.8%** | **27.6%** | **8.2%** |
 
-**Key observation:** Combined scores confirm the convergence pattern and make the 2024–2025 acceleration more visible. The gap between 2015 baseline (6.50) and 2024–2025 (7.80–7.86) is **1.3 points on the 0–16 scale** — a 20% increase. But the gap to MrBeast (11.06) remains large: the field has closed ~29% of the distance.
+**Key observation:** Combined scores confirm the convergence pattern and make the 2024–2025 acceleration more visible. The gap between 2015 baseline (6.52) and 2024–2025 (7.92–7.96) is **1.4 points on the 0–17 scale** — a 22% increase. But the gap to MrBeast (11.35) remains large: the field has closed ~30% of the distance.
 
-The combined score also makes the **2021–2022 inflection** clearer: the jump from 6.86–6.91 (2018–2020) to 7.39–7.40 (2021–2022) is a half-point step-change in combined terms, followed by the 2023 dip and 2024–2025 acceleration. This reinforces the two-phase convergence pattern.
+The combined score also makes the **2021–2022 inflection** clearer: the jump from 6.90–6.98 (2018–2020) to 7.48 (2021–2022) is a half-point step-change in combined terms, followed by the 2023 dip and 2024–2025 acceleration. This reinforces the two-phase convergence pattern.
 
 #### 7e. Channel Evolution — Title Slopes
 
@@ -430,7 +434,7 @@ Across 46 channels with ≥4 years of data:
 
 | Metric | Thumbnail | Title | Combined |
 |--------|-----------|-------|----------|
-| Avg slope / year | **+0.050** | **+0.016** | **+0.066** |
+| Avg slope / year | **+0.050** | **+0.020** | **+0.069** |
 | Converging channels | 28 (61%) | — | — |
 | Diverging channels | 17 (37%) | — | — |
 | Flat | 1 (2%) | — | — |
@@ -439,31 +443,31 @@ Across 46 channels with ≥4 years of data:
 
 | Channel | Thumb Slope | Title Slope | Combined Slope |
 |---------|-------------|-------------|----------------|
-| ZHC | +0.434 | +0.198 | **+0.633** |
-| Danny Duncan | +0.552 | +0.046 | **+0.598** |
-| Disguised Toast | +0.968 | −0.372 | **+0.596** |
-| Sidemen | +0.314 | +0.158 | **+0.471** |
-| FaZe Rug | +0.355 | +0.093 | **+0.447** |
-| IShowSpeed | +0.361 | +0.053 | **+0.414** |
-| Ryan Trahan | +0.269 | +0.086 | **+0.355** |
-| LazarBeam | +0.135 | +0.177 | **+0.312** |
-| Unspeakable | +0.116 | +0.155 | **+0.271** |
+| ZHC | +0.434 | +0.220 | **+0.654** |
+| Disguised Toast | +0.968 | −0.326 | **+0.642** |
+| Danny Duncan | +0.552 | +0.058 | **+0.610** |
+| Sidemen | +0.314 | +0.187 | **+0.501** |
+| FaZe Rug | +0.355 | +0.115 | **+0.470** |
+| IShowSpeed | +0.361 | +0.060 | **+0.421** |
+| Ryan Trahan | +0.269 | +0.101 | **+0.370** |
 
 **Notable patterns:**
-- **LazarBeam** and **Unspeakable** show stronger title convergence than thumbnail convergence — they're adopting MrBeast's *titling* style more than his visual style.
-- **Disguised Toast** has the highest thumbnail slope (+0.968) but a *negative* title slope (−0.372), suggesting a purely visual convergence with an independent titling strategy.
-- **ZHC** converges strongly on both dimensions (+0.434 thumb, +0.198 title), the most balanced convergence in the dataset.
+- **Disguised Toast** has the highest thumbnail slope (+0.968) but a *negative* title slope (−0.326), suggesting a purely visual convergence with an independent titling strategy.
+- **ZHC** converges strongly on both dimensions (+0.434 thumb, +0.220 title), the most balanced convergence in the dataset.
+- **Sidemen** has the highest title slope among top convergers (+0.187), reflecting increased adoption of money framing and challenge language in their titles alongside visual changes.
 - Most top convergers show positive slopes on *both* dimensions, suggesting the "clickbait package" is adopted as a whole.
 
 #### 7f. Title vs. Thumbnail Convergence: Different Speeds, Same Direction
 
 The data reveals that **titles and thumbnails converge at different rates**:
 
-1. **Thumbnails converge faster** (avg slope +0.050/yr vs. title +0.016/yr). Visual changes are easier to adopt — you can redesign a thumbnail without changing your content. Title patterns like "challenge framing" require the content itself to shift.
+1. **Thumbnails converge faster** (avg slope +0.050/yr vs. title +0.020/yr). Visual changes are easier to adopt — you can redesign a thumbnail without changing your content. Title patterns like "challenge framing" require the content itself to shift.
 
 2. **First-person framing is the one title trait that over-converged.** At 25.4% (2025) vs. MrBeast's 20.6%, it has already *surpassed* the reference. "I did X" titles are now a platform-wide convention, not just a MrBeast signature.
 
-3. **The combined (0–16) score smooths noise** and makes the convergence trajectory clearer than either dimension alone. It also reveals that some creators converge visually but not linguistically (or vice versa), suggesting different adoption barriers.
+3. **Money references are the fastest-growing title trait** — from 2.3% (2015) to 11.8% (2025), a 5x increase. This captures the growing trend of framing content around dollar amounts and financial stakes ("$20,000 vs $200", "GIVING BEST FRIEND $450,000 SUPER CAR"). The trajectory is still steep and shows no signs of plateauing, suggesting further convergence ahead.
+
+4. **The combined (0–17) score smooths noise** and makes the convergence trajectory clearer than either dimension alone. It also reveals that some creators converge visually but not linguistically (or vice versa), suggesting different adoption barriers.
 
 ### 8. MrBeast Centroid (Visual Reference Profile)
 
@@ -506,7 +510,7 @@ The data supports the thesis that entertainment YouTubers' thumbnails *and title
 
 6. **Divergers have explanations.** Most diverging channels are genre-locked (animated content, food shows) or intentionally counter-culture. True resisters among entertainment channels are few.
 
-7. **Titles converge too, but slower.** Title likeness scores rise from 2.91 (2015) to 3.25 (2025), a modest +11.7% vs. +27% for thumbnails. The convergence is led by first-person framing ("I ..." titles), which exploded from 2.1% → 25.4% — now exceeding MrBeast's own 20.6%. Large numbers and simpler vocabulary also trend toward MrBeast's patterns. However, MrBeast's most distinctive title traits (numeric hooks at 76.5%, challenge framing at 54.9%) remain largely unadopted by the field.
+7. **Titles converge too, but slower.** Title likeness scores rise from 2.94 (2015) to 3.37 (2025), a modest +14.6% vs. +27% for thumbnails. The convergence is led by first-person framing ("I ..." titles), which exploded from 2.1% → 25.4% — now exceeding MrBeast's own 20.6%. Money references show the second-strongest signal: 2.3% → 11.8% (5x increase), with titles increasingly featuring dollar amounts and spending language, though still far from MrBeast's 29.4%. However, MrBeast's most distinctive title traits (numeric hooks at 76.5%, challenge framing at 54.9%) remain largely unadopted by the field.
 
 8. **Combined scoring (0–16) strengthens the signal.** When thumbnail and title scores are summed, the convergence trajectory is smoother and the 2021–2022 inflection point is clearer (6.91 → 7.39). The combined score also reveals that some channels converge visually but not linguistically (Disguised Toast: +0.97 thumb, −0.37 title), while others converge on titles more than thumbnails (LazarBeam: +0.13 thumb, +0.18 title). The full "clickbait package" adoption varies by channel.
 
@@ -518,7 +522,7 @@ The data supports the thesis that entertainment YouTubers' thumbnails *and title
 
 3. **Clean pre/post separation.** With the expanded dataset, the 2021–2022 uptick blurs the previously clean "plateau then jump" narrative. The convergence may be more gradual than initially apparent, which is actually more consistent with a diffusion-of-innovation model.
 
-4. **Strong title convergence on MrBeast's core patterns.** While first-person framing has been widely adopted, titles have NOT converged on MrBeast's most distinctive traits — challenge/competition framing (54.9% vs. 13.3%) and heavy numeric usage (76.5% vs. 32.6%). Title convergence is selective: creators adopt the easy patterns (first-person, simpler words) while skipping those that require content-level changes.
+4. **Strong title convergence on MrBeast's core patterns.** While first-person framing and money references have been adopted (12x and 5x increases respectively), titles have NOT converged on MrBeast's most distinctive traits — challenge/competition framing (54.9% vs. 13.3%) and heavy numeric usage (76.5% vs. 32.6%). Title convergence is selective: creators adopt the easy patterns (first-person, dollar amounts, simpler words) while skipping those that require content-level changes.
 
 #### Methodological caveats
 

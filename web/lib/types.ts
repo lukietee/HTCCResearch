@@ -30,6 +30,7 @@ export interface TitleFeatures {
   has_number: boolean;
   number_count: number;
   has_large_number: boolean;
+  has_money_reference: boolean;
   first_person: boolean;
   has_superlative: boolean;
   has_challenge_framing: boolean;
