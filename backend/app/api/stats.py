@@ -243,6 +243,31 @@ def _compute_likeness_score(f: dict) -> int:
     return score
 
 
+def _compute_title_likeness_score(f: dict) -> int:
+    """Compute 0-8 MrBeast title-likeness score from extracted features."""
+    title = f.get("title", {})
+    if not title:
+        return 0
+    score = 0
+    if title.get("word_count", 99) <= 8:
+        score += 1
+    if title.get("char_count", 999) <= 50:
+        score += 1
+    if title.get("has_number", False):
+        score += 1
+    if title.get("has_large_number", False):
+        score += 1
+    if title.get("first_person", False):
+        score += 1
+    if title.get("has_superlative", False):
+        score += 1
+    if title.get("has_challenge_framing", False):
+        score += 1
+    if title.get("avg_word_length", 99) <= 5.0:
+        score += 1
+    return score
+
+
 @router.get("/mrbeast-likeness")
 async def mrbeast_likeness(db: Session = Depends(get_db)):
     """Compute per-group MrBeast-likeness scores using trait thresholds.
@@ -320,13 +345,16 @@ async def channel_evolution(
         Thumbnail.channel != "",
     ).all()
 
-    # group by channel -> year -> scores
+    # group by channel -> year -> (thumbnail_scores, title_scores)
     channel_year_scores: Dict[str, Dict[str, List]] = defaultdict(lambda: defaultdict(list))
+    channel_year_title_scores: Dict[str, Dict[str, List]] = defaultdict(lambda: defaultdict(list))
 
     for thumb in thumbnails:
         f = thumb.get_features()
         score = _compute_likeness_score(f)
+        title_score = _compute_title_likeness_score(f)
         channel_year_scores[thumb.channel][thumb.group].append(score)
+        channel_year_title_scores[thumb.channel][thumb.group].append(title_score)
 
     # Filter to channels with enough year groups (exclude mrbeast group)
     channels = {}
@@ -336,30 +364,40 @@ async def channel_evolution(
             years_summary = {}
             for y, scores in sorted(year_groups.items()):
                 arr = np.array(scores)
+                title_arr = np.array(channel_year_title_scores[ch][y])
                 years_summary[y] = {
                     "count": len(scores),
                     "mean_score": round(float(np.mean(arr)), 3),
                     "pct_4plus": round(float(np.mean(arr >= 4) * 100), 1),
+                    "title_mean_score": round(float(np.mean(title_arr)), 3),
                 }
             channels[ch] = {
                 "num_years": len(year_groups),
                 "years": years_summary,
             }
 
-    # Compute overall trend: for channels with 3+ years, compute slope of mean_score over time
+    # Compute overall trend: for channels with 2+ years, compute slope of mean_score over time
     trends = []
     for ch, data in channels.items():
         years_list = sorted(data["years"].keys())
         if len(years_list) >= 2:
             x = [int(y) for y in years_list]
             y_vals = [data["years"][y]["mean_score"] for y in years_list]
+            t_vals = [data["years"][y]["title_mean_score"] for y in years_list]
             # simple linear regression slope
             x_arr = np.array(x, dtype=float)
             y_arr = np.array(y_vals, dtype=float)
+            t_arr = np.array(t_vals, dtype=float)
             slope = float(np.polyfit(x_arr, y_arr, 1)[0])
+            title_slope = float(np.polyfit(x_arr, t_arr, 1)[0])
+            combined_vals = [y_vals[i] + t_vals[i] for i in range(len(y_vals))]
+            c_arr = np.array(combined_vals, dtype=float)
+            combined_slope = float(np.polyfit(x_arr, c_arr, 1)[0])
             trends.append({
                 "channel": ch,
                 "slope": round(slope, 4),
+                "title_slope": round(title_slope, 4),
+                "combined_slope": round(combined_slope, 4),
                 "start_score": y_vals[0],
                 "end_score": y_vals[-1],
                 "start_year": years_list[0],
@@ -382,7 +420,114 @@ async def channel_evolution(
             "diverging_from_mrbeast": diverging,
             "flat": flat,
             "avg_slope": round(float(np.mean([t["slope"] for t in trends])), 4) if trends else 0,
+            "avg_title_slope": round(float(np.mean([t["title_slope"] for t in trends])), 4) if trends else 0,
+            "avg_combined_slope": round(float(np.mean([t["combined_slope"] for t in trends])), 4) if trends else 0,
         },
+    }
+
+
+@router.get("/title-likeness")
+async def title_likeness(db: Session = Depends(get_db)):
+    """Compute per-group MrBeast title-likeness scores using trait thresholds.
+
+    Each title gets 0-8 points:
+      +1 word_count <= 8
+      +1 char_count <= 50
+      +1 has_number
+      +1 has_large_number
+      +1 first_person
+      +1 has_superlative
+      +1 has_challenge_framing
+      +1 avg_word_length <= 5.0
+    """
+    import numpy as np
+
+    thumbnails = db.query(Thumbnail).filter(
+        Thumbnail.features_extracted == True
+    ).all()
+
+    groups_data = defaultdict(list)
+    for thumb in thumbnails:
+        f = thumb.get_features()
+        score = _compute_title_likeness_score(f)
+        groups_data[thumb.group].append(score)
+
+    result = {}
+    for group, scores in groups_data.items():
+        arr = np.array(scores)
+        result[group] = {
+            "count": len(scores),
+            "mean_score": round(float(np.mean(arr)), 3),
+            "median_score": float(np.median(arr)),
+            "pct_4plus": round(float(np.mean(arr >= 4) * 100), 1),
+            "pct_5plus": round(float(np.mean(arr >= 5) * 100), 1),
+            "pct_6plus": round(float(np.mean(arr >= 6) * 100), 1),
+            "pct_7plus": round(float(np.mean(arr >= 7) * 100), 1),
+            "pct_8": round(float(np.mean(arr >= 8) * 100), 1),
+            "score_distribution": {
+                str(i): int(np.sum(arr == i)) for i in range(9)
+            },
+        }
+
+    return {
+        "criteria": [
+            "word_count <= 8",
+            "char_count <= 50",
+            "has_number",
+            "has_large_number",
+            "first_person",
+            "has_superlative",
+            "has_challenge_framing",
+            "avg_word_length <= 5.0",
+        ],
+        "max_score": 8,
+        "groups": result,
+    }
+
+
+@router.get("/combined-likeness")
+async def combined_likeness(db: Session = Depends(get_db)):
+    """Compute per-group combined thumbnail + title likeness scores.
+
+    Returns thumbnail (0-8), title (0-8), and combined (0-16) scores.
+    """
+    import numpy as np
+
+    thumbnails = db.query(Thumbnail).filter(
+        Thumbnail.features_extracted == True
+    ).all()
+
+    groups_data: Dict[str, Dict[str, list]] = defaultdict(lambda: {
+        "thumbnail": [], "title": [], "combined": []
+    })
+
+    for thumb in thumbnails:
+        f = thumb.get_features()
+        t_score = _compute_likeness_score(f)
+        ti_score = _compute_title_likeness_score(f)
+        groups_data[thumb.group]["thumbnail"].append(t_score)
+        groups_data[thumb.group]["title"].append(ti_score)
+        groups_data[thumb.group]["combined"].append(t_score + ti_score)
+
+    result = {}
+    for group, scores in groups_data.items():
+        t_arr = np.array(scores["thumbnail"])
+        ti_arr = np.array(scores["title"])
+        c_arr = np.array(scores["combined"])
+        result[group] = {
+            "count": len(scores["thumbnail"]),
+            "thumbnail_mean": round(float(np.mean(t_arr)), 3),
+            "title_mean": round(float(np.mean(ti_arr)), 3),
+            "combined_mean": round(float(np.mean(c_arr)), 3),
+            "combined_median": float(np.median(c_arr)),
+            "combined_pct_8plus": round(float(np.mean(c_arr >= 8) * 100), 1),
+            "combined_pct_10plus": round(float(np.mean(c_arr >= 10) * 100), 1),
+            "combined_pct_12plus": round(float(np.mean(c_arr >= 12) * 100), 1),
+        }
+
+    return {
+        "max_score": 16,
+        "groups": result,
     }
 
 

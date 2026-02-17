@@ -12,6 +12,7 @@ from app.services.features_text import extract_text_features
 from app.services.features_face import extract_face_features
 from app.services.features_pose import extract_pose_features
 from app.services.features_depth import extract_depth_features
+from app.services.features_title import extract_title_features
 
 
 # Available feature extractors
@@ -21,7 +22,11 @@ FEATURE_EXTRACTORS = {
     "face": extract_face_features,
     "pose": extract_pose_features,
     "depth": extract_depth_features,
+    "title": extract_title_features,
 }
+
+# Extractors that use DB metadata (title, channel) instead of image_path
+METADATA_EXTRACTORS = {"title"}
 
 ALL_FEATURES = set(FEATURE_EXTRACTORS.keys())
 
@@ -30,6 +35,8 @@ def extract_all_features(
     image_path: str,
     features: Optional[Set[str]] = None,
     save_depth_map: bool = False,
+    title: Optional[str] = None,
+    channel: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Extract all (or selected) features from an image.
@@ -38,6 +45,8 @@ def extract_all_features(
         image_path: Path to the image file
         features: Set of feature types to extract (default: all)
         save_depth_map: If True, save depth map visualization
+        title: Video title (for title feature extraction)
+        channel: Channel name (for title cleaning)
 
     Returns:
         Dictionary with all extracted features
@@ -56,7 +65,9 @@ def extract_all_features(
         extractor = FEATURE_EXTRACTORS[feature_name]
 
         try:
-            if feature_name == "depth":
+            if feature_name in METADATA_EXTRACTORS:
+                feature_data = extractor(title or "", channel=channel)
+            elif feature_name == "depth":
                 feature_data = extractor(image_path, save_depth_map=save_depth_map)
             else:
                 feature_data = extractor(image_path)
@@ -116,6 +127,8 @@ def process_thumbnail(
         thumbnail.file_path,
         features=features,
         save_depth_map=save_depth_map,
+        title=thumbnail.title,
+        channel=thumbnail.channel,
     )
     processing_time = time.time() - start_time
 

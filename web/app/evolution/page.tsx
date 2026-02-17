@@ -103,7 +103,7 @@ export default function EvolutionPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <div className="text-3xl font-bold text-gray-900">{data.total_channels}</div>
           <div className="text-sm text-gray-500">Channels Tracked</div>
@@ -118,7 +118,11 @@ export default function EvolutionPage() {
         </div>
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <div className="text-3xl font-bold text-blue-600">{data.summary.avg_slope > 0 ? '+' : ''}{data.summary.avg_slope}</div>
-          <div className="text-sm text-gray-500">Avg Slope / Year</div>
+          <div className="text-sm text-gray-500">Avg Thumbnail Slope</div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4 text-center">
+          <div className="text-3xl font-bold text-purple-600">{data.summary.avg_title_slope > 0 ? '+' : ''}{data.summary.avg_title_slope}</div>
+          <div className="text-sm text-gray-500">Avg Title Slope</div>
         </div>
       </div>
 
@@ -216,11 +220,12 @@ export default function EvolutionPage() {
             <tr className="border-b">
               <th className="text-left py-2 px-3">Channel</th>
               <th className="text-right py-2 px-3">Years</th>
-              <th className="text-right py-2 px-3">Start Score</th>
-              <th className="text-right py-2 px-3">End Score</th>
-              <th className="text-right py-2 px-3">Change</th>
-              <th className="text-right py-2 px-3">Slope/yr</th>
-              <th className="text-center py-2 px-3">Direction</th>
+              <th className="text-right py-2 px-3">Start</th>
+              <th className="text-right py-2 px-3">End</th>
+              <th className="text-right py-2 px-3">Thumb Slope</th>
+              <th className="text-right py-2 px-3">Title Slope</th>
+              <th className="text-right py-2 px-3">Combined</th>
+              <th className="text-center py-2 px-3">Dir</th>
             </tr>
           </thead>
           <tbody>
@@ -231,13 +236,18 @@ export default function EvolutionPage() {
                 <td className="text-right py-2 px-3">{t.start_score}</td>
                 <td className="text-right py-2 px-3">{t.end_score}</td>
                 <td className="text-right py-2 px-3">
-                  <span className={t.end_score > t.start_score ? 'text-green-600' : t.end_score < t.start_score ? 'text-red-600' : ''}>
-                    {t.end_score > t.start_score ? '+' : ''}{(t.end_score - t.start_score).toFixed(1)}
+                  <span className={t.slope > 0 ? 'text-green-600' : t.slope < 0 ? 'text-red-600' : ''}>
+                    {t.slope > 0 ? '+' : ''}{t.slope}
                   </span>
                 </td>
                 <td className="text-right py-2 px-3">
-                  <span className={t.slope > 0 ? 'text-green-600' : t.slope < 0 ? 'text-red-600' : ''}>
-                    {t.slope > 0 ? '+' : ''}{t.slope}
+                  <span className={t.title_slope > 0 ? 'text-green-600' : t.title_slope < 0 ? 'text-red-600' : ''}>
+                    {t.title_slope > 0 ? '+' : ''}{t.title_slope}
+                  </span>
+                </td>
+                <td className="text-right py-2 px-3">
+                  <span className={t.combined_slope > 0 ? 'text-green-600' : t.combined_slope < 0 ? 'text-red-600' : ''}>
+                    {t.combined_slope > 0 ? '+' : ''}{t.combined_slope}
                   </span>
                 </td>
                 <td className="text-center py-2 px-3">

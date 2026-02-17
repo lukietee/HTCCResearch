@@ -19,6 +19,24 @@ export interface ThumbnailFeatures {
   face?: FaceFeatures;
   pose?: PoseFeatures;
   depth?: DepthFeatures;
+  title?: TitleFeatures;
+}
+
+export interface TitleFeatures {
+  cleaned_title: string;
+  is_filename_derived: boolean;
+  char_count: number;
+  word_count: number;
+  has_number: boolean;
+  number_count: number;
+  has_large_number: boolean;
+  first_person: boolean;
+  has_superlative: boolean;
+  has_challenge_framing: boolean;
+  uppercase_ratio: number;
+  exclamation_count: number;
+  question_mark: boolean;
+  avg_word_length: number;
 }
 
 export interface ColorFeatures {
@@ -158,4 +176,34 @@ export interface MrBeastSimilarityResponse {
     std_similarity: number;
   }>;
   feature_trends: Record<string, Record<string, number>>;
+}
+
+export interface TitleLikenessResponse {
+  criteria: string[];
+  max_score: number;
+  groups: Record<string, {
+    count: number;
+    mean_score: number;
+    median_score: number;
+    pct_4plus: number;
+    pct_5plus: number;
+    pct_6plus: number;
+    pct_7plus: number;
+    pct_8: number;
+    score_distribution: Record<string, number>;
+  }>;
+}
+
+export interface CombinedLikenessResponse {
+  max_score: number;
+  groups: Record<string, {
+    count: number;
+    thumbnail_mean: number;
+    title_mean: number;
+    combined_mean: number;
+    combined_median: number;
+    combined_pct_8plus: number;
+    combined_pct_10plus: number;
+    combined_pct_12plus: number;
+  }>;
 }

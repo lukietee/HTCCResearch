@@ -8,6 +8,8 @@ import type {
   ClusteringResult,
   PipelineStatus,
   MrBeastSimilarityResponse,
+  TitleLikenessResponse,
+  CombinedLikenessResponse,
 } from './types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -134,15 +136,25 @@ export async function getMrBeastSimilarity(): Promise<MrBeastSimilarityResponse>
   return fetchAPI<MrBeastSimilarityResponse>('/stats/mrbeast-similarity');
 }
 
+export async function getTitleLikeness(): Promise<TitleLikenessResponse> {
+  return fetchAPI<TitleLikenessResponse>('/stats/title-likeness');
+}
+
+export async function getCombinedLikeness(): Promise<CombinedLikenessResponse> {
+  return fetchAPI<CombinedLikenessResponse>('/stats/combined-likeness');
+}
+
 export async function getChannelEvolution(minYears = 2): Promise<{
   total_channels: number;
   channels: Record<string, {
     num_years: number;
-    years: Record<string, { count: number; mean_score: number; pct_4plus: number }>;
+    years: Record<string, { count: number; mean_score: number; pct_4plus: number; title_mean_score: number }>;
   }>;
   trends: Array<{
     channel: string;
     slope: number;
+    title_slope: number;
+    combined_slope: number;
     start_score: number;
     end_score: number;
     start_year: string;
@@ -154,6 +166,8 @@ export async function getChannelEvolution(minYears = 2): Promise<{
     diverging_from_mrbeast: number;
     flat: number;
     avg_slope: number;
+    avg_title_slope: number;
+    avg_combined_slope: number;
   };
 }> {
   return fetchAPI(`/stats/channel-evolution?min_years=${minYears}`);

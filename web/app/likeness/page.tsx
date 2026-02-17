@@ -19,9 +19,9 @@ import {
   PolarRadiusAxis,
   ReferenceLine,
 } from 'recharts'
-import { getMrBeastLikeness, getMrBeastSimilarity } from '@/lib/api'
+import { getMrBeastLikeness, getMrBeastSimilarity, getTitleLikeness, getCombinedLikeness } from '@/lib/api'
 import { getGroupColor } from '@/lib/constants'
-import type { MrBeastSimilarityResponse } from '@/lib/types'
+import type { MrBeastSimilarityResponse, TitleLikenessResponse, CombinedLikenessResponse } from '@/lib/types'
 
 type LikenessData = Awaited<ReturnType<typeof getMrBeastLikeness>>
 
@@ -49,15 +49,19 @@ const FEATURE_LINE_COLORS = [
 export default function LikenessPage() {
   const [data, setData] = useState<LikenessData | null>(null)
   const [simData, setSimData] = useState<MrBeastSimilarityResponse | null>(null)
+  const [titleData, setTitleData] = useState<TitleLikenessResponse | null>(null)
+  const [combinedData, setCombinedData] = useState<CombinedLikenessResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedYear, setSelectedYear] = useState('2025')
 
   useEffect(() => {
-    Promise.all([getMrBeastLikeness(), getMrBeastSimilarity()])
-      .then(([likeness, similarity]) => {
+    Promise.all([getMrBeastLikeness(), getMrBeastSimilarity(), getTitleLikeness(), getCombinedLikeness()])
+      .then(([likeness, similarity, title, combined]) => {
         setData(likeness)
         setSimData(similarity)
+        setTitleData(title)
+        setCombinedData(combined)
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
@@ -364,6 +368,134 @@ export default function LikenessPage() {
         </ResponsiveContainer>
       </div>
 
+      {/* ========== TITLE LIKENESS SECTION ========== */}
+      {titleData && (() => {
+        const mbTitleScore = titleData.groups['mrbeast']
+        const titleChartData = YEAR_ORDER
+          .filter((y) => titleData.groups[y])
+          .map((y) => ({
+            group: y,
+            mean_score: titleData.groups[y].mean_score,
+            pct_4plus: titleData.groups[y].pct_4plus,
+            pct_5plus: titleData.groups[y].pct_5plus,
+            pct_6plus: titleData.groups[y].pct_6plus,
+          }))
+        return (
+          <>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-3">Title Likeness Scoring Criteria (1 point each, max {titleData.max_score})</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {titleData.criteria.map((c, i) => (
+                  <div key={i} className="flex items-center space-x-2 text-sm">
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                      style={{ backgroundColor: scoreColors[i + 1] || '#6b7280' }}>
+                      {i + 1}
+                    </span>
+                    <span className="text-gray-700">{c}</span>
+                  </div>
+                ))}
+              </div>
+              {mbTitleScore && (
+                <div className="mt-4 p-3 bg-red-50 rounded-lg">
+                  <span className="font-semibold text-red-700">MrBeast baseline: </span>
+                  <span className="text-red-600">
+                    mean {mbTitleScore.mean_score}/{titleData.max_score} | {mbTitleScore.pct_4plus}% score 4+ | {mbTitleScore.pct_6plus}% score 6+
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-4">Title Likeness Score Over Time</h2>
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={titleChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="group" />
+                  <YAxis domain={[0, 8]} label={{ value: `Score (0-${titleData.max_score})`, angle: -90, position: 'insideLeft' }} />
+                  <Tooltip />
+                  {mbTitleScore && (
+                    <ReferenceLine
+                      y={mbTitleScore.mean_score}
+                      stroke="#e6194b"
+                      strokeDasharray="5 5"
+                      strokeWidth={2}
+                      label={{ value: `MrBeast: ${mbTitleScore.mean_score}`, position: 'right', fill: '#e6194b', fontSize: 12 }}
+                    />
+                  )}
+                  <Line
+                    type="monotone"
+                    dataKey="mean_score"
+                    stroke="#911eb4"
+                    strokeWidth={3}
+                    dot={{ r: 5 }}
+                    name="Title Mean Score"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-4">% of Titles Meeting Score Thresholds</h2>
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={titleChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="group" />
+                  <YAxis domain={[0, 100]} label={{ value: '% of titles', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip formatter={(val: number) => `${val}%`} />
+                  <Legend />
+                  <Line type="monotone" dataKey="pct_4plus" stroke="#22c55e" strokeWidth={2} name="4+ traits" dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="pct_5plus" stroke="#0ea5e9" strokeWidth={2} name="5+ traits" dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="pct_6plus" stroke="#8b5cf6" strokeWidth={2} name="6+ traits" dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )
+      })()}
+
+      {/* ========== COMBINED LIKENESS SECTION ========== */}
+      {combinedData && (() => {
+        const combinedChartData = YEAR_ORDER
+          .filter((y) => combinedData.groups[y])
+          .map((y) => ({
+            group: y,
+            thumbnail_mean: combinedData.groups[y].thumbnail_mean,
+            title_mean: combinedData.groups[y].title_mean,
+            combined_mean: combinedData.groups[y].combined_mean,
+          }))
+        const mbCombined = combinedData.groups['mrbeast']
+        return (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-2">Combined Score Over Time (Thumbnail + Title, 0-{combinedData.max_score})</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Thumbnail likeness (0-8) + title likeness (0-8) = combined (0-16).
+              Higher combined scores indicate convergence on both visual and linguistic dimensions.
+            </p>
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={combinedChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="group" />
+                <YAxis domain={[0, 16]} label={{ value: `Score (0-${combinedData.max_score})`, angle: -90, position: 'insideLeft' }} />
+                <Tooltip />
+                <Legend />
+                {mbCombined && (
+                  <ReferenceLine
+                    y={mbCombined.combined_mean}
+                    stroke="#e6194b"
+                    strokeDasharray="5 5"
+                    strokeWidth={2}
+                    label={{ value: `MrBeast: ${mbCombined.combined_mean}`, position: 'right', fill: '#e6194b', fontSize: 12 }}
+                  />
+                )}
+                <Line type="monotone" dataKey="thumbnail_mean" stroke="#4363d8" strokeWidth={2} dot={{ r: 4 }} name="Thumbnail (0-8)" />
+                <Line type="monotone" dataKey="title_mean" stroke="#911eb4" strokeWidth={2} dot={{ r: 4 }} name="Title (0-8)" />
+                <Line type="monotone" dataKey="combined_mean" stroke="#e6194b" strokeWidth={3} dot={{ r: 5 }} name="Combined (0-16)" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )
+      })()}
+
       {/* Summary Table */}
       <div className="bg-white rounded-lg shadow p-6 overflow-x-auto">
         <h2 className="text-lg font-semibold mb-4">Summary Table</h2>
@@ -372,13 +504,13 @@ export default function LikenessPage() {
             <tr className="border-b">
               <th className="text-left py-2 px-3">Group</th>
               <th className="text-right py-2 px-3">Count</th>
-              <th className="text-right py-2 px-3">Mean Score</th>
+              <th className="text-right py-2 px-3">Thumb Score</th>
               <th className="text-right py-2 px-3">Median</th>
-              <th className="text-right py-2 px-3">4+</th>
-              <th className="text-right py-2 px-3">5+</th>
               <th className="text-right py-2 px-3">6+</th>
-              <th className="text-right py-2 px-3">7+</th>
-              <th className="text-right py-2 px-3">{data.max_score}/{data.max_score}</th>
+              <th className="text-right py-2 px-3">8/8</th>
+              {titleData && <th className="text-right py-2 px-3">Title Score</th>}
+              {titleData && <th className="text-right py-2 px-3">Title 4+</th>}
+              {combinedData && <th className="text-right py-2 px-3">Combined</th>}
               {simData && <th className="text-right py-2 px-3">Similarity</th>}
             </tr>
           </thead>
@@ -387,6 +519,8 @@ export default function LikenessPage() {
               const d = data.groups[g]
               if (!d) return null
               const sim = simData?.groups[g]
+              const ti = titleData?.groups[g]
+              const co = combinedData?.groups[g]
               return (
                 <tr key={g} className={`border-b ${g === 'mrbeast' ? 'bg-red-50 font-semibold' : ''}`}>
                   <td className="py-2 px-3">
@@ -396,11 +530,17 @@ export default function LikenessPage() {
                   <td className="text-right py-2 px-3">{d.count}</td>
                   <td className="text-right py-2 px-3">{d.mean_score}</td>
                   <td className="text-right py-2 px-3">{d.median_score}</td>
-                  <td className="text-right py-2 px-3">{d.pct_4plus}%</td>
-                  <td className="text-right py-2 px-3">{d.pct_5plus}%</td>
                   <td className="text-right py-2 px-3">{d.pct_6plus}%</td>
-                  <td className="text-right py-2 px-3">{d.pct_7plus}%</td>
                   <td className="text-right py-2 px-3">{d.pct_8}%</td>
+                  {titleData && (
+                    <td className="text-right py-2 px-3">{ti ? ti.mean_score : '—'}</td>
+                  )}
+                  {titleData && (
+                    <td className="text-right py-2 px-3">{ti ? `${ti.pct_4plus}%` : '—'}</td>
+                  )}
+                  {combinedData && (
+                    <td className="text-right py-2 px-3">{co ? co.combined_mean : '—'}</td>
+                  )}
                   {simData && (
                     <td className="text-right py-2 px-3">
                       {sim ? `${sim.mean_similarity}` : '—'}
