@@ -341,7 +341,7 @@ Across all 46 channels with ≥4 years of data (up from 45 in prior analysis):
 
 ### 7. Title Convergence Analysis (NEW)
 
-Title features were extracted from all 6,546 records using pure string analysis — no ML, no external dependencies. Titles are cleaned to fix filename artifacts (numeric prefixes, `39` → apostrophe, channel name prefixes). The same binary scoring approach (0–8) is applied to title traits that characterize MrBeast's titling style.
+Title features were extracted from all 6,546 records using pure string analysis — no ML, no external dependencies. Titles are cleaned to fix filename artifacts (numeric prefixes, `39` → apostrophe, channel name prefixes). A binary scoring approach (0–9) is applied to title traits that characterize MrBeast's titling style.
 
 #### 7a. Title Likeness Scoring Criteria
 
@@ -512,7 +512,7 @@ The data supports the thesis that entertainment YouTubers' thumbnails *and title
 
 7. **Titles converge too, but slower.** Title likeness scores rise from 2.94 (2015) to 3.37 (2025), a modest +14.6% vs. +27% for thumbnails. The convergence is led by first-person framing ("I ..." titles), which exploded from 2.1% → 25.4% — now exceeding MrBeast's own 20.6%. Money references show the second-strongest signal: 2.3% → 11.8% (5x increase), with titles increasingly featuring dollar amounts and spending language, though still far from MrBeast's 29.4%. However, MrBeast's most distinctive title traits (numeric hooks at 76.5%, challenge framing at 54.9%) remain largely unadopted by the field.
 
-8. **Combined scoring (0–16) strengthens the signal.** When thumbnail and title scores are summed, the convergence trajectory is smoother and the 2021–2022 inflection point is clearer (6.91 → 7.39). The combined score also reveals that some channels converge visually but not linguistically (Disguised Toast: +0.97 thumb, −0.37 title), while others converge on titles more than thumbnails (LazarBeam: +0.13 thumb, +0.18 title). The full "clickbait package" adoption varies by channel.
+8. **Combined scoring (0–17) strengthens the signal.** When thumbnail (0–8) and title (0–9) scores are summed, the convergence trajectory is smoother and the 2021–2022 inflection point is clearer (6.90–6.98 → 7.48). The combined score also reveals that some channels converge visually but not linguistically (Disguised Toast: +0.97 thumb, −0.33 title), while others converge on titles more than thumbnails (LazarBeam: +0.13 thumb, +0.18 title). The full "clickbait package" adoption varies by channel.
 
 #### What the data doesn't show
 
@@ -542,7 +542,7 @@ The data supports the thesis that entertainment YouTubers' thumbnails *and title
 2. ~~**Run feature extraction**~~ — Done. 1,125 thumbnails processed (100% pipeline completion).
 3. ~~**Re-run clustering**~~ — Done. 5,369/5,371 thumbnails clustered into 3 clusters.
 4. ~~**Collect historical years for 11 panel channels**~~ — Done. 1,266 thumbnails collected via YouTube API for Dude Perfect, Smosh, GMM, Markiplier, PewDiePie, VanossGaming, Sidemen, Unspeakable, Ryan Trahan, David Dobrik, JiDion (2015–2023). Then ingested (1,175 new records), extracted features, and re-clustered. DB now at 6,546.
-5. ~~**Title feature extraction**~~ — Done. 14 title features extracted from all 6,546 records (pure string processing, 37s, zero errors). Title likeness scoring (0–8), combined likeness (0–16), and channel-evolution title slopes all computed. New endpoints: `/stats/title-likeness`, `/stats/combined-likeness`. Channel evolution extended with `title_slope` and `combined_slope`. Frontend updated with title likeness charts, combined score visualization, and title slopes in evolution page.
+5. ~~**Title feature extraction**~~ — Done. 15 title features extracted from all 6,546 records (pure string processing, 37s, zero errors). Title likeness scoring (0–9, including money reference detection), combined likeness (0–17), and channel-evolution title slopes all computed. New endpoints: `/stats/title-likeness`, `/stats/combined-likeness`. Channel evolution extended with `title_slope` and `combined_slope`. Frontend updated with title likeness charts, combined score visualization, and title slopes in evolution page.
 
 ### Remaining Steps
 
