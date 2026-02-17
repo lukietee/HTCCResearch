@@ -31,9 +31,4 @@ backend/data/collection_state.json
 .claude/
 
 outputs/
-
-assignment.md
-CLUSTERING_ANALYSIS.md
-MRBEAST_CONVERGENCE_REPORT.md
-claude.md
-todo.md
+Analysis/
