@@ -2,7 +2,7 @@
 
 ## Thesis
 
-MrBeast's thumbnail style (high brightness, large faces, expressive emotions, bold colors, minimal text) has influenced the broader **entertainment** side of YouTube. This analysis tracks whether entertainment creators' thumbnails have converged toward MrBeast's visual signature over the period 2015–2025.
+MrBeast's thumbnail style (high brightness, large faces, expressive emotions, bold colors, minimal text) and title style (short, numeric, first-person, challenge-framing) have influenced the broader **entertainment** side of YouTube. This analysis tracks whether entertainment creators' thumbnails *and titles* have converged toward MrBeast's "clickbait package" over the period 2015–2025.
 
 ## Dataset Overview
 
@@ -32,6 +32,7 @@ MrBeast's thumbnail style (high brightness, large faces, expressive emotions, bo
 |--------|-------|
 | Total DB records | 6,546 |
 | With features extracted | 6,546 (100%) |
+| With title features | 6,546 (100%) |
 | With cluster assignment | 6,544 (99.97%) |
 | Pending ingestion | 0 |
 
@@ -338,9 +339,135 @@ Across all 46 channels with ≥4 years of data (up from 45 in prior analysis):
 
 **Panel summary:** 16/22 panel channels (73%) have positive slopes, vs. 63% across all tracked channels. The panel's average slope is higher than the overall, partly because these channels were selected for being entertainment-focused (and thus more likely to share MrBeast's visual language).
 
-### 7. MrBeast Centroid (Reference Profile)
+### 7. Title Convergence Analysis (NEW)
 
-The target that other channels are converging toward:
+Title features were extracted from all 6,546 records using pure string analysis — no ML, no external dependencies. Titles are cleaned to fix filename artifacts (numeric prefixes, `39` → apostrophe, channel name prefixes). The same binary scoring approach (0–8) is applied to title traits that characterize MrBeast's titling style.
+
+#### 7a. Title Likeness Scoring Criteria
+
+Each title gets 0–8 points:
+
+| Criterion | MrBeast Rationale |
+|-----------|-------------------|
+| `word_count <= 8` | MrBeast avg ~6 words, short & punchy |
+| `char_count <= 50` | MrBeast avg ~32 chars, concise |
+| `has_number` | 76.5% of MrBeast titles contain numbers |
+| `has_large_number` | "$1,000,000", "100,000 People" — 52% |
+| `first_person` | "I ..." pattern — 20.6% of MrBeast titles |
+| `has_superlative` | "World's Largest", "Most Expensive" — 16.7% |
+| `has_challenge_framing` | "Survive", "vs", "Win" — 54.9% |
+| `avg_word_length <= 5.0` | Simple vocabulary, accessible to young audiences |
+
+#### 7b. Title Likeness Scores by Group
+
+| Group | N | Mean | Median | ≥4 | ≥5 | ≥6 |
+|-------|---|------|--------|-----|-----|-----|
+| **MrBeast** | **102** | **4.93** | **5.0** | **88.2%** | **70.6%** | **36.3%** |
+| 2015 | 607 | 2.91 | 3.0 | 21.4% | 4.3% | 0.2% |
+| 2016 | 612 | 2.89 | 3.0 | 25.3% | 5.7% | 0.0% |
+| 2017 | 722 | 2.94 | 3.0 | 25.6% | 6.5% | 0.6% |
+| 2018 | 712 | 2.98 | 3.0 | 26.3% | 7.3% | 1.0% |
+| 2019 | 660 | 3.25 | 3.0 | 36.5% | 13.2% | 3.8% |
+| 2020 | 614 | 3.06 | 3.0 | 31.8% | 9.3% | 2.0% |
+| 2021 | 598 | 3.28 | 3.0 | 36.8% | 16.6% | 3.0% |
+| 2022 | 689 | 3.28 | 3.0 | 38.8% | 14.9% | 3.2% |
+| 2023 | 691 | 3.23 | 3.0 | 35.0% | 12.2% | 3.5% |
+| **2024** | **260** | **3.24** | **3.0** | **40.0%** | **15.4%** | **3.5%** |
+| **2025** | **279** | **3.25** | **3.0** | **40.5%** | **12.5%** | **4.3%** |
+
+**Key observation:** Title convergence is **weaker and more gradual** than thumbnail convergence. Mean scores rise from 2.91 (2015) to 3.25 (2025) — an 11.7% increase vs. the 27% increase seen in thumbnail scores over the same period. There is no dramatic 2024–2025 step-change for titles the way there is for thumbnails. Instead, title convergence is steady and incremental, with 2019 (3.25) marking the first notable jump. The ≥4 threshold tells the same story: 21.4% (2015) → 40.5% (2025), nearly doubling but never approaching MrBeast's 88.2%.
+
+The gap between MrBeast (4.93) and the field (3.25) is still large — titles have closed only ~17% of the distance, vs. ~40% for thumbnails.
+
+#### 7c. Per-Criterion Title Feature Trends
+
+| Group | Avg Words | Avg Chars | % Number | % Large# | % 1st Person | % Superlative | % Challenge | Avg Word Len |
+|-------|-----------|-----------|----------|----------|-------------|---------------|-------------|--------------|
+| **MrBeast** | **6.1** | **32.1** | **76.5%** | **52.0%** | **20.6%** | **16.7%** | **54.9%** | **4.51** |
+| 2015 | 6.0 | 34.1 | 31.0% | 3.5% | 2.1% | 9.7% | 11.4% | 5.03 |
+| 2018 | 6.8 | 37.9 | 29.8% | 4.1% | 5.1% | 11.9% | 17.1% | 4.88 |
+| 2021 | 6.1 | 33.9 | 28.3% | 9.0% | 13.5% | 12.9% | 12.7% | 4.84 |
+| 2023 | 6.2 | 34.0 | 24.3% | 6.7% | 16.4% | 15.5% | 9.8% | 4.78 |
+| **2025** | **6.7** | **36.8** | **32.6%** | **9.3%** | **25.4%** | **12.2%** | **13.3%** | **4.75** |
+
+**Strongest converging title traits (2015 → 2025):**
+- **First person ("I ...")**: 2.1% → 25.4% — a **12x increase**, now exceeding MrBeast's 20.6%. This is the single strongest title convergence signal. The "I did X" framing that MrBeast popularized is now ubiquitous.
+- **Large numbers (≥1,000)**: 3.5% → 9.3% — nearly tripled, though still far from MrBeast's 52%.
+- **Word length**: 5.03 → 4.75 — vocabulary is getting simpler.
+- **Superlatives**: 9.7% → 12.2% — modest increase toward MrBeast's 16.7%.
+
+**Weakest/non-converging title traits:**
+- **Numbers in titles**: 31% → 33% — essentially flat, well below MrBeast's 76.5%. Titles have not adopted MrBeast's aggressive use of numeric hooks.
+- **Challenge framing**: 11.4% → 13.3% — barely moved, far from MrBeast's 54.9%. "vs", "Survive", "Win" vocabulary remains distinctively MrBeast.
+- **Word/char count**: Titles are actually getting *slightly longer* (6.0 → 6.7 words, 34.1 → 36.8 chars), moving *away* from MrBeast's conciseness (6.1 words, 32.1 chars).
+
+**Interpretation:** Titles are converging on *some* MrBeast patterns (first-person framing, large numbers, simpler words) but not on his most distinctive traits (numeric hooks, challenge framing, extreme conciseness). This makes sense — first-person framing is a cheap, genre-neutral adoption, while "challenge/competition" framing requires the content to match. Titles converge where they can without changing the underlying content.
+
+#### 7d. Combined Likeness Scores (Thumbnail + Title, 0–16)
+
+| Group | N | Thumb (0–8) | Title (0–8) | Combined (0–16) | ≥8 | ≥10 | ≥12 |
+|-------|---|-------------|-------------|-----------------|-----|------|------|
+| **MrBeast** | **102** | **6.13** | **4.93** | **11.06** | **91.2%** | **78.4%** | **54.9%** |
+| 2015 | 607 | 3.59 | 2.91 | 6.50 | 35.1% | 17.0% | 1.8% |
+| 2016 | 612 | 3.76 | 2.89 | 6.65 | 39.5% | 16.7% | 2.6% |
+| 2017 | 722 | 3.80 | 2.94 | 6.74 | 39.1% | 17.5% | 1.9% |
+| 2018 | 712 | 3.88 | 2.98 | 6.86 | 40.4% | 19.9% | 2.5% |
+| 2019 | 660 | 3.85 | 3.25 | 7.09 | 44.5% | 20.6% | 4.2% |
+| 2020 | 614 | 3.85 | 3.06 | 6.91 | 42.5% | 21.0% | 4.1% |
+| 2021 | 598 | 4.11 | 3.28 | 7.39 | 50.3% | 24.1% | 6.5% |
+| 2022 | 689 | 4.13 | 3.28 | 7.40 | 50.5% | 25.4% | 6.2% |
+| 2023 | 691 | 3.64 | 3.23 | 6.87 | 43.1% | 18.4% | 4.9% |
+| **2024** | **260** | **4.62** | **3.24** | **7.86** | **56.9%** | **31.9%** | **9.6%** |
+| **2025** | **279** | **4.55** | **3.25** | **7.80** | **57.3%** | **24.7%** | **7.2%** |
+
+**Key observation:** Combined scores confirm the convergence pattern and make the 2024–2025 acceleration more visible. The gap between 2015 baseline (6.50) and 2024–2025 (7.80–7.86) is **1.3 points on the 0–16 scale** — a 20% increase. But the gap to MrBeast (11.06) remains large: the field has closed ~29% of the distance.
+
+The combined score also makes the **2021–2022 inflection** clearer: the jump from 6.86–6.91 (2018–2020) to 7.39–7.40 (2021–2022) is a half-point step-change in combined terms, followed by the 2023 dip and 2024–2025 acceleration. This reinforces the two-phase convergence pattern.
+
+#### 7e. Channel Evolution — Title Slopes
+
+Across 46 channels with ≥4 years of data:
+
+| Metric | Thumbnail | Title | Combined |
+|--------|-----------|-------|----------|
+| Avg slope / year | **+0.050** | **+0.016** | **+0.066** |
+| Converging channels | 28 (61%) | — | — |
+| Diverging channels | 17 (37%) | — | — |
+| Flat | 1 (2%) | — | — |
+
+**Top combined convergers:**
+
+| Channel | Thumb Slope | Title Slope | Combined Slope |
+|---------|-------------|-------------|----------------|
+| ZHC | +0.434 | +0.198 | **+0.633** |
+| Danny Duncan | +0.552 | +0.046 | **+0.598** |
+| Disguised Toast | +0.968 | −0.372 | **+0.596** |
+| Sidemen | +0.314 | +0.158 | **+0.471** |
+| FaZe Rug | +0.355 | +0.093 | **+0.447** |
+| IShowSpeed | +0.361 | +0.053 | **+0.414** |
+| Ryan Trahan | +0.269 | +0.086 | **+0.355** |
+| LazarBeam | +0.135 | +0.177 | **+0.312** |
+| Unspeakable | +0.116 | +0.155 | **+0.271** |
+
+**Notable patterns:**
+- **LazarBeam** and **Unspeakable** show stronger title convergence than thumbnail convergence — they're adopting MrBeast's *titling* style more than his visual style.
+- **Disguised Toast** has the highest thumbnail slope (+0.968) but a *negative* title slope (−0.372), suggesting a purely visual convergence with an independent titling strategy.
+- **ZHC** converges strongly on both dimensions (+0.434 thumb, +0.198 title), the most balanced convergence in the dataset.
+- Most top convergers show positive slopes on *both* dimensions, suggesting the "clickbait package" is adopted as a whole.
+
+#### 7f. Title vs. Thumbnail Convergence: Different Speeds, Same Direction
+
+The data reveals that **titles and thumbnails converge at different rates**:
+
+1. **Thumbnails converge faster** (avg slope +0.050/yr vs. title +0.016/yr). Visual changes are easier to adopt — you can redesign a thumbnail without changing your content. Title patterns like "challenge framing" require the content itself to shift.
+
+2. **First-person framing is the one title trait that over-converged.** At 25.4% (2025) vs. MrBeast's 20.6%, it has already *surpassed* the reference. "I did X" titles are now a platform-wide convention, not just a MrBeast signature.
+
+3. **The combined (0–16) score smooths noise** and makes the convergence trajectory clearer than either dimension alone. It also reveals that some creators converge visually but not linguistically (or vice versa), suggesting different adoption barriers.
+
+### 8. MrBeast Centroid (Visual Reference Profile)
+
+The visual target that other channels are converging toward:
 
 | Feature | MrBeast Mean | MrBeast Std | Role |
 |---------|-------------|-------------|------|
@@ -363,7 +490,7 @@ The profile can be summarized as: **bright, face-forward, emotionally expressive
 
 ### The Entertainment Convergence Hypothesis: Supported with Caveats
 
-The data supports the thesis that entertainment YouTubers' thumbnails have converged toward MrBeast's visual signature, with the following nuances:
+The data supports the thesis that entertainment YouTubers' thumbnails *and titles* have converged toward MrBeast's signature, with the following nuances:
 
 #### What the data shows
 
@@ -379,6 +506,10 @@ The data supports the thesis that entertainment YouTubers' thumbnails have conve
 
 6. **Divergers have explanations.** Most diverging channels are genre-locked (animated content, food shows) or intentionally counter-culture. True resisters among entertainment channels are few.
 
+7. **Titles converge too, but slower.** Title likeness scores rise from 2.91 (2015) to 3.25 (2025), a modest +11.7% vs. +27% for thumbnails. The convergence is led by first-person framing ("I ..." titles), which exploded from 2.1% → 25.4% — now exceeding MrBeast's own 20.6%. Large numbers and simpler vocabulary also trend toward MrBeast's patterns. However, MrBeast's most distinctive title traits (numeric hooks at 76.5%, challenge framing at 54.9%) remain largely unadopted by the field.
+
+8. **Combined scoring (0–16) strengthens the signal.** When thumbnail and title scores are summed, the convergence trajectory is smoother and the 2021–2022 inflection point is clearer (6.91 → 7.39). The combined score also reveals that some channels converge visually but not linguistically (Disguised Toast: +0.97 thumb, −0.37 title), while others converge on titles more than thumbnails (LazarBeam: +0.13 thumb, +0.18 title). The full "clickbait package" adoption varies by channel.
+
 #### What the data doesn't show
 
 1. **Causation.** The convergence could reflect MrBeast's influence, or both MrBeast and other creators could be independently responding to the same YouTube algorithm pressures, audience preferences, or thumbnail design tools.
@@ -386,6 +517,8 @@ The data supports the thesis that entertainment YouTubers' thumbnails have conve
 2. **Brightness convergence.** Unlike every other feature, brightness has *not* converged. Creators may use darker/moodier palettes as a deliberate differentiator.
 
 3. **Clean pre/post separation.** With the expanded dataset, the 2021–2022 uptick blurs the previously clean "plateau then jump" narrative. The convergence may be more gradual than initially apparent, which is actually more consistent with a diffusion-of-innovation model.
+
+4. **Strong title convergence on MrBeast's core patterns.** While first-person framing has been widely adopted, titles have NOT converged on MrBeast's most distinctive traits — challenge/competition framing (54.9% vs. 13.3%) and heavy numeric usage (76.5% vs. 32.6%). Title convergence is selective: creators adopt the easy patterns (first-person, simpler words) while skipping those that require content-level changes.
 
 #### Methodological caveats
 
@@ -405,34 +538,38 @@ The data supports the thesis that entertainment YouTubers' thumbnails have conve
 2. ~~**Run feature extraction**~~ — Done. 1,125 thumbnails processed (100% pipeline completion).
 3. ~~**Re-run clustering**~~ — Done. 5,369/5,371 thumbnails clustered into 3 clusters.
 4. ~~**Collect historical years for 11 panel channels**~~ — Done. 1,266 thumbnails collected via YouTube API for Dude Perfect, Smosh, GMM, Markiplier, PewDiePie, VanossGaming, Sidemen, Unspeakable, Ryan Trahan, David Dobrik, JiDion (2015–2023). Then ingested (1,175 new records), extracted features, and re-clustered. DB now at 6,546.
+5. ~~**Title feature extraction**~~ — Done. 14 title features extracted from all 6,546 records (pure string processing, 37s, zero errors). Title likeness scoring (0–8), combined likeness (0–16), and channel-evolution title slopes all computed. New endpoints: `/stats/title-likeness`, `/stats/combined-likeness`. Channel evolution extended with `title_slope` and `combined_slope`. Frontend updated with title likeness charts, combined score visualization, and title slopes in evolution page.
 
 ### Remaining Steps
 
-5. **Collect MrBeast reference set via API** — Structured era-based collection with full metadata
+6. **Collect MrBeast reference set via API** — Structured era-based collection with full metadata
    ```bash
    python scripts/collect_youtube.py mrbeast
    ```
    **Quota estimate:** ~1,010 units.
 
-6. **Re-run full pipeline** — Ingest → features → clustering on complete dataset after MrBeast era collection.
+7. **Re-run full pipeline** — Ingest → features → clustering on complete dataset after MrBeast era collection.
 
-7. **Panel-only reanalysis** — Filter 2015–2023 to panel channels only and recompute all findings tables. This is the key test to resolve the composition effect caveat. Compare panel-only vs. all-channel trends to quantify the composition effect.
+8. **Panel-only reanalysis** — Filter 2015–2023 to panel channels only and recompute all findings tables. This is the key test to resolve the composition effect caveat. Compare panel-only vs. all-channel trends to quantify the composition effect.
 
-8. **Statistical testing:**
+9. **Statistical testing:**
    - Paired t-tests or Wilcoxon signed-rank on early vs. late similarity scores per channel
    - ANOVA across year groups for key features (brightness, face size, text ratio)
    - Effect sizes (Cohen's d) for 2015 vs. 2025 feature differences
    - Confidence intervals on year-over-year likeness differences
    - Regression: similarity score ~ year, controlling for channel fixed effects
 
-9. **Weighted likeness score** — Develop an alternative to the binary 0–8 score that weights criteria by their discriminative power (e.g., face features weighted higher than text absence).
+10. **Weighted likeness score** — Develop an alternative to the binary 0–8 score that weights criteria by their discriminative power (e.g., face features weighted higher than text absence).
 
-10. **Generate publication-ready visualizations:**
-    - Heatmap of similarity scores (channels x years)
-    - Aggregate trendline: mean panel similarity by year with confidence bands
-    - Before/after thumbnail galleries for strongest convergers (Danny Duncan, FaZe Rug, SSSniperWolf)
-    - Feature distribution shifts over time (violin or ridgeline plots)
-    - Per-channel evolution timelines with slope annotations
+11. **Make convergence more visible — strengthen the visual argument:**
+    - **Heatmap of likeness scores (channels × years):** A color-coded grid where rows are channels, columns are years, and cells show likeness score. The visual should make the "warming" pattern (green → yellow → red as scores rise) immediately obvious. Include both thumbnail and title heatmaps side by side.
+    - **Aggregate trendline with confidence bands:** Plot mean panel similarity by year with shaded 95% CI. The narrowing CI in 2024–2025 (as variance drops) is itself a convergence signal.
+    - **Before/after thumbnail galleries:** For the top 5 convergers (Danny Duncan, FaZe Rug, ZHC, Sidemen, SSSniperWolf), show a 2×N grid: row 1 = earliest year thumbnails, row 2 = latest year thumbnails. Visual impact is immediate.
+    - **Feature distribution ridgeline plots:** Show how each feature's distribution shifts over time. For face count or smile score, the distribution should visibly migrate rightward (toward MrBeast) across years.
+    - **"Gap closing" chart:** For each key feature, plot the distance between the year-group mean and MrBeast's mean over time. If converging, these lines trend toward zero. Show all features on one plot to demonstrate coordinated convergence.
+    - **Combined (thumbnail + title) convergence waterfall:** Stacked bar chart showing how much each scoring dimension contributes to the combined score, by year. Makes it clear that thumbnail convergence drives most of the total, with title convergence adding incremental lift.
+    - **Per-channel trajectory sparklines:** Small multiples showing each panel channel's score trajectory (2015–2025) with a MrBeast reference line. Sort by slope. At a glance, the viewer sees most lines trending upward toward the reference.
+    - **Dual-axis title vs. thumbnail convergence:** Plot thumbnail likeness mean and title likeness mean on the same chart (different y-axes or normalized to 0–1) to show that thumbnails converge faster, but titles are following.
 
 ### API Quota Budget (remaining work)
 
