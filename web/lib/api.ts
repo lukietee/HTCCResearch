@@ -10,6 +10,8 @@ import type {
   MrBeastSimilarityResponse,
   TitleLikenessResponse,
   CombinedLikenessResponse,
+  ConvergenceTestsResponse,
+  WeightedLikenessResponse,
 } from './types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -114,7 +116,7 @@ export async function getCorrelations(target: 'views' | 'ctr' = 'views'): Promis
   return fetchAPI(`/stats/correlations?target=${target}`);
 }
 
-export async function getMrBeastLikeness(): Promise<{
+export async function getMrBeastLikeness(panelOnly?: boolean): Promise<{
   criteria: string[];
   max_score: number;
   groups: Record<string, {
@@ -129,22 +131,26 @@ export async function getMrBeastLikeness(): Promise<{
     score_distribution: Record<string, number>;
   }>;
 }> {
-  return fetchAPI('/stats/mrbeast-likeness');
+  const params = panelOnly ? '?panel_only=true' : '';
+  return fetchAPI(`/stats/mrbeast-likeness${params}`);
 }
 
-export async function getMrBeastSimilarity(): Promise<MrBeastSimilarityResponse> {
-  return fetchAPI<MrBeastSimilarityResponse>('/stats/mrbeast-similarity');
+export async function getMrBeastSimilarity(panelOnly?: boolean): Promise<MrBeastSimilarityResponse> {
+  const params = panelOnly ? '?panel_only=true' : '';
+  return fetchAPI<MrBeastSimilarityResponse>(`/stats/mrbeast-similarity${params}`);
 }
 
-export async function getTitleLikeness(): Promise<TitleLikenessResponse> {
-  return fetchAPI<TitleLikenessResponse>('/stats/title-likeness');
+export async function getTitleLikeness(panelOnly?: boolean): Promise<TitleLikenessResponse> {
+  const params = panelOnly ? '?panel_only=true' : '';
+  return fetchAPI<TitleLikenessResponse>(`/stats/title-likeness${params}`);
 }
 
-export async function getCombinedLikeness(): Promise<CombinedLikenessResponse> {
-  return fetchAPI<CombinedLikenessResponse>('/stats/combined-likeness');
+export async function getCombinedLikeness(panelOnly?: boolean): Promise<CombinedLikenessResponse> {
+  const params = panelOnly ? '?panel_only=true' : '';
+  return fetchAPI<CombinedLikenessResponse>(`/stats/combined-likeness${params}`);
 }
 
-export async function getChannelEvolution(minYears = 2): Promise<{
+export async function getChannelEvolution(minYears = 2, panelOnly?: boolean): Promise<{
   total_channels: number;
   channels: Record<string, {
     num_years: number;
@@ -170,7 +176,22 @@ export async function getChannelEvolution(minYears = 2): Promise<{
     avg_combined_slope: number;
   };
 }> {
-  return fetchAPI(`/stats/channel-evolution?min_years=${minYears}`);
+  const params = new URLSearchParams({ min_years: String(minYears) });
+  if (panelOnly) params.set('panel_only', 'true');
+  return fetchAPI(`/stats/channel-evolution?${params}`);
+}
+
+export async function getConvergenceTests(panelOnly?: boolean): Promise<ConvergenceTestsResponse> {
+  const params = panelOnly ? '?panel_only=true' : '';
+  return fetchAPI<ConvergenceTestsResponse>(`/stats/convergence-tests${params}`);
+}
+
+export async function getWeightedLikeness(panelOnly?: boolean, useDynamicWeights = true): Promise<WeightedLikenessResponse> {
+  const params = new URLSearchParams();
+  if (panelOnly) params.set('panel_only', 'true');
+  if (!useDynamicWeights) params.set('use_dynamic_weights', 'false');
+  const query = params.toString();
+  return fetchAPI<WeightedLikenessResponse>(`/stats/weighted-likeness${query ? `?${query}` : ''}`);
 }
 
 // Clustering endpoints

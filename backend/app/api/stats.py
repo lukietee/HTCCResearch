@@ -9,7 +9,7 @@ from sqlalchemy import func
 from pydantic import BaseModel
 
 from app.core.db import get_db
-from app.core.config import settings
+from app.core.config import settings, PANEL_CHANNELS
 from app.models.thumbnail import Thumbnail
 
 
@@ -271,7 +271,10 @@ def _compute_title_likeness_score(f: dict) -> int:
 
 
 @router.get("/mrbeast-likeness")
-async def mrbeast_likeness(db: Session = Depends(get_db)):
+async def mrbeast_likeness(
+    db: Session = Depends(get_db),
+    panel_only: bool = Query(False, description="Filter to panel channels only"),
+):
     """Compute per-group MrBeast-likeness scores using trait thresholds.
 
     Each thumbnail gets 0-8 points:
@@ -289,6 +292,9 @@ async def mrbeast_likeness(db: Session = Depends(get_db)):
     thumbnails = db.query(Thumbnail).filter(
         Thumbnail.features_extracted == True
     ).all()
+
+    if panel_only:
+        thumbnails = [t for t in thumbnails if t.group == "mrbeast" or t.channel in PANEL_CHANNELS]
 
     groups_data = defaultdict(list)
     for thumb in thumbnails:
@@ -333,6 +339,7 @@ async def mrbeast_likeness(db: Session = Depends(get_db)):
 async def channel_evolution(
     db: Session = Depends(get_db),
     min_years: int = Query(2, ge=2, description="Minimum number of year groups a channel must appear in"),
+    panel_only: bool = Query(False, description="Filter to panel channels only"),
 ):
     """Track how channels evolve their MrBeast-likeness score over time.
 
@@ -346,6 +353,9 @@ async def channel_evolution(
         Thumbnail.channel != None,
         Thumbnail.channel != "",
     ).all()
+
+    if panel_only:
+        thumbnails = [t for t in thumbnails if t.group == "mrbeast" or t.channel in PANEL_CHANNELS]
 
     # group by channel -> year -> (thumbnail_scores, title_scores)
     channel_year_scores: Dict[str, Dict[str, List]] = defaultdict(lambda: defaultdict(list))
@@ -429,7 +439,10 @@ async def channel_evolution(
 
 
 @router.get("/title-likeness")
-async def title_likeness(db: Session = Depends(get_db)):
+async def title_likeness(
+    db: Session = Depends(get_db),
+    panel_only: bool = Query(False, description="Filter to panel channels only"),
+):
     """Compute per-group MrBeast title-likeness scores using trait thresholds.
 
     Each title gets 0-9 points:
@@ -448,6 +461,9 @@ async def title_likeness(db: Session = Depends(get_db)):
     thumbnails = db.query(Thumbnail).filter(
         Thumbnail.features_extracted == True
     ).all()
+
+    if panel_only:
+        thumbnails = [t for t in thumbnails if t.group == "mrbeast" or t.channel in PANEL_CHANNELS]
 
     groups_data = defaultdict(list)
     for thumb in thumbnails:
@@ -490,7 +506,10 @@ async def title_likeness(db: Session = Depends(get_db)):
 
 
 @router.get("/combined-likeness")
-async def combined_likeness(db: Session = Depends(get_db)):
+async def combined_likeness(
+    db: Session = Depends(get_db),
+    panel_only: bool = Query(False, description="Filter to panel channels only"),
+):
     """Compute per-group combined thumbnail + title likeness scores.
 
     Returns thumbnail (0-8), title (0-9), and combined (0-17) scores.
@@ -500,6 +519,9 @@ async def combined_likeness(db: Session = Depends(get_db)):
     thumbnails = db.query(Thumbnail).filter(
         Thumbnail.features_extracted == True
     ).all()
+
+    if panel_only:
+        thumbnails = [t for t in thumbnails if t.group == "mrbeast" or t.channel in PANEL_CHANNELS]
 
     groups_data: Dict[str, Dict[str, list]] = defaultdict(lambda: {
         "thumbnail": [], "title": [], "combined": []
@@ -536,7 +558,10 @@ async def combined_likeness(db: Session = Depends(get_db)):
 
 
 @router.get("/mrbeast-similarity")
-async def mrbeast_similarity(db: Session = Depends(get_db)):
+async def mrbeast_similarity(
+    db: Session = Depends(get_db),
+    panel_only: bool = Query(False, description="Filter to panel channels only"),
+):
     """Compute continuous 0-100 MrBeast similarity score per thumbnail.
 
     Uses z-score distance from MrBeast centroid across the 10 most
@@ -563,6 +588,9 @@ async def mrbeast_similarity(db: Session = Depends(get_db)):
     thumbnails = db.query(Thumbnail).filter(
         Thumbnail.features_extracted == True
     ).all()
+
+    if panel_only:
+        thumbnails = [t for t in thumbnails if t.group == "mrbeast" or t.channel in PANEL_CHANNELS]
 
     def _extract_vector(thumb):
         f = thumb.get_features()
@@ -731,4 +759,258 @@ async def get_correlations(
         "target": target,
         "total_samples": len(thumbnails),
         "correlations": correlations,
+    }
+
+
+# ──────────────────────────────────────────────────────────────
+# Likeness criteria feature paths for weighted scoring
+# ──────────────────────────────────────────────────────────────
+_LIKENESS_CRITERIA = [
+    ("avg_brightness",          lambda f: f.get("color", {}).get("avg_brightness", 0)),
+    ("face_count",              lambda f: f.get("face", {}).get("face_count", 0)),
+    ("text_area_ratio",         lambda f: f.get("text", {}).get("text_area_ratio", 1)),
+    ("smile_score",             lambda f: f.get("face", {}).get("emotion_proxies", {}).get("smile_score", 0)),
+    ("mouth_open_score",        lambda f: f.get("face", {}).get("emotion_proxies", {}).get("mouth_open_score", 0)),
+    ("body_coverage",           lambda f: f.get("pose", {}).get("body_coverage", 0)),
+    ("brow_raise_score",        lambda f: f.get("face", {}).get("emotion_proxies", {}).get("brow_raise_score", 0)),
+    ("largest_face_area_ratio", lambda f: f.get("face", {}).get("largest_face_area_ratio", 0)),
+]
+
+_LIKENESS_THRESHOLDS = {
+    "avg_brightness": (">=", 0.60),
+    "face_count": (">=", 1),
+    "text_area_ratio": ("<=", 0.005),
+    "smile_score": (">=", 0.40),
+    "mouth_open_score": (">=", 0.15),
+    "body_coverage": (">=", 0.30),
+    "brow_raise_score": (">=", 0.30),
+    "largest_face_area_ratio": (">=", 0.06),
+}
+
+
+def _passes_threshold(name: str, value: float) -> bool:
+    op, thresh = _LIKENESS_THRESHOLDS[name]
+    if op == ">=":
+        return value >= thresh
+    return value <= thresh
+
+
+def _derive_feature_weights(thumbnails) -> Dict[str, float]:
+    """Compute |mrbeast_mean - panel_mean| / panel_std for each criterion feature."""
+    import numpy as np
+
+    mb_vals: Dict[str, list] = {name: [] for name, _ in _LIKENESS_CRITERIA}
+    panel_vals: Dict[str, list] = {name: [] for name, _ in _LIKENESS_CRITERIA}
+
+    for thumb in thumbnails:
+        f = thumb.get_features()
+        bucket = mb_vals if thumb.group == "mrbeast" else panel_vals
+        for name, extractor in _LIKENESS_CRITERIA:
+            val = extractor(f)
+            if isinstance(val, (int, float)):
+                bucket[name].append(float(val))
+
+    weights = {}
+    for name in mb_vals:
+        mb = np.array(mb_vals[name]) if mb_vals[name] else np.array([0.0])
+        pa = np.array(panel_vals[name]) if panel_vals[name] else np.array([0.0])
+        pa_std = float(np.std(pa)) if len(pa) > 1 else 1.0
+        if pa_std < 1e-6:
+            pa_std = 1e-6
+        weights[name] = round(abs(float(np.mean(mb)) - float(np.mean(pa))) / pa_std, 4)
+
+    return weights
+
+
+def _compute_weighted_likeness_score(f: dict, weights: Dict[str, float]) -> float:
+    """Same 8 criteria as binary score, but adds weight[feature] instead of 1."""
+    score = 0.0
+    for name, extractor in _LIKENESS_CRITERIA:
+        val = extractor(f)
+        if isinstance(val, (int, float)) and _passes_threshold(name, float(val)):
+            score += weights.get(name, 1.0)
+    return score
+
+
+@router.get("/convergence-tests")
+async def convergence_tests(
+    db: Session = Depends(get_db),
+    panel_only: bool = Query(False, description="Filter to panel channels only"),
+    early_years: str = Query("2015,2016,2017", description="Comma-separated early year groups"),
+    late_years: str = Query("2024,2025", description="Comma-separated late year groups"),
+):
+    """Run hypothesis tests on whether likeness scores increase over time."""
+    import numpy as np
+    from scipy import stats as sp_stats
+
+    thumbnails = db.query(Thumbnail).filter(
+        Thumbnail.features_extracted == True
+    ).all()
+
+    if panel_only:
+        thumbnails = [t for t in thumbnails if t.group == "mrbeast" or t.channel in PANEL_CHANNELS]
+
+    early_set = set(early_years.split(","))
+    late_set = set(late_years.split(","))
+
+    # Collect scores per year group
+    year_scores: Dict[str, list] = defaultdict(list)
+    for thumb in thumbnails:
+        if thumb.group == "mrbeast":
+            continue
+        f = thumb.get_features()
+        score = _compute_likeness_score(f)
+        year_scores[thumb.group].append(score)
+
+    early_scores = []
+    late_scores = []
+    for y, scores in year_scores.items():
+        if y in early_set:
+            early_scores.extend(scores)
+        if y in late_set:
+            late_scores.extend(scores)
+
+    result: Dict[str, Any] = {}
+
+    # T-test
+    if len(early_scores) >= 2 and len(late_scores) >= 2:
+        early_arr = np.array(early_scores, dtype=float)
+        late_arr = np.array(late_scores, dtype=float)
+        t_stat, t_p = sp_stats.ttest_ind(early_arr, late_arr, equal_var=False)
+        result["ttest"] = {
+            "t_statistic": round(float(t_stat), 4),
+            "p_value": float(t_p),
+            "significant": float(t_p) < 0.05,
+            "early_mean": round(float(np.mean(early_arr)), 4),
+            "late_mean": round(float(np.mean(late_arr)), 4),
+            "early_n": len(early_scores),
+            "late_n": len(late_scores),
+        }
+
+        # Cohen's d
+        pooled_std = float(np.sqrt((np.std(early_arr, ddof=1)**2 + np.std(late_arr, ddof=1)**2) / 2))
+        if pooled_std > 1e-6:
+            d = (float(np.mean(late_arr)) - float(np.mean(early_arr))) / pooled_std
+        else:
+            d = 0.0
+        interpretation = "negligible"
+        if abs(d) >= 0.8:
+            interpretation = "large"
+        elif abs(d) >= 0.5:
+            interpretation = "medium"
+        elif abs(d) >= 0.2:
+            interpretation = "small"
+        result["cohens_d"] = {
+            "d": round(d, 4),
+            "interpretation": interpretation,
+        }
+
+    # ANOVA across all year groups
+    group_arrays = []
+    anova_groups = []
+    for y in sorted(year_scores.keys()):
+        if len(year_scores[y]) >= 2:
+            group_arrays.append(np.array(year_scores[y], dtype=float))
+            anova_groups.append(y)
+    if len(group_arrays) >= 2:
+        f_stat, f_p = sp_stats.f_oneway(*group_arrays)
+        result["anova"] = {
+            "f_statistic": round(float(f_stat), 4),
+            "p_value": float(f_p),
+            "significant": float(f_p) < 0.05,
+            "num_groups": len(group_arrays),
+            "groups": anova_groups,
+        }
+
+    # Linear regression: score ~ year
+    all_x = []
+    all_y = []
+    for y, scores in year_scores.items():
+        try:
+            year_num = int(y)
+        except ValueError:
+            continue
+        for s in scores:
+            all_x.append(year_num)
+            all_y.append(s)
+    if len(all_x) >= 3:
+        x_arr = np.array(all_x, dtype=float)
+        y_arr = np.array(all_y, dtype=float)
+        slope, intercept, r_value, p_value, std_err = sp_stats.linregress(x_arr, y_arr)
+        result["linear_regression"] = {
+            "slope": round(float(slope), 6),
+            "intercept": round(float(intercept), 4),
+            "r_squared": round(float(r_value**2), 4),
+            "p_value": float(p_value),
+            "significant": float(p_value) < 0.05,
+            "std_err": round(float(std_err), 6),
+            "n": len(all_x),
+        }
+
+    # Per-year 95% CIs
+    year_cis = {}
+    for y in sorted(year_scores.keys()):
+        scores = year_scores[y]
+        if len(scores) >= 2:
+            arr = np.array(scores, dtype=float)
+            mean = float(np.mean(arr))
+            sem = float(sp_stats.sem(arr))
+            ci_low, ci_high = sp_stats.t.interval(0.95, len(arr) - 1, loc=mean, scale=sem)
+            year_cis[y] = {
+                "mean": round(mean, 4),
+                "ci_low": round(float(ci_low), 4),
+                "ci_high": round(float(ci_high), 4),
+                "n": len(scores),
+                "sem": round(sem, 4),
+            }
+
+    result["year_confidence_intervals"] = year_cis
+
+    return result
+
+
+@router.get("/weighted-likeness")
+async def weighted_likeness(
+    db: Session = Depends(get_db),
+    panel_only: bool = Query(False, description="Filter to panel channels only"),
+    use_dynamic_weights: bool = Query(True, description="Compute weights from data vs equal weights"),
+):
+    """Compute weighted MrBeast-likeness scores using data-derived feature weights."""
+    import numpy as np
+
+    thumbnails = db.query(Thumbnail).filter(
+        Thumbnail.features_extracted == True
+    ).all()
+
+    if panel_only:
+        thumbnails = [t for t in thumbnails if t.group == "mrbeast" or t.channel in PANEL_CHANNELS]
+
+    if use_dynamic_weights:
+        weights = _derive_feature_weights(thumbnails)
+    else:
+        weights = {name: 1.0 for name, _ in _LIKENESS_CRITERIA}
+
+    max_possible = sum(weights.values())
+
+    groups_data: Dict[str, list] = defaultdict(list)
+    for thumb in thumbnails:
+        f = thumb.get_features()
+        score = _compute_weighted_likeness_score(f, weights)
+        groups_data[thumb.group].append(score)
+
+    groups_result = {}
+    for group, scores in groups_data.items():
+        arr = np.array(scores)
+        mean_val = float(np.mean(arr))
+        groups_result[group] = {
+            "count": len(scores),
+            "mean_score": round(mean_val, 4),
+            "median_score": round(float(np.median(arr)), 4),
+            "normalized_mean": round(mean_val / max_possible, 4) if max_possible > 0 else 0,
+        }
+
+    return {
+        "weights": weights,
+        "max_possible_score": round(max_possible, 4),
+        "groups": groups_result,
     }

@@ -18,10 +18,11 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   ReferenceLine,
+  ComposedChart,
 } from 'recharts'
-import { getMrBeastLikeness, getMrBeastSimilarity, getTitleLikeness, getCombinedLikeness } from '@/lib/api'
+import { getMrBeastLikeness, getMrBeastSimilarity, getTitleLikeness, getCombinedLikeness, getWeightedLikeness } from '@/lib/api'
 import { getGroupColor } from '@/lib/constants'
-import type { MrBeastSimilarityResponse, TitleLikenessResponse, CombinedLikenessResponse } from '@/lib/types'
+import type { MrBeastSimilarityResponse, TitleLikenessResponse, CombinedLikenessResponse, WeightedLikenessResponse } from '@/lib/types'
 
 type LikenessData = Awaited<ReturnType<typeof getMrBeastLikeness>>
 
@@ -51,21 +52,31 @@ export default function LikenessPage() {
   const [simData, setSimData] = useState<MrBeastSimilarityResponse | null>(null)
   const [titleData, setTitleData] = useState<TitleLikenessResponse | null>(null)
   const [combinedData, setCombinedData] = useState<CombinedLikenessResponse | null>(null)
+  const [weightedData, setWeightedData] = useState<WeightedLikenessResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedYear, setSelectedYear] = useState('2025')
+  const [panelOnly, setPanelOnly] = useState(false)
 
   useEffect(() => {
-    Promise.all([getMrBeastLikeness(), getMrBeastSimilarity(), getTitleLikeness(), getCombinedLikeness()])
-      .then(([likeness, similarity, title, combined]) => {
+    setLoading(true)
+    Promise.all([
+      getMrBeastLikeness(panelOnly),
+      getMrBeastSimilarity(panelOnly),
+      getTitleLikeness(panelOnly),
+      getCombinedLikeness(panelOnly),
+      getWeightedLikeness(panelOnly),
+    ])
+      .then(([likeness, similarity, title, combined, weighted]) => {
         setData(likeness)
         setSimData(similarity)
         setTitleData(title)
         setCombinedData(combined)
+        setWeightedData(weighted)
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [])
+  }, [panelOnly])
 
   if (loading) return <div className="text-center py-12 text-gray-500">Loading...</div>
   if (error) return <div className="text-center py-12 text-red-500">Error: {error}</div>
@@ -148,11 +159,22 @@ export default function LikenessPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">MrBeast-Likeness Analysis</h1>
-        <p className="mt-2 text-gray-600">
-          Continuous similarity scoring and 8-trait binary likeness analysis across year groups.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">MrBeast-Likeness Analysis</h1>
+          <p className="mt-2 text-gray-600">
+            Continuous similarity scoring and 8-trait binary likeness analysis across year groups.
+          </p>
+        </div>
+        <label className="flex items-center gap-2 bg-white rounded-lg shadow px-4 py-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={panelOnly}
+            onChange={(e) => setPanelOnly(e.target.checked)}
+            className="rounded border-gray-300"
+          />
+          <span className="text-sm font-medium text-gray-700">Panel channels only</span>
+        </label>
       </div>
 
       {/* ========== CONTINUOUS SIMILARITY SECTION ========== */}
@@ -493,6 +515,98 @@ export default function LikenessPage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+        )
+      })()}
+
+      {/* ========== DUAL-AXIS: THUMBNAIL vs TITLE CONVERGENCE ========== */}
+      {data && titleData && (() => {
+        const mbThumb = data.groups['mrbeast']
+        const mbTitle = titleData.groups['mrbeast']
+        const dualAxisData = YEAR_ORDER
+          .filter((y) => data.groups[y] && titleData.groups[y])
+          .map((y) => ({
+            group: y,
+            thumbnail_mean: data.groups[y].mean_score,
+            title_mean: titleData.groups[y].mean_score,
+          }))
+        return (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-2">Dual Convergence: Thumbnail vs Title Likeness</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Left axis: thumbnail mean (0-8). Right axis: title mean (0-9).
+              Both trending toward MrBeast baselines at different rates.
+            </p>
+            <ResponsiveContainer width="100%" height={400}>
+              <ComposedChart data={dualAxisData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="group" />
+                <YAxis yAxisId="left" domain={[0, 8]} label={{ value: 'Thumbnail (0-8)', angle: -90, position: 'insideLeft' }} />
+                <YAxis yAxisId="right" orientation="right" domain={[0, 9]} label={{ value: 'Title (0-9)', angle: 90, position: 'insideRight' }} />
+                <Tooltip />
+                <Legend />
+                {mbThumb && (
+                  <ReferenceLine yAxisId="left" y={mbThumb.mean_score} stroke="#4363d8" strokeDasharray="5 5" strokeWidth={1} />
+                )}
+                {mbTitle && (
+                  <ReferenceLine yAxisId="right" y={mbTitle.mean_score} stroke="#911eb4" strokeDasharray="5 5" strokeWidth={1} />
+                )}
+                <Line yAxisId="left" type="monotone" dataKey="thumbnail_mean" stroke="#4363d8" strokeWidth={3} dot={{ r: 5 }} name="Thumbnail Mean" />
+                <Line yAxisId="right" type="monotone" dataKey="title_mean" stroke="#911eb4" strokeWidth={3} dot={{ r: 5 }} name="Title Mean" />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        )
+      })()}
+
+      {/* ========== WEIGHTED vs UNWEIGHTED COMPARISON ========== */}
+      {weightedData && data && (() => {
+        const comparisonData = YEAR_ORDER
+          .filter((y) => data.groups[y] && weightedData.groups[y])
+          .map((y) => ({
+            group: y,
+            unweighted: data.groups[y].mean_score / 8,
+            weighted: weightedData.groups[y].normalized_mean,
+          }))
+        const weightEntries = Object.entries(weightedData.weights).sort((a, b) => b[1] - a[1])
+        const weightChartData = weightEntries.map(([name, weight]) => ({
+          feature: FEATURE_LABELS[name] || name,
+          weight,
+        }))
+        return (
+          <>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-2">Feature Weights (Data-Derived)</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Weight = |MrBeast mean - panel mean| / panel std. Higher = more discriminative.
+              </p>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={weightChartData} layout="vertical" margin={{ left: 100 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis type="category" dataKey="feature" width={90} tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(val: number) => val.toFixed(3)} />
+                  <Bar dataKey="weight" fill="#4363d8" name="Weight" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-2">Weighted vs Unweighted Normalized Scores</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Both scores normalized to 0-1 range for comparison. Weighted scoring emphasizes the traits that most distinguish MrBeast.
+              </p>
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={comparisonData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="group" />
+                  <YAxis domain={[0, 1]} label={{ value: 'Normalized Score', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip formatter={(val: number) => val.toFixed(4)} />
+                  <Legend />
+                  <Line type="monotone" dataKey="unweighted" stroke="#4363d8" strokeWidth={2} dot={{ r: 4 }} name="Unweighted (equal)" />
+                  <Line type="monotone" dataKey="weighted" stroke="#e6194b" strokeWidth={2} dot={{ r: 4 }} name="Weighted (data-derived)" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
         )
       })()}
 

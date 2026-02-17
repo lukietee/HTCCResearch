@@ -34,11 +34,12 @@ export default function EvolutionPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [minYears, setMinYears] = useState(3)
+  const [panelOnly, setPanelOnly] = useState(false)
   const [selectedChannels, setSelectedChannels] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     setLoading(true)
-    getChannelEvolution(minYears)
+    getChannelEvolution(minYears, panelOnly)
       .then((d) => {
         setData(d)
         // Auto-select top 5 converging + top 3 diverging
@@ -49,7 +50,7 @@ export default function EvolutionPage() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [minYears])
+  }, [minYears, panelOnly])
 
   if (loading) return <div className="text-center py-12 text-gray-500">Loading...</div>
   if (error) return <div className="text-center py-12 text-red-500">Error: {error}</div>
@@ -126,18 +127,29 @@ export default function EvolutionPage() {
         </div>
       </div>
 
-      {/* Min years selector */}
-      <div className="bg-white rounded-lg shadow p-4 flex items-center gap-4">
-        <label className="text-sm font-medium text-gray-700">Min years per channel:</label>
-        <select
-          value={minYears}
-          onChange={(e) => setMinYears(Number(e.target.value))}
-          className="border rounded px-3 py-1.5 text-sm"
-        >
-          {[2, 3, 4, 5].map((n) => (
-            <option key={n} value={n}>{n}+ years</option>
-          ))}
-        </select>
+      {/* Filters */}
+      <div className="bg-white rounded-lg shadow p-4 flex items-center gap-6">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Min years per channel:</label>
+          <select
+            value={minYears}
+            onChange={(e) => setMinYears(Number(e.target.value))}
+            className="border rounded px-3 py-1.5 text-sm"
+          >
+            {[2, 3, 4, 5].map((n) => (
+              <option key={n} value={n}>{n}+ years</option>
+            ))}
+          </select>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={panelOnly}
+            onChange={(e) => setPanelOnly(e.target.checked)}
+            className="rounded border-gray-300"
+          />
+          <span className="text-sm font-medium text-gray-700">Panel channels only</span>
+        </label>
       </div>
 
       {/* Slope Chart */}
@@ -210,6 +222,56 @@ export default function EvolutionPage() {
             ))}
           </LineChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Heatmap Table */}
+      <div className="bg-white rounded-lg shadow p-6 overflow-x-auto">
+        <h2 className="text-lg font-semibold mb-2">Score Heatmap: Channels x Years</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Rows sorted by slope (most converging at top). Color: blue (low) to red (high score).
+        </p>
+        {(() => {
+          const heatYears = sortedYears
+          const sortedChannels = data.trends.map((t) => t.channel)
+          const getColor = (score: number) => {
+            const t = Math.min(Math.max(score / 8, 0), 1)
+            const r = Math.round(59 + t * (220 - 59))
+            const g = Math.round(130 + t * (38 - 130))
+            const b = Math.round(246 + t * (38 - 246))
+            return `rgb(${r},${g},${b})`
+          }
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: `140px repeat(${heatYears.length}, 1fr)`, gap: '2px', fontSize: '12px' }}>
+              <div className="font-semibold text-gray-600 p-1">Channel</div>
+              {heatYears.map((y) => (
+                <div key={y} className="font-semibold text-gray-600 p-1 text-center">{y}</div>
+              ))}
+              {sortedChannels.map((ch) => {
+                const chData = data.channels[ch]
+                if (!chData) return null
+                return [
+                  <div key={`${ch}-label`} className="p-1 truncate font-medium text-gray-700" title={ch}>{ch}</div>,
+                  ...heatYears.map((y) => {
+                    const yearData = chData.years[y]
+                    if (!yearData) {
+                      return <div key={`${ch}-${y}`} className="p-1 text-center rounded" style={{ backgroundColor: '#f3f4f6', color: '#9ca3af' }}>—</div>
+                    }
+                    return (
+                      <div
+                        key={`${ch}-${y}`}
+                        className="p-1 text-center rounded text-white font-medium"
+                        style={{ backgroundColor: getColor(yearData.mean_score) }}
+                        title={`${ch} ${y}: ${yearData.mean_score}`}
+                      >
+                        {yearData.mean_score.toFixed(1)}
+                      </div>
+                    )
+                  }),
+                ]
+              })}
+            </div>
+          )
+        })()}
       </div>
 
       {/* Trends Table */}

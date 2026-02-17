@@ -208,3 +208,53 @@ export interface CombinedLikenessResponse {
     combined_pct_12plus: number;
   }>;
 }
+
+export interface ConvergenceTestsResponse {
+  ttest?: {
+    t_statistic: number;
+    p_value: number;
+    significant: boolean;
+    early_mean: number;
+    late_mean: number;
+    early_n: number;
+    late_n: number;
+  };
+  cohens_d?: {
+    d: number;
+    interpretation: string;
+  };
+  anova?: {
+    f_statistic: number;
+    p_value: number;
+    significant: boolean;
+    num_groups: number;
+    groups: string[];
+  };
+  linear_regression?: {
+    slope: number;
+    intercept: number;
+    r_squared: number;
+    p_value: number;
+    significant: boolean;
+    std_err: number;
+    n: number;
+  };
+  year_confidence_intervals: Record<string, {
+    mean: number;
+    ci_low: number;
+    ci_high: number;
+    n: number;
+    sem: number;
+  }>;
+}
+
+export interface WeightedLikenessResponse {
+  weights: Record<string, number>;
+  max_possible_score: number;
+  groups: Record<string, {
+    count: number;
+    mean_score: number;
+    median_score: number;
+    normalized_mean: number;
+  }>;
+}

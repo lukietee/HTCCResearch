@@ -1,5 +1,6 @@
 """Application configuration settings."""
 
+import json as _json
 from pathlib import Path
 from pydantic_settings import BaseSettings
 
@@ -49,3 +50,11 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Panel channels loaded from channels.json
+_channels_file = Path(__file__).resolve().parent.parent.parent / "scripts" / "channels.json"
+if _channels_file.exists():
+    _channels_data = _json.loads(_channels_file.read_text())
+    PANEL_CHANNELS: list[str] = [ch["name"] for ch in _channels_data["panel"]]
+else:
+    PANEL_CHANNELS: list[str] = []
