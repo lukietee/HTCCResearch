@@ -32,6 +32,7 @@ const TOTAL_SLIDES = 28;
 const CASE_STUDY_CHANNELS = ['Danny Duncan', 'ZHC', 'FaZe Rug', 'Sidemen'];
 const CASE_STUDY_COLORS = ['#e6194b', '#f58231', '#3cb44b', '#4363d8'];
 const MRBEAST_MEAN_LIKENESS = 5.42;
+const EXAMPLE_THUMB = 'http://localhost:8000/static/thumbnails/mrbeast/001_30%20Celebrities%20Fight%20For%201000000.jpg';
 
 // ─── Slide wrapper ───────────────────────────────────────────────
 function Slide({ children }: { children: React.ReactNode }) {
@@ -56,6 +57,19 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
       <div className="text-2xl font-bold text-gray-900">{value}</div>
       <div className="text-sm text-gray-500 mt-1">{label}</div>
       {sub && <div className="text-xs text-gray-400 mt-1">{sub}</div>}
+    </div>
+  );
+}
+
+function ThumbOverlay({ children, label }: { children?: React.ReactNode; label?: string }) {
+  return (
+    <div className="relative inline-block rounded-lg overflow-hidden shadow-lg mb-4" style={{ width: 300 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={EXAMPLE_THUMB} alt="Example MrBeast thumbnail" className="w-full h-auto block" />
+      {children}
+      {label && (
+        <div className="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded font-mono">{label}</div>
+      )}
     </div>
   );
 }
@@ -281,6 +295,15 @@ export default function PresentationPage() {
     <Slide key={4}>
       <SlideTitle>Feature: Color Analysis</SlideTitle>
       <SlideSubtitle>Converts each thumbnail to HSV color space to measure brightness, saturation, and color temperature.</SlideSubtitle>
+      <ThumbOverlay label="brightness: 0.66 | warm_cool: 0.17">
+        {/* Color palette swatches */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {['#2a6cb6', '#d4a056', '#3b8c4a', '#8b6b4f', '#c9dff0'].map((c) => (
+            <div key={c} className="w-6 h-6 rounded-full border-2 border-white shadow" style={{ backgroundColor: c }} />
+          ))}
+        </div>
+        <div className="absolute inset-0 border-4 border-yellow-400/40 rounded-lg pointer-events-none" />
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">Each pixel&apos;s hue is classified as warm (reds, oranges: 0&ndash;30 and 150&ndash;179) or cool (greens, blues: 30&ndash;150). The ratio gives a single warm/cool score.</p>
@@ -309,6 +332,18 @@ export default function PresentationPage() {
     <Slide key={5}>
       <SlideTitle>Feature: Face &amp; Emotion Detection</SlideTitle>
       <SlideSubtitle>Uses MediaPipe FaceMesh (468 landmarks per face) to detect faces and approximate emotional expressions.</SlideSubtitle>
+      <ThumbOverlay label="faces: 7 | smile: 0.71 | brow: 0.42">
+        {/* Face bounding boxes */}
+        <div className="absolute border-2 border-green-400 rounded" style={{ top: '8%', left: '2%', width: '22%', height: '70%' }}>
+          <span className="absolute -top-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">smile: 0.8</span>
+        </div>
+        <div className="absolute border-2 border-green-400 rounded" style={{ top: '5%', left: '25%', width: '14%', height: '45%' }}>
+          <span className="absolute -top-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">smile: 0.6</span>
+        </div>
+        <div className="absolute border-2 border-green-400 rounded" style={{ top: '8%', left: '35%', width: '18%', height: '55%' }}>
+          <span className="absolute -top-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">smile: 0.3</span>
+        </div>
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">Smile is measured by comparing mouth corner height to lip center height, normalized by mouth width. Higher values indicate upturned corners (smiling).</p>
@@ -338,6 +373,15 @@ export default function PresentationPage() {
     <Slide key={6}>
       <SlideTitle>Feature: Pose Detection</SlideTitle>
       <SlideSubtitle>Uses MediaPipe Pose (33 body landmarks) to measure how much of the frame a person occupies.</SlideSubtitle>
+      <ThumbOverlay label="body_coverage: 0.41 | people: 7">
+        {/* Body coverage bounding box */}
+        <div className="absolute border-2 border-blue-400 bg-blue-400/15 rounded" style={{ top: '5%', left: '2%', width: '55%', height: '90%' }}>
+          <span className="absolute top-1 left-1 text-[9px] bg-blue-500 text-white px-1 rounded">coverage: 41%</span>
+        </div>
+        {/* Hand markers */}
+        <div className="absolute w-3 h-3 rounded-full bg-yellow-400 border border-white" style={{ top: '50%', left: '8%' }} />
+        <div className="absolute w-3 h-3 rounded-full bg-yellow-400 border border-white" style={{ top: '48%', left: '20%' }} />
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">Body coverage is the bounding box area of all visible pose landmarks divided by total image area. Higher values mean the subject dominates the thumbnail.</p>
@@ -367,6 +411,12 @@ export default function PresentationPage() {
     <Slide key={7}>
       <SlideTitle>Feature: Text Detection</SlideTitle>
       <SlideSubtitle>Runs Tesseract OCR to detect and measure text overlays on thumbnails.</SlideSubtitle>
+      <ThumbOverlay label="text_area: 0.02 | boxes: 1">
+        {/* Text bounding box around "HOLLYWOOD" */}
+        <div className="absolute border-2 border-red-500 bg-red-500/10 rounded" style={{ top: '2%', right: '5%', width: '38%', height: '14%' }}>
+          <span className="absolute -top-4 right-0 text-[9px] bg-red-500 text-white px-1 rounded">&ldquo;HOLLYWOOD&rdquo;</span>
+        </div>
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">OCR scans each thumbnail, filters results by confidence (&gt;30%), then measures total text bounding box area as a fraction of the image. MrBeast thumbnails average near-zero text.</p>
@@ -395,6 +445,15 @@ export default function PresentationPage() {
     <Slide key={8}>
       <SlideTitle>Feature: Depth Estimation</SlideTitle>
       <SlideSubtitle>Uses MiDaS (monocular depth) to estimate foreground/background separation without stereo cameras.</SlideSubtitle>
+      <ThumbOverlay label="depth_contrast: 0.34 | fg_ratio: 0.42">
+        {/* Depth gradient overlay simulating depth map */}
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(to right, rgba(255,0,0,0.25) 0%, rgba(255,165,0,0.2) 30%, rgba(0,100,255,0.25) 70%, rgba(0,0,180,0.3) 100%)',
+        }} />
+        <div className="absolute top-2 right-2 text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded font-mono">
+          <span className="text-red-400">near</span> &rarr; <span className="text-blue-400">far</span>
+        </div>
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">A pre-trained MiDaS model produces a per-pixel depth map from a single image. We then analyze the depth distribution to measure subject isolation and depth contrast.</p>
@@ -425,6 +484,16 @@ export default function PresentationPage() {
     <Slide key={9}>
       <SlideTitle>Feature: Title Analysis</SlideTitle>
       <SlideSubtitle>Parses video titles to detect MrBeast-style linguistic patterns using keyword matching and regex.</SlideSubtitle>
+      <div className="bg-gray-900 rounded-lg px-6 py-4 mb-4 text-lg font-mono">
+        <span className="text-orange-400 font-bold">30</span>{' '}
+        <span className="text-white">Celebrities Fight For </span>
+        <span className="text-green-400 font-bold">$1,000,000</span>
+      </div>
+      <div className="flex gap-3 mb-4 text-xs">
+        <span className="bg-orange-400/20 text-orange-400 px-2 py-1 rounded">has_number</span>
+        <span className="bg-green-400/20 text-green-400 px-2 py-1 rounded">has_money_reference</span>
+        <span className="bg-purple-400/20 text-purple-400 px-2 py-1 rounded">has_challenge_framing</span>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">Titles are tokenized, lowercased, then checked against curated word lists for money references (&ldquo;$10,000&rdquo;), superlatives (&ldquo;craziest&rdquo;), and challenge framing (&ldquo;survive&rdquo;, &ldquo;last to&rdquo;).</p>
