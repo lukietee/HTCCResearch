@@ -29,6 +29,7 @@ backend/data/collection_state.json
 
 # Claude Code
 .claude/
+CLAUDE.md
 
 outputs/
 Analysis/
