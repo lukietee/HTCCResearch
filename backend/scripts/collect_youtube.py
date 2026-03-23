@@ -8,6 +8,9 @@ Usage:
     python scripts/collect_youtube.py panel               # Collect panel channels
     python scripts/collect_youtube.py panel --dry-run      # Preview without API calls
     python scripts/collect_youtube.py panel --channels "MKBHD" "Smosh" --years 2020 2021
+    python scripts/collect_youtube.py supplementary        # Collect supplementary channels (2024-2025)
+    python scripts/collect_youtube.py supplementary --years 2024 2025
+    python scripts/collect_youtube.py resolve              # Resolve empty channel IDs via API
     python scripts/collect_youtube.py mrbeast              # Expand MrBeast reference set
     python scripts/collect_youtube.py status               # Show collection progress
     python scripts/collect_youtube.py validate             # Check completeness
@@ -320,40 +323,49 @@ class YouTubeCollector:
                 self.quota.used = self.quota.limit  # Force stop
             return []
 
-    def collect_panel(
+    def _collect_channels(
         self,
+        channels: list[dict],
+        years: list[int],
         channel_filter: Optional[list[str]] = None,
-        year_filter: Optional[list[int]] = None,
+        label: str = "Collection",
     ):
-        """Collect thumbnails for panel channels.
+        """Core collection logic shared by panel and supplementary commands.
 
         Args:
+            channels: List of channel dicts with name, channel_id, etc.
+            years: Years to collect.
             channel_filter: If set, only collect these channel names.
-            year_filter: If set, only collect these years.
+            label: Label for progress output.
         """
-        channels_data = self._load_channels()
-        panel = channels_data["panel"]
-
         # Apply channel name filter
         if channel_filter:
             filter_lower = [c.lower() for c in channel_filter]
-            panel = [ch for ch in panel if ch["name"].lower() in filter_lower]
-            if not panel:
+            channels = [ch for ch in channels if ch["name"].lower() in filter_lower]
+            if not channels:
                 print(f"No channels matched filter: {channel_filter}")
                 return
 
-        years = year_filter or YEARS
+        # Skip channels with no channel_id
+        resolved = [ch for ch in channels if ch.get("channel_id")]
+        unresolved = [ch for ch in channels if not ch.get("channel_id")]
+        if unresolved:
+            print(f"\nWARNING: {len(unresolved)} channels have no channel_id and will be skipped:")
+            for ch in unresolved:
+                print(f"  - {ch['name']}")
+            print("Run 'python scripts/collect_youtube.py resolve' to look up channel IDs first.\n")
+        channels = resolved
 
-        total_pairs = len(panel) * len(years)
+        total_pairs = len(channels) * len(years)
         done_pairs = 0
         skipped_pairs = 0
         collected_total = 0
 
-        print(f"\nPanel collection: {len(panel)} channels x {len(years)} years = {total_pairs} pairs")
+        print(f"\n{label}: {len(channels)} channels x {len(years)} years = {total_pairs} pairs")
         print(f"Target: {THUMBNAILS_PER_CHANNEL_YEAR} thumbnails per channel-year")
         print(f"{self.quota}\n")
 
-        for ch in panel:
+        for ch in channels:
             channel_name = ch["name"]
             channel_id = ch["channel_id"]
             active_since = ch.get("active_since", 2010)
@@ -436,12 +448,44 @@ class YouTubeCollector:
                     self.state.mark_panel_done(channel_id, year, count)
 
         print(f"\n{'='*60}")
-        print(f"PANEL COLLECTION COMPLETE")
+        print(f"{label.upper()} COMPLETE")
         print(f"{'='*60}")
         print(f"Pairs completed: {done_pairs}")
         print(f"Pairs skipped: {skipped_pairs}")
         print(f"Thumbnails collected this session: {collected_total}")
         print(f"{self.quota}")
+
+    def collect_panel(
+        self,
+        channel_filter: Optional[list[str]] = None,
+        year_filter: Optional[list[int]] = None,
+    ):
+        """Collect thumbnails for panel channels."""
+        channels_data = self._load_channels()
+        self._collect_channels(
+            channels=channels_data["panel"],
+            years=year_filter or YEARS,
+            channel_filter=channel_filter,
+            label="Panel collection",
+        )
+
+    def collect_supplementary(
+        self,
+        channel_filter: Optional[list[str]] = None,
+        year_filter: Optional[list[int]] = None,
+    ):
+        """Collect thumbnails for supplementary channels (defaults to 2024-2025)."""
+        channels_data = self._load_channels()
+        supplementary = channels_data.get("supplementary", [])
+        if not supplementary:
+            print("ERROR: No supplementary channels found in channels.json")
+            return
+        self._collect_channels(
+            channels=supplementary,
+            years=year_filter or [2024, 2025],
+            channel_filter=channel_filter,
+            label="Supplementary collection",
+        )
 
     def collect_mrbeast(self):
         """Collect expanded MrBeast reference set by era."""
@@ -523,6 +567,90 @@ class YouTubeCollector:
         print(f"\nMrBeast total collected this session: {total_collected}")
         print(f"{self.quota}")
 
+    def resolve_channels(self):
+        """Look up YouTube channel IDs for supplementary channels with empty IDs.
+
+        Uses search.list (100 quota units per lookup) to find channel IDs.
+        Updates channels.json in place with resolved IDs.
+        """
+        channels_data = self._load_channels()
+        supplementary = channels_data.get("supplementary", [])
+
+        unresolved = [ch for ch in supplementary if not ch.get("channel_id")]
+        if not unresolved:
+            print("All supplementary channels already have channel IDs.")
+            return
+
+        print(f"\nResolving {len(unresolved)} channel IDs...")
+        print(f"Estimated quota cost: {len(unresolved) * SEARCH_LIST_COST} units")
+        print(f"{self.quota}\n")
+
+        resolved_count = 0
+        for ch in unresolved:
+            name = ch["name"]
+
+            if not self.quota.can_afford(SEARCH_LIST_COST):
+                print(f"\n[QUOTA EXHAUSTED] {self.quota}")
+                print(f"Resolved {resolved_count}/{len(unresolved)} channels so far.")
+                break
+
+            if self.dry_run:
+                print(f"  [DRY RUN] Would look up: {name}")
+                continue
+
+            try:
+                response = self.youtube.search().list(
+                    q=name,
+                    type="channel",
+                    maxResults=5,
+                    part="snippet",
+                ).execute()
+                self.quota.charge(SEARCH_LIST_COST)
+
+                items = response.get("items", [])
+                if not items:
+                    print(f"  {name}: No channel found")
+                    continue
+
+                # Try exact name match first, then take first result
+                matched = None
+                for item in items:
+                    title = item["snippet"]["title"]
+                    if title.lower() == name.lower():
+                        matched = item
+                        break
+
+                if not matched:
+                    # Take first result but warn
+                    matched = items[0]
+                    api_name = matched["snippet"]["title"]
+                    print(f"  {name}: No exact match, using '{api_name}'")
+
+                channel_id = matched["snippet"]["channelId"]
+                ch["channel_id"] = channel_id
+                resolved_count += 1
+                print(f"  {name}: {channel_id}")
+
+                time.sleep(0.3)  # Be polite
+
+            except HttpError as e:
+                print(f"  {name}: API error - {e}")
+                if e.resp.status == 403:
+                    self.quota.used = self.quota.limit
+                    break
+
+        # Save updated channels.json
+        if resolved_count > 0 and not self.dry_run:
+            with open(CHANNELS_FILE, "w") as f:
+                json.dump(channels_data, f, indent=2)
+            print(f"\nUpdated {CHANNELS_FILE} with {resolved_count} new channel IDs.")
+
+        print(f"\nResolved: {resolved_count}/{len(unresolved)}")
+        remaining = len(unresolved) - resolved_count
+        if remaining > 0:
+            print(f"Still need: {remaining} channel IDs (re-run after quota resets)")
+        print(f"{self.quota}")
+
     def show_status(self):
         """Show collection progress."""
         channels_data = self._load_channels()
@@ -551,6 +679,29 @@ class YouTubeCollector:
                 done_years = len(years)
                 total_thumbs = sum(info.get("count", 0) for info in years.values())
                 print(f"  {name}: {done_years}/{len(YEARS)} years, {total_thumbs} thumbnails")
+
+        # Supplementary channels
+        supplementary = channels_data.get("supplementary", [])
+        if supplementary:
+            resolved = [ch for ch in supplementary if ch.get("channel_id")]
+            unresolved = [ch for ch in supplementary if not ch.get("channel_id")]
+            print(f"\nSupplementary channels: {len(supplementary)} total")
+            print(f"  Resolved (have channel_id): {len(resolved)}")
+            print(f"  Unresolved (need 'resolve' command): {len(unresolved)}")
+
+            if resolved:
+                completed_supp = self.state.data.get("completed", {})
+                supp_ids = {ch["channel_id"] for ch in resolved}
+                supp_collected = 0
+                supp_year_pairs = 0
+                for channel_id, years in completed_supp.items():
+                    if channel_id in supp_ids:
+                        for year, info in years.items():
+                            if year in ("2024", "2025"):
+                                supp_year_pairs += 1
+                                supp_collected += info.get("count", 0)
+                print(f"  2024-2025 pairs collected: {supp_year_pairs}/{len(resolved) * 2}")
+                print(f"  2024-2025 thumbnails: {supp_collected}")
 
         # MrBeast status
         mrbeast = channels_data["mrbeast"]
@@ -683,6 +834,32 @@ def main():
         help="Only collect specific years",
     )
 
+    # supplementary command
+    supp_parser = subparsers.add_parser(
+        "supplementary", help="Collect supplementary channel thumbnails (2024-2025)"
+    )
+    supp_parser.add_argument(
+        "--dry-run", action="store_true",
+        help="Preview without making API calls",
+    )
+    supp_parser.add_argument(
+        "--channels", nargs="+", type=str,
+        help="Only collect specific channels (by name)",
+    )
+    supp_parser.add_argument(
+        "--years", nargs="+", type=int, default=[2024, 2025],
+        help="Years to collect (default: 2024 2025)",
+    )
+
+    # resolve command
+    resolve_parser = subparsers.add_parser(
+        "resolve", help="Look up YouTube channel IDs for supplementary channels"
+    )
+    resolve_parser.add_argument(
+        "--dry-run", action="store_true",
+        help="Preview without making API calls",
+    )
+
     # mrbeast command
     mrbeast_parser = subparsers.add_parser("mrbeast", help="Expand MrBeast reference set")
     mrbeast_parser.add_argument(
@@ -705,7 +882,7 @@ def main():
     # Load API key
     api_key = settings.YOUTUBE_API_KEY or os.environ.get("YOUTUBE_API_KEY", "")
 
-    if args.command in ("panel", "mrbeast"):
+    if args.command in ("panel", "mrbeast", "supplementary", "resolve"):
         dry_run = getattr(args, "dry_run", False)
 
         if not api_key and not dry_run:
@@ -720,6 +897,13 @@ def main():
                 channel_filter=getattr(args, "channels", None),
                 year_filter=getattr(args, "years", None),
             )
+        elif args.command == "supplementary":
+            collector.collect_supplementary(
+                channel_filter=getattr(args, "channels", None),
+                year_filter=getattr(args, "years", None),
+            )
+        elif args.command == "resolve":
+            collector.resolve_channels()
         elif args.command == "mrbeast":
             collector.collect_mrbeast()
 
