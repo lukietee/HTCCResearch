@@ -62,7 +62,7 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 
 function CodeBlock({ lines }: { lines: Array<{ tokens: Array<{ text: string; color: string }> }> }) {
   return (
-    <pre className="bg-[#1e1e2e] p-4 rounded-lg text-[13px] leading-relaxed font-mono whitespace-pre">
+    <pre className="bg-[#1e1e2e] p-4 rounded-lg text-[12px] leading-relaxed font-mono whitespace-pre-wrap break-words">
       {lines.map((line, i) => (
         <div key={i}>
           {line.tokens.map((t, j) => (
@@ -286,9 +286,9 @@ export default function PresentationPage() {
           <p className="text-gray-700 mb-4">Each pixel&apos;s hue is classified as warm (reds, oranges: 0&ndash;30 and 150&ndash;179) or cool (greens, blues: 30&ndash;150). The ratio gives a single warm/cool score.</p>
           <CodeBlock lines={[
             { tokens: [{ text: '# Warm/cool color scoring', color: '#6c7086' }] },
-            { tokens: [{ text: 'warm_mask', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(hue ', color: '#cdd6f4' }, { text: '<= ', color: '#89dceb' }, { text: '30', color: '#fab387' }, { text: ') ', color: '#cdd6f4' }, { text: '| ', color: '#89dceb' }, { text: '(hue ', color: '#cdd6f4' }, { text: '>= ', color: '#89dceb' }, { text: '150', color: '#fab387' }, { text: ')', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'cool_mask', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(hue ', color: '#cdd6f4' }, { text: '> ', color: '#89dceb' }, { text: '30', color: '#fab387' }, { text: ') ', color: '#cdd6f4' }, { text: '& ', color: '#89dceb' }, { text: '(hue ', color: '#cdd6f4' }, { text: '< ', color: '#89dceb' }, { text: '150', color: '#fab387' }, { text: ')', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'warm_cool_score', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(warm_count ', color: '#cdd6f4' }, { text: '- ', color: '#89dceb' }, { text: 'cool_count) ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: 'total', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'warm', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(hue ', color: '#cdd6f4' }, { text: '<= ', color: '#89dceb' }, { text: '30', color: '#fab387' }, { text: ') ', color: '#cdd6f4' }, { text: '| ', color: '#89dceb' }, { text: '(hue ', color: '#cdd6f4' }, { text: '>= ', color: '#89dceb' }, { text: '150', color: '#fab387' }, { text: ')', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'cool', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(hue ', color: '#cdd6f4' }, { text: '> ', color: '#89dceb' }, { text: '30', color: '#fab387' }, { text: ') ', color: '#cdd6f4' }, { text: '& ', color: '#89dceb' }, { text: '(hue ', color: '#cdd6f4' }, { text: '< ', color: '#89dceb' }, { text: '150', color: '#fab387' }, { text: ')', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'score', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(warm ', color: '#cdd6f4' }, { text: '- ', color: '#89dceb' }, { text: 'cool) ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: 'total', color: '#cdd6f4' }] },
           ]} />
         </div>
         <div className="bg-white rounded-lg shadow p-4">
@@ -313,11 +313,11 @@ export default function PresentationPage() {
         <div>
           <p className="text-gray-700 mb-4">Smile is measured by comparing mouth corner height to lip center height, normalized by mouth width. Higher values indicate upturned corners (smiling).</p>
           <CodeBlock lines={[
-            { tokens: [{ text: '# Smile detection from face landmarks', color: '#6c7086' }] },
-            { tokens: [{ text: 'lip_center_y', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(upper_lip[', color: '#cdd6f4' }, { text: '1', color: '#fab387' }, { text: '] ', color: '#cdd6f4' }, { text: '+ ', color: '#89dceb' }, { text: 'lower_lip[', color: '#cdd6f4' }, { text: '1', color: '#fab387' }, { text: ']) ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: '2', color: '#fab387' }] },
-            { tokens: [{ text: 'corner_avg_y', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(mouth_left[', color: '#cdd6f4' }, { text: '1', color: '#fab387' }, { text: '] ', color: '#cdd6f4' }, { text: '+ ', color: '#89dceb' }, { text: 'mouth_right[', color: '#cdd6f4' }, { text: '1', color: '#fab387' }, { text: ']) ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: '2', color: '#fab387' }] },
-            { tokens: [{ text: 'smile_score', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(lip_center_y ', color: '#cdd6f4' }, { text: '- ', color: '#89dceb' }, { text: 'corner_avg_y) ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: 'mouth_width', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'smile_score', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'max', color: '#89b4fa' }, { text: '(', color: '#cdd6f4' }, { text: '0', color: '#fab387' }, { text: ', ', color: '#cdd6f4' }, { text: 'min', color: '#89b4fa' }, { text: '(', color: '#cdd6f4' }, { text: '1', color: '#fab387' }, { text: ', smile_score ', color: '#cdd6f4' }, { text: '+ ', color: '#89dceb' }, { text: '0.5', color: '#fab387' }, { text: '))', color: '#cdd6f4' }] },
+            { tokens: [{ text: '# Smile from landmark geometry', color: '#6c7086' }] },
+            { tokens: [{ text: 'lip_y', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(up_lip.y ', color: '#cdd6f4' }, { text: '+ ', color: '#89dceb' }, { text: 'lo_lip.y) ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: '2', color: '#fab387' }] },
+            { tokens: [{ text: 'corner_y', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(left.y ', color: '#cdd6f4' }, { text: '+ ', color: '#89dceb' }, { text: 'right.y) ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: '2', color: '#fab387' }] },
+            { tokens: [{ text: 'smile', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(lip_y ', color: '#cdd6f4' }, { text: '- ', color: '#89dceb' }, { text: 'corner_y) ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: 'width', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'smile', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'clamp', color: '#89b4fa' }, { text: '(smile ', color: '#cdd6f4' }, { text: '+ ', color: '#89dceb' }, { text: '0.5', color: '#fab387' }, { text: ', ', color: '#cdd6f4' }, { text: '0', color: '#fab387' }, { text: ', ', color: '#cdd6f4' }, { text: '1', color: '#fab387' }, { text: ')', color: '#cdd6f4' }] },
           ]} />
         </div>
         <div className="bg-white rounded-lg shadow p-4">
@@ -342,11 +342,12 @@ export default function PresentationPage() {
         <div>
           <p className="text-gray-700 mb-4">Body coverage is the bounding box area of all visible pose landmarks divided by total image area. Higher values mean the subject dominates the thumbnail.</p>
           <CodeBlock lines={[
-            { tokens: [{ text: '# Body coverage from pose landmarks', color: '#6c7086' }] },
-            { tokens: [{ text: 'xs', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '[p[', color: '#cdd6f4' }, { text: '0', color: '#fab387' }, { text: '] ', color: '#cdd6f4' }, { text: 'for ', color: '#cba6f7' }, { text: 'p ', color: '#cdd6f4' }, { text: 'in ', color: '#cba6f7' }, { text: 'visible_points]', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'ys', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '[p[', color: '#cdd6f4' }, { text: '1', color: '#fab387' }, { text: '] ', color: '#cdd6f4' }, { text: 'for ', color: '#cba6f7' }, { text: 'p ', color: '#cdd6f4' }, { text: 'in ', color: '#cba6f7' }, { text: 'visible_points]', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'body_area', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(', color: '#cdd6f4' }, { text: 'max', color: '#89b4fa' }, { text: '(xs) ', color: '#cdd6f4' }, { text: '- ', color: '#89dceb' }, { text: 'min', color: '#89b4fa' }, { text: '(xs)) ', color: '#cdd6f4' }, { text: '* ', color: '#89dceb' }, { text: '(', color: '#cdd6f4' }, { text: 'max', color: '#89b4fa' }, { text: '(ys) ', color: '#cdd6f4' }, { text: '- ', color: '#89dceb' }, { text: 'min', color: '#89b4fa' }, { text: '(ys))', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'body_coverage', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'body_area ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: 'img_area', color: '#cdd6f4' }] },
+            { tokens: [{ text: '# Body coverage from landmarks', color: '#6c7086' }] },
+            { tokens: [{ text: 'xs', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '[p.x ', color: '#cdd6f4' }, { text: 'for ', color: '#cba6f7' }, { text: 'p ', color: '#cdd6f4' }, { text: 'in ', color: '#cba6f7' }, { text: 'points]', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'ys', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '[p.y ', color: '#cdd6f4' }, { text: 'for ', color: '#cba6f7' }, { text: 'p ', color: '#cdd6f4' }, { text: 'in ', color: '#cba6f7' }, { text: 'points]', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'w', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'max', color: '#89b4fa' }, { text: '(xs) ', color: '#cdd6f4' }, { text: '- ', color: '#89dceb' }, { text: 'min', color: '#89b4fa' }, { text: '(xs)', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'h', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'max', color: '#89b4fa' }, { text: '(ys) ', color: '#cdd6f4' }, { text: '- ', color: '#89dceb' }, { text: 'min', color: '#89b4fa' }, { text: '(ys)', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'coverage', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: '(w ', color: '#cdd6f4' }, { text: '* ', color: '#89dceb' }, { text: 'h) ', color: '#cdd6f4' }, { text: '/ ', color: '#89dceb' }, { text: 'img_area', color: '#cdd6f4' }] },
           ]} />
         </div>
         <div className="bg-white rounded-lg shadow p-4">
@@ -371,11 +372,10 @@ export default function PresentationPage() {
           <p className="text-gray-700 mb-4">OCR scans each thumbnail, filters results by confidence (&gt;30%), then measures total text bounding box area as a fraction of the image. MrBeast thumbnails average near-zero text.</p>
           <CodeBlock lines={[
             { tokens: [{ text: '# OCR text detection', color: '#6c7086' }] },
-            { tokens: [{ text: 'ocr_data', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'pytesseract', color: '#cdd6f4' }, { text: '.', color: '#cdd6f4' }, { text: 'image_to_data', color: '#89b4fa' }, { text: '(img)', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'for ', color: '#cba6f7' }, { text: 'i ', color: '#cdd6f4' }, { text: 'in ', color: '#cba6f7' }, { text: 'range', color: '#89b4fa' }, { text: '(n_boxes):', color: '#cdd6f4' }] },
-            { tokens: [{ text: '    ', color: '#cdd6f4' }, { text: 'if ', color: '#cba6f7' }, { text: 'int', color: '#89b4fa' }, { text: '(ocr_data[', color: '#cdd6f4' }, { text: '"conf"', color: '#a6e3a1' }, { text: '][i]) ', color: '#cdd6f4' }, { text: '> ', color: '#89dceb' }, { text: '30', color: '#fab387' }, { text: ':', color: '#cdd6f4' }] },
-            { tokens: [{ text: '        x, y, w, h', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'ocr_data[', color: '#cdd6f4' }, { text: '"left"', color: '#a6e3a1' }, { text: '][i] ...', color: '#cdd6f4' }] },
-            { tokens: [{ text: '        text_boxes.', color: '#cdd6f4' }, { text: 'append', color: '#89b4fa' }, { text: '({...})', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'data', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'pytesseract.', color: '#cdd6f4' }, { text: 'image_to_data', color: '#89b4fa' }, { text: '(img)', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'for ', color: '#cba6f7' }, { text: 'i ', color: '#cdd6f4' }, { text: 'in ', color: '#cba6f7' }, { text: 'range', color: '#89b4fa' }, { text: '(n):', color: '#cdd6f4' }] },
+            { tokens: [{ text: '  ', color: '#cdd6f4' }, { text: 'if ', color: '#cba6f7' }, { text: 'data[', color: '#cdd6f4' }, { text: '"conf"', color: '#a6e3a1' }, { text: '][i] ', color: '#cdd6f4' }, { text: '> ', color: '#89dceb' }, { text: '30', color: '#fab387' }, { text: ':', color: '#cdd6f4' }] },
+            { tokens: [{ text: '    boxes.', color: '#cdd6f4' }, { text: 'append', color: '#89b4fa' }, { text: '(box)', color: '#cdd6f4' }] },
           ]} />
         </div>
         <div className="bg-white rounded-lg shadow p-4">
@@ -399,14 +399,13 @@ export default function PresentationPage() {
         <div>
           <p className="text-gray-700 mb-4">A pre-trained MiDaS model produces a per-pixel depth map from a single image. We then analyze the depth distribution to measure subject isolation and depth contrast.</p>
           <CodeBlock lines={[
-            { tokens: [{ text: '# MiDaS monocular depth inference', color: '#6c7086' }] },
-            { tokens: [{ text: 'input_batch', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'transform', color: '#89b4fa' }, { text: '(img).', color: '#cdd6f4' }, { text: 'to', color: '#89b4fa' }, { text: '(device)', color: '#cdd6f4' }] },
+            { tokens: [{ text: '# MiDaS depth inference', color: '#6c7086' }] },
+            { tokens: [{ text: 'x', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'transform', color: '#89b4fa' }, { text: '(img).', color: '#cdd6f4' }, { text: 'to', color: '#89b4fa' }, { text: '(device)', color: '#cdd6f4' }] },
             { tokens: [{ text: 'with ', color: '#cba6f7' }, { text: 'torch.', color: '#cdd6f4' }, { text: 'no_grad', color: '#89b4fa' }, { text: '():', color: '#cdd6f4' }] },
-            { tokens: [{ text: '    depth_map', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'model', color: '#89b4fa' }, { text: '(input_batch)', color: '#cdd6f4' }] },
-            { tokens: [{ text: '    depth_map', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'F.', color: '#cdd6f4' }, { text: 'interpolate', color: '#89b4fa' }, { text: '(', color: '#cdd6f4' }] },
-            { tokens: [{ text: '        depth_map.', color: '#cdd6f4' }, { text: 'unsqueeze', color: '#89b4fa' }, { text: '(', color: '#cdd6f4' }, { text: '1', color: '#fab387' }, { text: '),', color: '#cdd6f4' }] },
-            { tokens: [{ text: '        size', color: '#fab387' }, { text: '=', color: '#89dceb' }, { text: 'img.shape[:',  color: '#cdd6f4' }, { text: '2', color: '#fab387' }, { text: '],', color: '#cdd6f4' }] },
-            { tokens: [{ text: '        mode', color: '#fab387' }, { text: '=', color: '#89dceb' }, { text: '"bicubic"', color: '#a6e3a1' }, { text: ')', color: '#cdd6f4' }] },
+            { tokens: [{ text: '  depth', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'model', color: '#89b4fa' }, { text: '(x)', color: '#cdd6f4' }] },
+            { tokens: [{ text: '  depth', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'F.', color: '#cdd6f4' }, { text: 'interpolate', color: '#89b4fa' }, { text: '(', color: '#cdd6f4' }] },
+            { tokens: [{ text: '    depth, size', color: '#cdd6f4' }, { text: '=', color: '#89dceb' }, { text: 'img.shape[:',  color: '#cdd6f4' }, { text: '2', color: '#fab387' }, { text: '],', color: '#cdd6f4' }] },
+            { tokens: [{ text: '    mode', color: '#fab387' }, { text: '=', color: '#89dceb' }, { text: '"bicubic"', color: '#a6e3a1' }, { text: ')', color: '#cdd6f4' }] },
           ]} />
         </div>
         <div className="bg-white rounded-lg shadow p-4">
@@ -431,10 +430,10 @@ export default function PresentationPage() {
           <p className="text-gray-700 mb-4">Titles are tokenized, lowercased, then checked against curated word lists for money references (&ldquo;$10,000&rdquo;), superlatives (&ldquo;craziest&rdquo;), and challenge framing (&ldquo;survive&rdquo;, &ldquo;last to&rdquo;).</p>
           <CodeBlock lines={[
             { tokens: [{ text: '# Title pattern matching', color: '#6c7086' }] },
-            { tokens: [{ text: 'words', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'set', color: '#89b4fa' }, { text: '(title.', color: '#cdd6f4' }, { text: 'lower', color: '#89b4fa' }, { text: '().', color: '#cdd6f4' }, { text: 'split', color: '#89b4fa' }, { text: '())', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'has_money', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'bool', color: '#89b4fa' }, { text: '(re.', color: '#cdd6f4' }, { text: 'search', color: '#89b4fa' }, { text: '(', color: '#cdd6f4' }, { text: 'r"\\$[\\d,]+"', color: '#a6e3a1' }, { text: ', title))', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'has_superlative', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'bool', color: '#89b4fa' }, { text: '(SUPERLATIVES ', color: '#cdd6f4' }, { text: '& ', color: '#89dceb' }, { text: 'words)', color: '#cdd6f4' }] },
-            { tokens: [{ text: 'has_challenge', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'bool', color: '#89b4fa' }, { text: '(CHALLENGES ', color: '#cdd6f4' }, { text: '& ', color: '#89dceb' }, { text: 'words)', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'w', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'set', color: '#89b4fa' }, { text: '(title.', color: '#cdd6f4' }, { text: 'lower', color: '#89b4fa' }, { text: '().', color: '#cdd6f4' }, { text: 'split', color: '#89b4fa' }, { text: '())', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'money', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 're.', color: '#cdd6f4' }, { text: 'search', color: '#89b4fa' }, { text: '(', color: '#cdd6f4' }, { text: 'r"\\$[\\d,]+"', color: '#a6e3a1' }, { text: ', title)', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'superlative', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'SUPERLATIVES ', color: '#f5c2e7' }, { text: '& ', color: '#89dceb' }, { text: 'w', color: '#cdd6f4' }] },
+            { tokens: [{ text: 'challenge', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'CHALLENGES ', color: '#f5c2e7' }, { text: '& ', color: '#89dceb' }, { text: 'w', color: '#cdd6f4' }] },
           ]} />
         </div>
         <div className="bg-white rounded-lg shadow p-4">
