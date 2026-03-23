@@ -30,9 +30,6 @@ CLUSTERING_FEATURES = [
     # Pose features
     ("pose", "hand_visible_count"),
     ("pose", "body_coverage"),
-    # Depth features
-    ("depth", "depth_contrast"),
-    ("depth", "foreground_ratio"),
 ]
 
 

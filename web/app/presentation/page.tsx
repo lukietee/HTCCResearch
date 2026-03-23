@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, ScatterChart, Scatter, RadarChart, Radar, PolarGrid,
-  PolarAngleAxis, PolarRadiusAxis, Cell, Legend, Area, AreaChart,
+  LineChart, Line, ScatterChart, Scatter, Cell, Area, AreaChart,
 } from 'recharts';
 import {
   getOverviewStats,
@@ -28,7 +27,10 @@ import type {
   WeightedLikenessResponse,
 } from '@/lib/types';
 
-const TOTAL_SLIDES = 18;
+const TOTAL_SLIDES = 19;
+
+const CASE_STUDY_CHANNELS = ['Danny Duncan', 'FaZe Rug', 'Sidemen', 'ZHC'];
+const CASE_STUDY_COLORS = ['#e6194b', '#3cb44b', '#4363d8', '#f58231'];
 
 // ─── Slide wrapper ───────────────────────────────────────────────
 function Slide({ children }: { children: React.ReactNode }) {
@@ -81,6 +83,7 @@ export default function PresentationPage() {
   const [faceCompare, setFaceCompare] = useState<CompareStats | null>(null);
   const [clusterPoints, setClusterPoints] = useState<ClusterPoint[]>([]);
   const [evolution, setEvolution] = useState<{
+    channels: Record<string, { num_years: number; years: Record<string, { count: number; mean_score: number }> }>;
     trends: Array<{ channel: string; slope: number; start_score: number; end_score: number; num_years: number }>;
     summary: { converging_toward_mrbeast: number; diverging_from_mrbeast: number; avg_slope: number };
   } | null>(null);
@@ -94,7 +97,7 @@ export default function PresentationPage() {
     getMrBeastSimilarity(true).then(setSimilarity).catch(() => {});
     compareGroups('face_count').then(setFaceCompare).catch(() => {});
     getClusteringPoints().then(setClusterPoints).catch(() => {});
-    getChannelEvolution(3, true).then((d) => setEvolution({ trends: d.trends, summary: d.summary })).catch(() => {});
+    getChannelEvolution(3, true).then((d) => setEvolution({ channels: d.channels, trends: d.trends, summary: d.summary })).catch(() => {});
     getWeightedLikeness(true).then(setWeighted).catch(() => {});
     getConvergenceTests(true).then(setConvergence).catch(() => {});
     getTitleLikeness(true).then(setTitleData).catch(() => {});
@@ -113,6 +116,16 @@ export default function PresentationPage() {
   }, [goNext, goPrev]);
 
   // ─── Derived chart data ──────────────────────────────────────
+
+  // Weighted likeness by year (primary metric)
+  const weightedChartData = weighted
+    ? YEAR_GROUPS.map((g) => ({
+        group: g,
+        mean: weighted.groups[g]?.normalized_mean ?? 0,
+      }))
+    : [];
+
+  // Binary likeness (secondary reference)
   const likenessChartData = likeness
     ? YEAR_GROUPS.map((g) => ({ group: g, mean: likeness[g]?.mean_score ?? 0 }))
     : [];
@@ -129,7 +142,21 @@ export default function PresentationPage() {
     ? [...evolution.trends].sort((a, b) => b.slope - a.slope).slice(0, 10)
     : [];
 
-  const weightChartData = weighted
+  // Case study data: per-year scores for specific channels
+  const caseStudyData = evolution?.channels
+    ? YEAR_GROUPS.map((year) => {
+        const point: Record<string, string | number> = { year };
+        CASE_STUDY_CHANNELS.forEach((ch) => {
+          const chData = evolution.channels[ch];
+          if (chData?.years[year]) {
+            point[ch] = chData.years[year].mean_score;
+          }
+        });
+        return point;
+      }).filter((d) => CASE_STUDY_CHANNELS.some((ch) => ch in d))
+    : [];
+
+  const weightFeatureChartData = weighted
     ? Object.entries(weighted.weights)
         .sort(([, a], [, b]) => b - a)
         .map(([feat, w]) => ({ feature: feat.replace(/_/g, ' '), weight: Number(w.toFixed(3)) }))
@@ -232,17 +259,17 @@ export default function PresentationPage() {
     <Slide key={5}>
       <SlideTitle>Scoring Systems</SlideTitle>
       <div className="space-y-6 max-w-3xl">
-        <div className="bg-white rounded-lg shadow p-5">
-          <h3 className="font-semibold text-gray-900 text-lg">Binary Likeness (0&ndash;8 pts)</h3>
-          <p className="text-sm text-gray-600 mt-2">+1 for each: brightness &ge; 0.60, face count &ge; 1, text area &le; 0.005, smile &ge; 0.40, mouth open &ge; 0.15, body coverage &ge; 0.30, brow raise &ge; 0.30, face area &ge; 0.06</p>
+        <div className="bg-white rounded-lg shadow p-5 border-l-4 border-red-500">
+          <h3 className="font-semibold text-gray-900 text-lg">Weighted Likeness (Primary)</h3>
+          <p className="text-sm text-gray-600 mt-2">Data-derived weights per feature based on discriminative power (z-score separation from MrBeast). Captures gradual shifts that binary scoring misses. Features weighted by importance: smile (0.515), brightness (0.471), brow raise (0.353), body coverage (0.296).</p>
         </div>
         <div className="bg-white rounded-lg shadow p-5">
           <h3 className="font-semibold text-gray-900 text-lg">Continuous Similarity (0&ndash;100%)</h3>
           <p className="text-sm text-gray-600 mt-2">Z-score distance from MrBeast centroid across 10 discriminative features with exponential decay mapping</p>
         </div>
         <div className="bg-white rounded-lg shadow p-5">
-          <h3 className="font-semibold text-gray-900 text-lg">Title Likeness (0&ndash;9 pts)</h3>
-          <p className="text-sm text-gray-600 mt-2">9 binary criteria matching MrBeast&apos;s titling patterns (numbers, money, challenge framing, first-person, superlatives, etc.)</p>
+          <h3 className="font-semibold text-gray-900 text-lg">Binary Likeness (0&ndash;8 pts, Reference)</h3>
+          <p className="text-sm text-gray-600 mt-2">+1 for each threshold met: brightness &ge; 0.60, face count &ge; 1, text area &le; 0.005, smile &ge; 0.40, mouth open &ge; 0.15, body coverage &ge; 0.30, brow raise &ge; 0.30, face area &ge; 0.06</p>
         </div>
       </div>
     </Slide>,
@@ -282,12 +309,44 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 7 — Likeness Score Over Time
+    // 7 — Weighted Likeness Over Time (PRIMARY METRIC)
     <Slide key={7}>
-      <SlideTitle>Likeness Score Over Time (Panel Only)</SlideTitle>
-      <SlideSubtitle>Binary likeness mean by year group. Score range: 0&ndash;8.</SlideSubtitle>
-      {likenessChartData.length > 0 ? (
+      <SlideTitle>Weighted Likeness Over Time (Panel Only)</SlideTitle>
+      <SlideSubtitle>Normalized weighted score by year. Features weighted by discriminative power &mdash; captures gradual convergence that binary scoring misses.</SlideSubtitle>
+      {weightedChartData.length > 0 ? (
         <div className="w-full max-w-3xl h-[350px]">
+          <ResponsiveContainer>
+            <BarChart data={weightedChartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="group" />
+              <YAxis domain={[0, 1]} tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} />
+              <Tooltip formatter={(v: number) => `${(v * 100).toFixed(1)}%`} />
+              <Bar dataKey="mean" name="Weighted Likeness (normalized)">
+                {weightedChartData.map((d) => (
+                  <Cell key={d.group} fill={getGroupColor(d.group)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ) : <p className="text-gray-400">Loading data...</p>}
+      {weighted && (
+        <div className="flex gap-6 mt-4">
+          <StatCard label="Max Possible" value={weighted.max_possible_score.toFixed(2)} sub="weighted points" />
+          <StatCard
+            label="MrBeast Mean"
+            value={weighted.groups['mrbeast'] ? `${(weighted.groups['mrbeast'].normalized_mean * 100).toFixed(1)}%` : '...'}
+          />
+        </div>
+      )}
+    </Slide>,
+
+    // 8 — Binary Likeness (secondary reference)
+    <Slide key={8}>
+      <SlideTitle>Binary Likeness Score (Reference)</SlideTitle>
+      <SlideSubtitle>Simple 0&ndash;8 threshold scoring. Shows the same upward trend but with less sensitivity to gradual change.</SlideSubtitle>
+      {likenessChartData.length > 0 ? (
+        <div className="w-full max-w-3xl h-[320px]">
           <ResponsiveContainer>
             <BarChart data={likenessChartData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -309,8 +368,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 8 — Continuous Similarity Trend
-    <Slide key={8}>
+    // 9 — Continuous Similarity Trend
+    <Slide key={9}>
       <SlideTitle>Continuous Similarity Trend (Panel Only)</SlideTitle>
       <SlideSubtitle>Mean z-score similarity to MrBeast centroid (0&ndash;100%)</SlideSubtitle>
       {similarityChartData.length > 0 ? (
@@ -332,8 +391,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 9 — Feature-Level Convergence
-    <Slide key={9}>
+    // 10 — Feature-Level Convergence
+    <Slide key={10}>
       <SlideTitle>Feature-Level Convergence</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
@@ -367,10 +426,10 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 10 — Clustering Analysis
-    <Slide key={10}>
+    // 11 — Clustering Analysis
+    <Slide key={11}>
       <SlideTitle>Clustering Analysis</SlideTitle>
-      <SlideSubtitle>K-means clustering with PCA 2D projection (14 features)</SlideSubtitle>
+      <SlideSubtitle>K-means clustering with PCA 2D projection (12 signal-bearing features, depth noise removed)</SlideSubtitle>
       {clusterPoints.length > 0 ? (
         <div className="w-full max-w-3xl h-[350px]">
           <ResponsiveContainer>
@@ -395,8 +454,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 11 — Channel-Level Evolution
-    <Slide key={11}>
+    // 12 — Channel-Level Evolution (slopes)
+    <Slide key={12}>
       <SlideTitle>Channel-Level Evolution</SlideTitle>
       <SlideSubtitle>Per-channel likeness trends over time (panel channels, &ge;3 years)</SlideSubtitle>
       {topConvergers.length > 0 ? (
@@ -418,14 +477,60 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 12 — Weighted Feature Importance
-    <Slide key={12}>
-      <SlideTitle>Weighted Feature Importance</SlideTitle>
-      <SlideSubtitle>Data-derived weights: how discriminative is each feature?</SlideSubtitle>
-      {weightChartData.length > 0 ? (
+    // 13 — Case Studies (NEW SLIDE)
+    <Slide key={13}>
+      <SlideTitle>Case Studies: Individual Channel Trajectories</SlideTitle>
+      <SlideSubtitle>Tracking likeness scores year-by-year for top converging channels</SlideSubtitle>
+      {caseStudyData.length > 0 ? (
         <div className="w-full max-w-3xl h-[350px]">
           <ResponsiveContainer>
-            <BarChart data={weightChartData} layout="vertical">
+            <LineChart data={caseStudyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis domain={[0, 8]} />
+              <Tooltip />
+              {CASE_STUDY_CHANNELS.map((ch, i) => (
+                <Line
+                  key={ch}
+                  type="monotone"
+                  dataKey={ch}
+                  stroke={CASE_STUDY_COLORS[i]}
+                  strokeWidth={2.5}
+                  dot={{ r: 4 }}
+                  connectNulls
+                  name={ch}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      ) : <p className="text-gray-400">Loading channel data...</p>}
+      <div className="flex gap-4 mt-4 flex-wrap justify-center">
+        {CASE_STUDY_CHANNELS.map((ch, i) => {
+          const trend = evolution?.trends.find((t) => t.channel === ch);
+          return (
+            <div key={ch} className="text-center">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CASE_STUDY_COLORS[i] }} />
+                <span className="text-sm font-semibold text-gray-700">{ch}</span>
+              </div>
+              {trend && (
+                <p className="text-xs text-gray-500">{trend.start_score.toFixed(1)} &rarr; {trend.end_score.toFixed(1)}</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </Slide>,
+
+    // 14 — Weighted Feature Importance
+    <Slide key={14}>
+      <SlideTitle>Weighted Feature Importance</SlideTitle>
+      <SlideSubtitle>Data-derived weights: how discriminative is each feature?</SlideSubtitle>
+      {weightFeatureChartData.length > 0 ? (
+        <div className="w-full max-w-3xl h-[350px]">
+          <ResponsiveContainer>
+            <BarChart data={weightFeatureChartData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" domain={[0, 0.6]} />
               <YAxis type="category" dataKey="feature" width={140} tick={{ fontSize: 12 }} />
@@ -438,8 +543,8 @@ export default function PresentationPage() {
       <p className="text-gray-500 mt-3 text-center">Smile (0.515) + Brightness (0.471) = <strong>43%</strong> of total discriminative weight</p>
     </Slide>,
 
-    // 13 — Statistical Validation
-    <Slide key={13}>
+    // 15 — Statistical Validation
+    <Slide key={15}>
       <SlideTitle>Statistical Validation</SlideTitle>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard
@@ -481,8 +586,8 @@ export default function PresentationPage() {
       )}
     </Slide>,
 
-    // 14 — Title Convergence
-    <Slide key={14}>
+    // 16 — Title Convergence
+    <Slide key={16}>
       <SlideTitle>Title Convergence</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
@@ -516,8 +621,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 15 — Diffusion of Innovation
-    <Slide key={15}>
+    // 17 — Diffusion of Innovation
+    <Slide key={17}>
       <SlideTitle>Diffusion of Innovation Model</SlideTitle>
       <div className="max-w-3xl w-full space-y-4">
         {[
@@ -541,44 +646,28 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 16 — Limitations
-    <Slide key={16}>
-      <SlideTitle>Limitations &amp; Alternative Explanations</SlideTitle>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+    // 18 — Limitations
+    <Slide key={18}>
+      <SlideTitle>Limitations &amp; Conclusions</SlideTitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
           <h3 className="font-semibold text-gray-900 mb-3">Limitations</h3>
           <BulletList items={[
-            'No engagement data (views/CTR not linked to convergence)',
+            'No engagement data (views/CTR not linked)',
             'Low R\u00B2 (0.5\u20131.7%) \u2014 individual variation dominates',
-            'Panel selection bias toward entertainment channels',
-            'Emotion proxies are approximations, not validated against human ratings',
+            'Cannot prove causation \u2014 algorithm, tools, audience all plausible',
+            'Panel selection bias toward entertainment',
           ]} />
         </div>
         <div>
-          <h3 className="font-semibold text-gray-900 mb-3">Alternative Explanations</h3>
+          <h3 className="font-semibold text-gray-900 mb-3">Conclusions</h3>
           <BulletList items={[
-            'Algorithm pressure: YouTube recommendation may reward this style',
-            'Tool availability: Canva/AI generators default to bright, face-forward templates',
-            'Audience preferences: viewers may simply prefer this aesthetic',
-            'Survivorship bias: channels that grew adopted the style',
+            'Convergence is statistically significant (p < 10\u207B\u2078)',
+            '73% of panel channels converge (2.5x faster than all-channel)',
+            'Multi-dimensional shift: face, smile, brow, body, text',
+            'Titles converge selectively \u2014 visual > linguistic',
           ]} />
         </div>
-      </div>
-      <p className="text-gray-500 mt-6 text-center italic max-w-2xl">Correlation does not imply causation \u2014 we cannot determine whether MrBeast caused the convergence or exemplifies a broader trend.</p>
-    </Slide>,
-
-    // 17 — Conclusions
-    <Slide key={17}>
-      <SlideTitle>Conclusions</SlideTitle>
-      <div className="max-w-3xl space-y-4">
-        <BulletList items={[
-          'Convergence is statistically significant (p < 10\u207B\u2078) across all major tests',
-          '73% of entertainment panel channels converge; panel convergence is 2.5x faster than all-channel',
-          'Multi-dimensional shift: face count, smile, brow raise, body coverage, and text all move toward MrBeast simultaneously',
-          'Titles converge selectively \u2014 visual style adopted more readily than linguistic patterns',
-          'Smile score (0.515) and brightness (0.471) are the most discriminative features',
-          'Whether MrBeast caused the shift or exemplifies a broader trend remains an open question',
-        ]} />
       </div>
       <div className="mt-8 text-center">
         <p className="text-xl text-gray-600">Thank You</p>
