@@ -29,8 +29,8 @@ import type {
 
 const TOTAL_SLIDES = 19;
 
-const CASE_STUDY_CHANNELS = ['Danny Duncan', 'FaZe Rug', 'Sidemen', 'ZHC'];
-const CASE_STUDY_COLORS = ['#e6194b', '#3cb44b', '#4363d8', '#f58231'];
+const CASE_STUDY_CHANNELS = ['Danny Duncan', 'ZHC', 'FaZe Rug', 'Sidemen'];
+const CASE_STUDY_COLORS = ['#e6194b', '#f58231', '#3cb44b', '#4363d8'];
 
 // ─── Slide wrapper ───────────────────────────────────────────────
 function Slide({ children }: { children: React.ReactNode }) {
@@ -261,7 +261,7 @@ export default function PresentationPage() {
       <div className="space-y-6 max-w-3xl">
         <div className="bg-white rounded-lg shadow p-5 border-l-4 border-red-500">
           <h3 className="font-semibold text-gray-900 text-lg">Weighted Likeness (Primary)</h3>
-          <p className="text-sm text-gray-600 mt-2">Data-derived weights per feature based on discriminative power (z-score separation from MrBeast). Captures gradual shifts that binary scoring misses. Features weighted by importance: smile (0.515), brightness (0.471), brow raise (0.353), body coverage (0.296).</p>
+          <p className="text-sm text-gray-600 mt-2">Data-derived weights per feature based on discriminative power (z-score separation from MrBeast). Captures gradual shifts that binary scoring misses. Features weighted by importance: smile (0.442), brightness (0.441), brow raise (0.270), body coverage (0.182).</p>
         </div>
         <div className="bg-white rounded-lg shadow p-5">
           <h3 className="font-semibold text-gray-900 text-lg">Continuous Similarity (0&ndash;100%)</h3>
@@ -429,7 +429,7 @@ export default function PresentationPage() {
     // 11 — Clustering Analysis
     <Slide key={11}>
       <SlideTitle>Clustering Analysis</SlideTitle>
-      <SlideSubtitle>K-means clustering with PCA 2D projection (12 signal-bearing features, depth noise removed)</SlideSubtitle>
+      <SlideSubtitle>K-means clustering with PCA 2D projection (12 signal-bearing features, depth noise removed). PCA explains 43.2% of variance (up from 33.4% with depth).</SlideSubtitle>
       {clusterPoints.length > 0 ? (
         <div className="w-full max-w-3xl h-[350px]">
           <ResponsiveContainer>
@@ -448,9 +448,10 @@ export default function PresentationPage() {
         </div>
       ) : <p className="text-gray-400">Loading cluster data...</p>}
       <div className="flex gap-4 mt-4 flex-wrap justify-center">
-        <StatCard label="Cluster 0 (Modern)" value="87%" sub="MrBeast in this cluster" />
-        <StatCard label="Cluster 1 (Classic)" value="49%" sub="of 2015 here" />
-        <StatCard label="Centroid Distance" value="1.14" sub="PCA Euclidean" />
+        <StatCard label="Cluster 0 (Modern)" value="59%" sub="of MrBeast in this cluster" />
+        <StatCard label="Cluster 1 (Classic)" value="52%" sub="of 2015 here" />
+        <StatCard label="Centroid Distance" value="1.05" sub="PCA Euclidean" />
+        <StatCard label="PCA Variance" value="43.2%" sub="up from 33.4%" />
       </div>
     </Slide>,
 
@@ -540,7 +541,7 @@ export default function PresentationPage() {
           </ResponsiveContainer>
         </div>
       ) : <p className="text-gray-400">Loading weights...</p>}
-      <p className="text-gray-500 mt-3 text-center">Smile (0.515) + Brightness (0.471) = <strong>43%</strong> of total discriminative weight</p>
+      <p className="text-gray-500 mt-3 text-center">Smile (0.442) + Brightness (0.441) = <strong>53%</strong> of total discriminative weight</p>
     </Slide>,
 
     // 15 — Statistical Validation
@@ -662,10 +663,10 @@ export default function PresentationPage() {
         <div>
           <h3 className="font-semibold text-gray-900 mb-3">Conclusions</h3>
           <BulletList items={[
-            'Convergence is statistically significant (p < 10\u207B\u2078)',
-            '73% of panel channels converge (2.5x faster than all-channel)',
+            'Convergence is statistically significant (p < 10\u207B\u00B9\u2070, slope +0.105/yr)',
+            '73% of panel channels converge (avg slope +0.127/yr)',
             'Multi-dimensional shift: face, smile, brow, body, text',
-            'Titles converge selectively \u2014 visual > linguistic',
+            'Smile + brightness = 53% of discriminative weight',
           ]} />
         </div>
       </div>
