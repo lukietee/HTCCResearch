@@ -293,7 +293,7 @@ export default function PresentationPage() {
               ['Face Count', '1.37', '0.78', '+75.6%'],
               ['Largest Face Size', '0.087', '0.058', '+50.5%'],
               ['Body Coverage', '0.413', '0.237', '+74.3%'],
-              ['Text Area Ratio', '0.001', '0.022', '-96.8%'],
+              ['Smile Score', '0.443', '0.266', '+66.9%'],
               ['Visible Hands', '1.31', '1.01', '+30.5%'],
               ['Warm/Cool Score', '0.171', '0.282', '-39.3%'],
             ].map(([feat, mb, base, change]) => (
