@@ -27,7 +27,7 @@ import type {
   WeightedLikenessResponse,
 } from '@/lib/types';
 
-const TOTAL_SLIDES = 19;
+const TOTAL_SLIDES = 20;
 
 const CASE_STUDY_CHANNELS = ['Danny Duncan', 'ZHC', 'FaZe Rug', 'Sidemen'];
 const CASE_STUDY_COLORS = ['#e6194b', '#f58231', '#3cb44b', '#4363d8'];
@@ -90,6 +90,7 @@ export default function PresentationPage() {
   const [weighted, setWeighted] = useState<WeightedLikenessResponse | null>(null);
   const [convergence, setConvergence] = useState<ConvergenceTestsResponse | null>(null);
   const [titleData, setTitleData] = useState<TitleLikenessResponse | null>(null);
+  const [gapClosureData, setGapClosureData] = useState<Array<{ feature: string; closure2024: number; closure2025: number }>>([]);
 
   useEffect(() => {
     getOverviewStats().then(setOverview).catch(() => {});
@@ -101,6 +102,33 @@ export default function PresentationPage() {
     getWeightedLikeness(true).then(setWeighted).catch(() => {});
     getConvergenceTests(true).then(setConvergence).catch(() => {});
     getTitleLikeness(true).then(setTitleData).catch(() => {});
+
+    // Fetch gap closure data for multiple features
+    const gapFeatures = [
+      { path: 'face.face_count', label: 'Face Count' },
+      { path: 'face.largest_face_area_ratio', label: 'Face Size' },
+      { path: 'pose.body_coverage', label: 'Body Coverage' },
+      { path: 'face.emotion_proxies.mouth_open_score', label: 'Mouth Open' },
+      { path: 'face.emotion_proxies.smile_score', label: 'Smile Score' },
+      { path: 'face.emotion_proxies.brow_raise_score', label: 'Brow Raise' },
+      { path: 'color.avg_brightness', label: 'Brightness' },
+    ];
+    Promise.all(gapFeatures.map((f) => compareGroups(f.path))).then((results) => {
+      const closures = results.map((r, i) => {
+        const mb = r.groups['mrbeast']?.mean ?? 0;
+        const y15 = r.groups['2015']?.mean ?? 0;
+        const y24 = r.groups['2024']?.mean ?? 0;
+        const y25 = r.groups['2025']?.mean ?? 0;
+        const gap = mb - y15;
+        return {
+          feature: gapFeatures[i].label,
+          closure2024: Math.abs(gap) > 0.001 ? Math.round(((y24 - y15) / gap) * 100) : 0,
+          closure2025: Math.abs(gap) > 0.001 ? Math.round(((y25 - y15) / gap) * 100) : 0,
+        };
+      });
+      closures.sort((a, b) => b.closure2025 - a.closure2025);
+      setGapClosureData(closures);
+    }).catch(() => {});
   }, []);
 
   const goNext = useCallback(() => setSlide((s) => Math.min(s + 1, TOTAL_SLIDES - 1)), []);
@@ -426,8 +454,31 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 11 — Clustering Analysis
+    // 11 — Gap Closure (NEW — strongest visual)
     <Slide key={11}>
+      <SlideTitle>Gap Closure: How Far Has the Industry Moved?</SlideTitle>
+      <SlideSubtitle>Percentage of the 2015-to-MrBeast gap that has been closed by 2024 and 2025 (panel only)</SlideSubtitle>
+      {gapClosureData.length > 0 ? (
+        <div className="w-full max-w-3xl h-[380px]">
+          <ResponsiveContainer>
+            <BarChart data={gapClosureData} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" domain={[0, 110]} tickFormatter={(v: number) => `${v}%`} />
+              <YAxis type="category" dataKey="feature" width={120} tick={{ fontSize: 13 }} />
+              <Tooltip formatter={(v: number) => `${v}%`} />
+              <Bar dataKey="closure2025" name="By 2025" fill="#e6194b" barSize={16} />
+              <Bar dataKey="closure2024" name="By 2024" fill="#fabed4" barSize={16} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ) : <p className="text-gray-400">Loading gap closure data...</p>}
+      <p className="text-gray-500 mt-4 text-center max-w-2xl">
+        Face count, face size, and body coverage have <strong>fully converged</strong> to MrBeast&apos;s levels. Expression features (smile, brow, mouth) are 58&ndash;73% of the way there.
+      </p>
+    </Slide>,
+
+    // 12 — Clustering Analysis
+    <Slide key={12}>
       <SlideTitle>Clustering Analysis</SlideTitle>
       <SlideSubtitle>K-means clustering with PCA 2D projection (12 signal-bearing features, depth noise removed). PCA explains 43.2% of variance (up from 33.4% with depth).</SlideSubtitle>
       {clusterPoints.length > 0 ? (
@@ -455,8 +506,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 12 — Channel-Level Evolution (slopes)
-    <Slide key={12}>
+    // 13 — Channel-Level Evolution (slopes)
+    <Slide key={13}>
       <SlideTitle>Channel-Level Evolution</SlideTitle>
       <SlideSubtitle>Per-channel likeness trends over time (panel channels, &ge;3 years)</SlideSubtitle>
       {topConvergers.length > 0 ? (
@@ -478,8 +529,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 13 — Case Studies (NEW SLIDE)
-    <Slide key={13}>
+    // 14 — Case Studies
+    <Slide key={14}>
       <SlideTitle>Case Studies: Individual Channel Trajectories</SlideTitle>
       <SlideSubtitle>Tracking likeness scores year-by-year for top converging channels</SlideSubtitle>
       {caseStudyData.length > 0 ? (
@@ -524,8 +575,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 14 — Weighted Feature Importance
-    <Slide key={14}>
+    // 15 — Weighted Feature Importance
+    <Slide key={15}>
       <SlideTitle>Weighted Feature Importance</SlideTitle>
       <SlideSubtitle>Data-derived weights: how discriminative is each feature?</SlideSubtitle>
       {weightFeatureChartData.length > 0 ? (
@@ -544,8 +595,8 @@ export default function PresentationPage() {
       <p className="text-gray-500 mt-3 text-center">Smile (0.442) + Brightness (0.441) = <strong>53%</strong> of total discriminative weight</p>
     </Slide>,
 
-    // 15 — Statistical Validation
-    <Slide key={15}>
+    // 16 — Statistical Validation
+    <Slide key={16}>
       <SlideTitle>Statistical Validation</SlideTitle>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard
@@ -587,8 +638,8 @@ export default function PresentationPage() {
       )}
     </Slide>,
 
-    // 16 — Title Convergence
-    <Slide key={16}>
+    // 17 — Title Convergence
+    <Slide key={17}>
       <SlideTitle>Title Convergence</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
@@ -622,8 +673,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 17 — Diffusion of Innovation
-    <Slide key={17}>
+    // 18 — Diffusion of Innovation
+    <Slide key={18}>
       <SlideTitle>Diffusion of Innovation Model</SlideTitle>
       <div className="max-w-3xl w-full space-y-4">
         {[
@@ -647,8 +698,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 18 — Limitations
-    <Slide key={18}>
+    // 19 — Limitations & Conclusions
+    <Slide key={19}>
       <SlideTitle>Limitations &amp; Conclusions</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
