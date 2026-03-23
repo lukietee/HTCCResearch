@@ -27,7 +27,7 @@ import type {
   WeightedLikenessResponse,
 } from '@/lib/types';
 
-const TOTAL_SLIDES = 23;
+const TOTAL_SLIDES = 28;
 
 const CASE_STUDY_CHANNELS = ['Danny Duncan', 'ZHC', 'FaZe Rug', 'Sidemen'];
 const CASE_STUDY_COLORS = ['#e6194b', '#f58231', '#3cb44b', '#4363d8'];
@@ -263,29 +263,170 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 4 — Methodology: Feature Extraction
+    // 4 — Color Analysis
     <Slide key={4}>
-      <SlideTitle>Methodology: Feature Extraction</SlideTitle>
+      <SlideTitle>Feature: Color Analysis</SlideTitle>
+      <SlideSubtitle>Converts each thumbnail to HSV color space to measure brightness, saturation, and color temperature.</SlideSubtitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-        {[
-          { title: 'Color Analysis', desc: 'Saturation, brightness, hue distribution, warm/cool scoring', tool: 'OpenCV, PIL, NumPy' },
-          { title: 'Face & Emotion', desc: 'Face count, face size, smile, brow raise, mouth open proxies', tool: 'MediaPipe FaceMesh' },
-          { title: 'Pose Detection', desc: 'Body coverage, hand visibility, people count, orientation', tool: 'MediaPipe Pose' },
-          { title: 'Text Detection', desc: 'Text area ratio, box count, spatial placement', tool: 'PyTesseract OCR' },
-          { title: 'Depth Estimation', desc: 'Foreground/background separation, depth contrast, subject center', tool: 'MiDaS / PyTorch' },
-          { title: 'Title Analysis', desc: 'Word count, numbers, money refs, challenge framing, superlatives', tool: 'NLP / Regex' },
-        ].map((item) => (
-          <div key={item.title} className="bg-white rounded-lg shadow p-4">
-            <h3 className="font-semibold text-gray-900">{item.title}</h3>
-            <p className="text-sm text-gray-600 mt-1">{item.desc}</p>
-            <p className="text-xs text-blue-500 mt-2">{item.tool}</p>
-          </div>
-        ))}
+        <div>
+          <p className="text-gray-700 mb-4">Each pixel&apos;s hue is classified as warm (reds, oranges: 0&ndash;30 and 150&ndash;179) or cool (greens, blues: 30&ndash;150). The ratio gives a single warm/cool score.</p>
+          <pre className="bg-gray-900 text-green-400 text-xs p-4 rounded-lg overflow-x-auto">{`# Warm/cool color scoring
+warm_mask = (hue <= 30) | (hue >= 150)
+cool_mask = (hue > 30) & (hue < 150)
+warm_cool_score = (warm_count - cool_count) / total`}</pre>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="font-semibold text-gray-900 mb-2">Outputs</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li><code className="text-blue-600">avg_saturation</code> &mdash; mean color intensity</li>
+            <li><code className="text-blue-600">avg_brightness</code> &mdash; mean luminance</li>
+            <li><code className="text-blue-600">warm_cool_score</code> &mdash; -1 (cool) to +1 (warm)</li>
+            <li><code className="text-blue-600">dominant_palette</code> &mdash; top 5 hex colors</li>
+            <li><code className="text-blue-600">hue_hist</code> &mdash; 36-bin hue distribution</li>
+          </ul>
+          <p className="text-xs text-blue-500 mt-3">OpenCV, PIL, NumPy</p>
+        </div>
       </div>
     </Slide>,
 
-    // 5 — Methodology: Scoring Systems
+    // 5 — Face & Emotion Detection
     <Slide key={5}>
+      <SlideTitle>Feature: Face &amp; Emotion Detection</SlideTitle>
+      <SlideSubtitle>Uses MediaPipe FaceMesh (468 landmarks per face) to detect faces and approximate emotional expressions.</SlideSubtitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+        <div>
+          <p className="text-gray-700 mb-4">Smile is measured by comparing mouth corner height to lip center height, normalized by mouth width. Higher values indicate upturned corners (smiling).</p>
+          <pre className="bg-gray-900 text-green-400 text-xs p-4 rounded-lg overflow-x-auto">{`# Smile detection from face landmarks
+lip_center_y = (upper_lip[1] + lower_lip[1]) / 2
+corner_avg_y = (mouth_left[1] + mouth_right[1]) / 2
+smile_score = (lip_center_y - corner_avg_y) / mouth_width
+smile_score = max(0, min(1, smile_score + 0.5))`}</pre>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="font-semibold text-gray-900 mb-2">Outputs</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li><code className="text-blue-600">face_count</code> &mdash; number of faces detected</li>
+            <li><code className="text-blue-600">largest_face_area_ratio</code> &mdash; biggest face as % of image</li>
+            <li><code className="text-blue-600">smile_score</code> &mdash; 0&ndash;1 smile intensity</li>
+            <li><code className="text-blue-600">mouth_open_score</code> &mdash; 0&ndash;1 mouth openness</li>
+            <li><code className="text-blue-600">brow_raise_score</code> &mdash; 0&ndash;1 eyebrow lift</li>
+          </ul>
+          <p className="text-xs text-blue-500 mt-3">MediaPipe FaceMesh</p>
+        </div>
+      </div>
+    </Slide>,
+
+    // 6 — Pose Detection
+    <Slide key={6}>
+      <SlideTitle>Feature: Pose Detection</SlideTitle>
+      <SlideSubtitle>Uses MediaPipe Pose (33 body landmarks) to measure how much of the frame a person occupies.</SlideSubtitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+        <div>
+          <p className="text-gray-700 mb-4">Body coverage is the bounding box area of all visible pose landmarks divided by total image area. Higher values mean the subject dominates the thumbnail.</p>
+          <pre className="bg-gray-900 text-green-400 text-xs p-4 rounded-lg overflow-x-auto">{`# Body coverage from pose landmarks
+xs = [p[0] for p in visible_points]
+ys = [p[1] for p in visible_points]
+body_area = (max(xs) - min(xs)) * (max(ys) - min(ys))
+body_coverage = body_area / img_area`}</pre>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="font-semibold text-gray-900 mb-2">Outputs</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li><code className="text-blue-600">people_count</code> &mdash; number of people detected</li>
+            <li><code className="text-blue-600">body_coverage</code> &mdash; 0&ndash;1 frame occupancy</li>
+            <li><code className="text-blue-600">hand_visible_count</code> &mdash; visible hands (0&ndash;2)</li>
+            <li><code className="text-blue-600">pose_orientation</code> &mdash; frontal, side, or back</li>
+          </ul>
+          <p className="text-xs text-blue-500 mt-3">MediaPipe Pose</p>
+        </div>
+      </div>
+    </Slide>,
+
+    // 7 — Text Detection
+    <Slide key={7}>
+      <SlideTitle>Feature: Text Detection</SlideTitle>
+      <SlideSubtitle>Runs Tesseract OCR to detect and measure text overlays on thumbnails.</SlideSubtitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+        <div>
+          <p className="text-gray-700 mb-4">OCR scans each thumbnail, filters results by confidence (&gt;30%), then measures total text bounding box area as a fraction of the image. MrBeast thumbnails average near-zero text.</p>
+          <pre className="bg-gray-900 text-green-400 text-xs p-4 rounded-lg overflow-x-auto">{`# OCR text detection with confidence filter
+ocr_data = pytesseract.image_to_data(img, output_type=Output.DICT)
+for i in range(n_boxes):
+    if int(ocr_data["conf"][i]) > 30 and text:
+        x, y, w, h = ocr_data["left"][i], ...
+        text_boxes.append({"x": x, "y": y, "w": w, "h": h})`}</pre>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="font-semibold text-gray-900 mb-2">Outputs</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li><code className="text-blue-600">has_text</code> &mdash; boolean, any text detected</li>
+            <li><code className="text-blue-600">text_area_ratio</code> &mdash; text area / image area</li>
+            <li><code className="text-blue-600">text_box_count</code> &mdash; number of text regions</li>
+            <li><code className="text-blue-600">detected_text</code> &mdash; recognized strings</li>
+          </ul>
+          <p className="text-xs text-blue-500 mt-3">PyTesseract OCR</p>
+        </div>
+      </div>
+    </Slide>,
+
+    // 8 — Depth Estimation
+    <Slide key={8}>
+      <SlideTitle>Feature: Depth Estimation</SlideTitle>
+      <SlideSubtitle>Uses MiDaS (monocular depth) to estimate foreground/background separation without stereo cameras.</SlideSubtitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+        <div>
+          <p className="text-gray-700 mb-4">A pre-trained MiDaS model produces a per-pixel depth map from a single image. We then analyze the depth distribution to measure subject isolation and depth contrast.</p>
+          <pre className="bg-gray-900 text-green-400 text-xs p-4 rounded-lg overflow-x-auto">{`# MiDaS monocular depth inference
+input_batch = transform(img).to(device)
+with torch.no_grad():
+    depth_map = model(input_batch)
+    depth_map = F.interpolate(
+        depth_map.unsqueeze(1), size=img.shape[:2],
+        mode="bicubic", align_corners=False
+    ).squeeze()`}</pre>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="font-semibold text-gray-900 mb-2">Outputs</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li><code className="text-blue-600">depth_contrast</code> &mdash; std of depth values</li>
+            <li><code className="text-blue-600">foreground_ratio</code> &mdash; % of pixels in foreground</li>
+            <li><code className="text-blue-600">depth_range</code> &mdash; max &minus; min depth</li>
+            <li><code className="text-blue-600">subject_depth_center</code> &mdash; (x, y) of subject</li>
+          </ul>
+          <p className="text-xs text-blue-500 mt-3">MiDaS / PyTorch</p>
+        </div>
+      </div>
+    </Slide>,
+
+    // 9 — Title Analysis
+    <Slide key={9}>
+      <SlideTitle>Feature: Title Analysis</SlideTitle>
+      <SlideSubtitle>Parses video titles to detect MrBeast-style linguistic patterns using keyword matching and regex.</SlideSubtitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+        <div>
+          <p className="text-gray-700 mb-4">Titles are tokenized, lowercased, then checked against curated word lists for money references (&ldquo;$10,000&rdquo;), superlatives (&ldquo;craziest&rdquo;), and challenge framing (&ldquo;survive&rdquo;, &ldquo;last to&rdquo;).</p>
+          <pre className="bg-gray-900 text-green-400 text-xs p-4 rounded-lg overflow-x-auto">{`# Title pattern matching
+words_lower_set = set(words_lower)
+has_money = bool(re.search(r"\\$[\\d,]+", title))
+has_superlative = bool(SUPERLATIVE_WORDS & words_lower_set)
+has_challenge = bool(CHALLENGE_WORDS & words_lower_set)`}</pre>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="font-semibold text-gray-900 mb-2">Outputs</h3>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li><code className="text-blue-600">has_money_reference</code> &mdash; dollar amounts detected</li>
+            <li><code className="text-blue-600">has_superlative</code> &mdash; extreme adjectives</li>
+            <li><code className="text-blue-600">has_challenge_framing</code> &mdash; competition language</li>
+            <li><code className="text-blue-600">uppercase_ratio</code> &mdash; ALL CAPS intensity</li>
+            <li><code className="text-blue-600">word_count</code> &mdash; title length</li>
+          </ul>
+          <p className="text-xs text-blue-500 mt-3">NLP / Regex</p>
+        </div>
+      </div>
+    </Slide>,
+
+    // 10 — Methodology: Scoring Systems
+    <Slide key={10}>
       <SlideTitle>Scoring Systems</SlideTitle>
       <div className="space-y-6 max-w-3xl">
         <div className="bg-white rounded-lg shadow p-5 border-l-4 border-red-500">
@@ -303,8 +444,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 6 — The MrBeast Formula
-    <Slide key={6}>
+    // 11 — The MrBeast Formula
+    <Slide key={11}>
       <SlideTitle>The MrBeast Formula vs. 2015 Baseline</SlideTitle>
       <div className="overflow-x-auto w-full max-w-3xl">
         <table className="w-full text-left border-collapse">
@@ -338,8 +479,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 7 — Weighted Likeness Over Time (PRIMARY METRIC)
-    <Slide key={7}>
+    // 12 — Weighted Likeness Over Time (PRIMARY METRIC)
+    <Slide key={12}>
       <SlideTitle>Weighted Likeness Over Time (Panel Only)</SlideTitle>
       <SlideSubtitle>Normalized weighted score by year. Features weighted by discriminative power &mdash; captures gradual convergence that binary scoring misses.</SlideSubtitle>
       {weightedChartData.length > 0 ? (
@@ -370,8 +511,8 @@ export default function PresentationPage() {
       )}
     </Slide>,
 
-    // 8 — Binary Likeness (secondary reference)
-    <Slide key={8}>
+    // 13 — Binary Likeness (secondary reference)
+    <Slide key={13}>
       <SlideTitle>Binary Likeness Score (Reference)</SlideTitle>
       <SlideSubtitle>Simple 0&ndash;8 threshold scoring. Shows the same upward trend but with less sensitivity to gradual change.</SlideSubtitle>
       {likenessChartData.length > 0 ? (
@@ -397,8 +538,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 9 — Continuous Similarity Trend
-    <Slide key={9}>
+    // 14 — Continuous Similarity Trend
+    <Slide key={14}>
       <SlideTitle>Continuous Similarity Trend (Panel Only)</SlideTitle>
       <SlideSubtitle>Mean z-score similarity to MrBeast centroid (0&ndash;100%)</SlideSubtitle>
       {similarityChartData.length > 0 ? (
@@ -420,8 +561,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 10 — Feature-Level Convergence
-    <Slide key={10}>
+    // 15 — Feature-Level Convergence
+    <Slide key={15}>
       <SlideTitle>Feature-Level Convergence</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
@@ -455,8 +596,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 11 — Gap Closure (NEW — strongest visual)
-    <Slide key={11}>
+    // 16 — Gap Closure
+    <Slide key={16}>
       <SlideTitle>Gap Closure: How Far Has the Industry Moved?</SlideTitle>
       <SlideSubtitle>Percentage of the 2015-to-MrBeast gap that has been closed by 2024 and 2025 (panel only)</SlideSubtitle>
       {gapClosureData.length > 0 ? (
@@ -478,8 +619,8 @@ export default function PresentationPage() {
       </p>
     </Slide>,
 
-    // 12 — Clustering Analysis
-    <Slide key={12}>
+    // 17 — Clustering Analysis
+    <Slide key={17}>
       <SlideTitle>Clustering Analysis</SlideTitle>
       <SlideSubtitle>K-means clustering with PCA 2D projection (12 signal-bearing features, depth noise removed). PCA explains 43.2% of variance (up from 33.4% with depth).</SlideSubtitle>
       {clusterPoints.length > 0 ? (
@@ -507,8 +648,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 13 — Channel-Level Evolution (slopes)
-    <Slide key={13}>
+    // 18 — Channel-Level Evolution (slopes)
+    <Slide key={18}>
       <SlideTitle>Channel-Level Evolution</SlideTitle>
       <SlideSubtitle>Per-channel likeness trends over time (panel channels, &ge;3 years)</SlideSubtitle>
       {topConvergers.length > 0 ? (
@@ -530,8 +671,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 14 — Danny Duncan
-    <Slide key={14}>
+    // 19 — Danny Duncan
+    <Slide key={19}>
       <SlideTitle>Case Study: Danny Duncan</SlideTitle>
       <SlideSubtitle>Fastest converger &mdash; surpassed MrBeast&apos;s average by 2022</SlideSubtitle>
       {caseStudyData.length > 0 ? (
@@ -556,8 +697,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 15 — ZHC
-    <Slide key={15}>
+    // 20 — ZHC
+    <Slide key={20}>
       <SlideTitle>Case Study: ZHC</SlideTitle>
       <SlideSubtitle>Peaked at 7.40 in 2024 &mdash; highest single-year score of any panel channel</SlideSubtitle>
       {caseStudyData.length > 0 ? (
@@ -582,8 +723,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 16 — FaZe Rug
-    <Slide key={16}>
+    // 21 — FaZe Rug
+    <Slide key={21}>
       <SlideTitle>Case Study: FaZe Rug</SlideTitle>
       <SlideSubtitle>Slow start, rapid adoption &mdash; jumped from 3.1 to 6.6 in three years</SlideSubtitle>
       {caseStudyData.length > 0 ? (
@@ -608,8 +749,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 17 — Sidemen
-    <Slide key={17}>
+    // 22 — Sidemen
+    <Slide key={22}>
       <SlideTitle>Case Study: Sidemen</SlideTitle>
       <SlideSubtitle>Steady climb from 1.3 to 5.1 &mdash; now approaching MrBeast&apos;s average</SlideSubtitle>
       {caseStudyData.length > 0 ? (
@@ -634,8 +775,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 18 — Weighted Feature Importance
-    <Slide key={18}>
+    // 23 — Weighted Feature Importance
+    <Slide key={23}>
       <SlideTitle>Weighted Feature Importance</SlideTitle>
       <SlideSubtitle>Data-derived weights: how discriminative is each feature?</SlideSubtitle>
       {weightFeatureChartData.length > 0 ? (
@@ -654,8 +795,8 @@ export default function PresentationPage() {
       <p className="text-gray-500 mt-3 text-center">Smile (0.442) + Brightness (0.441) = <strong>53%</strong> of total discriminative weight</p>
     </Slide>,
 
-    // 19 — Statistical Validation
-    <Slide key={19}>
+    // 24 — Statistical Validation
+    <Slide key={24}>
       <SlideTitle>Statistical Validation</SlideTitle>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard
@@ -697,8 +838,8 @@ export default function PresentationPage() {
       )}
     </Slide>,
 
-    // 20 — Title Convergence
-    <Slide key={20}>
+    // 25 — Title Convergence
+    <Slide key={25}>
       <SlideTitle>Title Convergence</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
@@ -732,8 +873,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 21 — Diffusion of Innovation
-    <Slide key={21}>
+    // 26 — Diffusion of Innovation
+    <Slide key={26}>
       <SlideTitle>Diffusion of Innovation Model</SlideTitle>
       <div className="max-w-3xl w-full space-y-4">
         {[
@@ -757,8 +898,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 22 — Limitations & Conclusions
-    <Slide key={22}>
+    // 27 — Limitations & Conclusions
+    <Slide key={27}>
       <SlideTitle>Limitations &amp; Conclusions</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
