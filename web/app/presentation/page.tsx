@@ -253,10 +253,10 @@ export default function PresentationPage() {
       <SlideTitle>Why MrBeast?</SlideTitle>
       <SlideSubtitle>Most subscribed individual creator (~300M+). Pioneered a distinct, widely-imitated thumbnail formula.</SlideSubtitle>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Avg Brightness" value="0.658" sub="+15.5% vs 2015" />
-        <StatCard label="Face Count" value="1.37" sub="+75.6% vs 2015" />
-        <StatCard label="Smile Score" value="0.443" sub="+66.9% vs 2015" />
-        <StatCard label="Body Coverage" value="0.413" sub="+74.3% vs 2015" />
+        <StatCard label="Have a Face" value="81%" sub="vs 60% in 2015" />
+        <StatCard label="Are Smiling" value="75%" sub="vs 47% in 2015" />
+        <StatCard label="Bright Thumbnails" value="69%" sub="vs 41% in 2015" />
+        <StatCard label="Large Body in Frame" value="53%" sub="vs 30% in 2015" />
       </div>
       <p className="text-gray-500 mt-6 text-center text-lg italic">&ldquo;Big faces, big expressions, bright colors.&rdquo;</p>
     </Slide>,
