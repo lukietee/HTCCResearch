@@ -212,10 +212,10 @@ export default function PresentationPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Avg Brightness" value="0.658" sub="+15.5% vs 2015" />
         <StatCard label="Face Count" value="1.37" sub="+75.6% vs 2015" />
-        <StatCard label="Text Area" value="0.001" sub="-96.8% vs 2015" />
+        <StatCard label="Smile Score" value="0.443" sub="+66.9% vs 2015" />
         <StatCard label="Body Coverage" value="0.413" sub="+74.3% vs 2015" />
       </div>
-      <p className="text-gray-500 mt-6 text-center text-lg italic">&ldquo;Faces first, text never.&rdquo;</p>
+      <p className="text-gray-500 mt-6 text-center text-lg italic">&ldquo;Big faces, big expressions, bright colors.&rdquo;</p>
     </Slide>,
 
     // 3 — Dataset Overview
@@ -289,13 +289,13 @@ export default function PresentationPage() {
           </thead>
           <tbody>
             {[
-              ['Brightness', '0.658', '0.570', '+15.5%'],
               ['Face Count', '1.37', '0.78', '+75.6%'],
-              ['Largest Face Size', '0.087', '0.058', '+50.5%'],
               ['Body Coverage', '0.413', '0.237', '+74.3%'],
               ['Smile Score', '0.443', '0.266', '+66.9%'],
-              ['Visible Hands', '1.31', '1.01', '+30.5%'],
-              ['Warm/Cool Score', '0.171', '0.282', '-39.3%'],
+              ['Mouth Open', '0.175', '0.105', '+66.7%'],
+              ['Brow Raise', '0.332', '0.209', '+58.7%'],
+              ['Largest Face Size', '0.087', '0.058', '+50.5%'],
+              ['Brightness', '0.658', '0.570', '+15.5%'],
             ].map(([feat, mb, base, change]) => (
               <tr key={feat} className="border-b border-gray-200">
                 <td className="py-2.5 px-4 text-gray-800">{feat}</td>
@@ -402,7 +402,7 @@ export default function PresentationPage() {
             'Smile score: +18.9 percentage points',
             'Brow raise: 59\u201387% gap closure',
             'Body coverage: significant increase',
-            'Text area: 74% drop, approaching MrBeast levels',
+            'Mouth open score: +66.7%, matching MrBeast\u2019s expressive style',
           ]} />
         </div>
         {faceChartData.length > 0 && (
@@ -627,7 +627,7 @@ export default function PresentationPage() {
       <SlideTitle>Diffusion of Innovation Model</SlideTitle>
       <div className="max-w-3xl w-full space-y-4">
         {[
-          { phase: 'Innovators', years: '2015\u20132017', desc: 'MrBeast pioneering the bright, face-forward, text-free formula', color: '#e6194b' },
+          { phase: 'Innovators', years: '2015\u20132017', desc: 'MrBeast pioneering the bright, face-forward, expressive formula', color: '#e6194b' },
           { phase: 'Early Adopters', years: '2018\u20132019', desc: 'David Dobrik, ZHC, Ryan Trahan begin experimenting', color: '#f58231' },
           { phase: 'Early Majority', years: '2020\u20132022', desc: 'Broad panel adoption; inflection point in convergence data', color: '#3cb44b' },
           { phase: 'Late Majority', years: '2023\u20132025', desc: 'Near-ubiquitous among entertainment channels', color: '#4363d8' },
@@ -665,7 +665,7 @@ export default function PresentationPage() {
           <BulletList items={[
             'Convergence is statistically significant (p < 10\u207B\u00B9\u2070, slope +0.105/yr)',
             '73% of panel channels converge (avg slope +0.127/yr)',
-            'Multi-dimensional shift: face, smile, brow, body, text',
+            'Multi-dimensional shift: face, smile, brow, body coverage',
             'Smile + brightness = 53% of discriminative weight',
           ]} />
         </div>
