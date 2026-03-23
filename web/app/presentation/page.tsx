@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, ScatterChart, Scatter, Cell, Area, AreaChart,
+  LineChart, Line, ScatterChart, Scatter, Cell, Area, AreaChart, ReferenceLine,
 } from 'recharts';
 import {
   getOverviewStats,
@@ -27,10 +27,11 @@ import type {
   WeightedLikenessResponse,
 } from '@/lib/types';
 
-const TOTAL_SLIDES = 20;
+const TOTAL_SLIDES = 23;
 
 const CASE_STUDY_CHANNELS = ['Danny Duncan', 'ZHC', 'FaZe Rug', 'Sidemen'];
 const CASE_STUDY_COLORS = ['#e6194b', '#f58231', '#3cb44b', '#4363d8'];
+const MRBEAST_MEAN_LIKENESS = 5.42;
 
 // ─── Slide wrapper ───────────────────────────────────────────────
 function Slide({ children }: { children: React.ReactNode }) {
@@ -529,54 +530,112 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 14 — Case Studies
+    // 14 — Danny Duncan
     <Slide key={14}>
-      <SlideTitle>Case Studies: Individual Channel Trajectories</SlideTitle>
-      <SlideSubtitle>Tracking likeness scores year-by-year for top converging channels</SlideSubtitle>
+      <SlideTitle>Case Study: Danny Duncan</SlideTitle>
+      <SlideSubtitle>Fastest converger &mdash; surpassed MrBeast&apos;s average by 2022</SlideSubtitle>
       {caseStudyData.length > 0 ? (
-        <div className="w-full max-w-3xl h-[350px]">
+        <div className="w-full max-w-3xl h-[320px]">
           <ResponsiveContainer>
             <LineChart data={caseStudyData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis domain={[0, 8]} />
               <Tooltip />
-              {CASE_STUDY_CHANNELS.map((ch, i) => (
-                <Line
-                  key={ch}
-                  type="monotone"
-                  dataKey={ch}
-                  stroke={CASE_STUDY_COLORS[i]}
-                  strokeWidth={2.5}
-                  dot={{ r: 4 }}
-                  connectNulls
-                  name={ch}
-                />
-              ))}
+              <ReferenceLine y={MRBEAST_MEAN_LIKENESS} stroke="#e6194b" strokeDasharray="8 4" strokeWidth={1.5} label={{ value: 'MrBeast avg (5.42)', position: 'right', fontSize: 11, fill: '#e6194b' }} />
+              <Line type="monotone" dataKey="Danny Duncan" stroke="#e6194b" strokeWidth={3} dot={{ r: 5 }} connectNulls name="Danny Duncan" />
             </LineChart>
           </ResponsiveContainer>
         </div>
-      ) : <p className="text-gray-400">Loading channel data...</p>}
-      <div className="flex gap-4 mt-4 flex-wrap justify-center">
-        {CASE_STUDY_CHANNELS.map((ch, i) => {
-          const trend = evolution?.trends.find((t) => t.channel === ch);
-          return (
-            <div key={ch} className="text-center">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CASE_STUDY_COLORS[i] }} />
-                <span className="text-sm font-semibold text-gray-700">{ch}</span>
-              </div>
-              {trend && (
-                <p className="text-xs text-gray-500">{trend.start_score.toFixed(1)} &rarr; {trend.end_score.toFixed(1)}</p>
-              )}
-            </div>
-          );
-        })}
+      ) : <p className="text-gray-400">Loading data...</p>}
+      <div className="flex gap-4 mt-4">
+        <StatCard label="Start (2015)" value="2.00" />
+        <StatCard label="End (2025)" value="6.67" sub="Exceeds MrBeast avg" />
+        <StatCard label="Slope" value="+0.551/yr" sub="Fastest in panel" />
+        <StatCard label="Peak" value="6.67" sub="2025" />
       </div>
     </Slide>,
 
-    // 15 — Weighted Feature Importance
+    // 15 — ZHC
     <Slide key={15}>
+      <SlideTitle>Case Study: ZHC</SlideTitle>
+      <SlideSubtitle>Peaked at 7.40 in 2024 &mdash; highest single-year score of any panel channel</SlideSubtitle>
+      {caseStudyData.length > 0 ? (
+        <div className="w-full max-w-3xl h-[320px]">
+          <ResponsiveContainer>
+            <LineChart data={caseStudyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis domain={[0, 8]} />
+              <Tooltip />
+              <ReferenceLine y={MRBEAST_MEAN_LIKENESS} stroke="#e6194b" strokeDasharray="8 4" strokeWidth={1.5} label={{ value: 'MrBeast avg (5.42)', position: 'right', fontSize: 11, fill: '#e6194b' }} />
+              <Line type="monotone" dataKey="ZHC" stroke="#f58231" strokeWidth={3} dot={{ r: 5 }} connectNulls name="ZHC" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      ) : <p className="text-gray-400">Loading data...</p>}
+      <div className="flex gap-4 mt-4">
+        <StatCard label="Start (2017)" value="1.47" />
+        <StatCard label="End (2025)" value="4.53" />
+        <StatCard label="Slope" value="+0.434/yr" sub="2nd fastest" />
+        <StatCard label="Peak" value="7.40" sub="2024 — highest ever" />
+      </div>
+    </Slide>,
+
+    // 16 — FaZe Rug
+    <Slide key={16}>
+      <SlideTitle>Case Study: FaZe Rug</SlideTitle>
+      <SlideSubtitle>Slow start, rapid adoption &mdash; jumped from 3.1 to 6.6 in three years</SlideSubtitle>
+      {caseStudyData.length > 0 ? (
+        <div className="w-full max-w-3xl h-[320px]">
+          <ResponsiveContainer>
+            <LineChart data={caseStudyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis domain={[0, 8]} />
+              <Tooltip />
+              <ReferenceLine y={MRBEAST_MEAN_LIKENESS} stroke="#e6194b" strokeDasharray="8 4" strokeWidth={1.5} label={{ value: 'MrBeast avg (5.42)', position: 'right', fontSize: 11, fill: '#e6194b' }} />
+              <Line type="monotone" dataKey="FaZe Rug" stroke="#3cb44b" strokeWidth={3} dot={{ r: 5 }} connectNulls name="FaZe Rug" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      ) : <p className="text-gray-400">Loading data...</p>}
+      <div className="flex gap-4 mt-4">
+        <StatCard label="Start (2015)" value="3.33" />
+        <StatCard label="End (2025)" value="6.47" sub="Exceeds MrBeast avg" />
+        <StatCard label="Slope" value="+0.355/yr" />
+        <StatCard label="2021 → 2024" value="3.1 → 6.6" sub="Rapid jump" />
+      </div>
+    </Slide>,
+
+    // 17 — Sidemen
+    <Slide key={17}>
+      <SlideTitle>Case Study: Sidemen</SlideTitle>
+      <SlideSubtitle>Steady climb from 1.3 to 5.1 &mdash; now approaching MrBeast&apos;s average</SlideSubtitle>
+      {caseStudyData.length > 0 ? (
+        <div className="w-full max-w-3xl h-[320px]">
+          <ResponsiveContainer>
+            <LineChart data={caseStudyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis domain={[0, 8]} />
+              <Tooltip />
+              <ReferenceLine y={MRBEAST_MEAN_LIKENESS} stroke="#e6194b" strokeDasharray="8 4" strokeWidth={1.5} label={{ value: 'MrBeast avg (5.42)', position: 'right', fontSize: 11, fill: '#e6194b' }} />
+              <Line type="monotone" dataKey="Sidemen" stroke="#4363d8" strokeWidth={3} dot={{ r: 5 }} connectNulls name="Sidemen" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      ) : <p className="text-gray-400">Loading data...</p>}
+      <div className="flex gap-4 mt-4">
+        <StatCard label="Start (2016)" value="1.29" />
+        <StatCard label="End (2025)" value="5.07" sub="94% of MrBeast avg" />
+        <StatCard label="Slope" value="+0.314/yr" />
+        <StatCard label="Gap Remaining" value="0.35 pts" sub="from MrBeast mean" />
+      </div>
+    </Slide>,
+
+    // 18 — Weighted Feature Importance
+    <Slide key={18}>
       <SlideTitle>Weighted Feature Importance</SlideTitle>
       <SlideSubtitle>Data-derived weights: how discriminative is each feature?</SlideSubtitle>
       {weightFeatureChartData.length > 0 ? (
@@ -595,8 +654,8 @@ export default function PresentationPage() {
       <p className="text-gray-500 mt-3 text-center">Smile (0.442) + Brightness (0.441) = <strong>53%</strong> of total discriminative weight</p>
     </Slide>,
 
-    // 16 — Statistical Validation
-    <Slide key={16}>
+    // 19 — Statistical Validation
+    <Slide key={19}>
       <SlideTitle>Statistical Validation</SlideTitle>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard
@@ -638,8 +697,8 @@ export default function PresentationPage() {
       )}
     </Slide>,
 
-    // 17 — Title Convergence
-    <Slide key={17}>
+    // 20 — Title Convergence
+    <Slide key={20}>
       <SlideTitle>Title Convergence</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
@@ -673,8 +732,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 18 — Diffusion of Innovation
-    <Slide key={18}>
+    // 21 — Diffusion of Innovation
+    <Slide key={21}>
       <SlideTitle>Diffusion of Innovation Model</SlideTitle>
       <div className="max-w-3xl w-full space-y-4">
         {[
@@ -698,8 +757,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 19 — Limitations & Conclusions
-    <Slide key={19}>
+    // 22 — Limitations & Conclusions
+    <Slide key={22}>
       <SlideTitle>Limitations &amp; Conclusions</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
