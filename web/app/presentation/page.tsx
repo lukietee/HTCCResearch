@@ -32,7 +32,7 @@ const TOTAL_SLIDES = 28;
 const CASE_STUDY_CHANNELS = ['Danny Duncan', 'ZHC', 'FaZe Rug', 'Sidemen'];
 const CASE_STUDY_COLORS = ['#e6194b', '#f58231', '#3cb44b', '#4363d8'];
 const MRBEAST_MEAN_LIKENESS = 5.42;
-const EXAMPLE_THUMB = 'http://localhost:8000/static/thumbnails/mrbeast/001_30%20Celebrities%20Fight%20For%201000000.jpg';
+const EXAMPLE_THUMB = 'http://localhost:8000/static/thumbnails/mrbeast/019_I%20Survived%20100%20Hours%20In%20An%20Ancient%20Temple.jpg';
 
 // ─── Slide wrapper ───────────────────────────────────────────────
 function Slide({ children }: { children: React.ReactNode }) {
@@ -295,10 +295,10 @@ export default function PresentationPage() {
     <Slide key={4}>
       <SlideTitle>Feature: Color Analysis</SlideTitle>
       <SlideSubtitle>Converts each thumbnail to HSV color space to measure brightness, saturation, and color temperature.</SlideSubtitle>
-      <ThumbOverlay label="brightness: 0.66 | warm_cool: 0.17">
+      <ThumbOverlay label="brightness: 0.58 | warm_cool: 0.31">
         {/* Color palette swatches */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-1.5">
-          {['#2a6cb6', '#d4a056', '#3b8c4a', '#8b6b4f', '#c9dff0'].map((c) => (
+          {['#4a6e3a', '#8b7355', '#c8a44e', '#5b8c6e', '#2d3b2a'].map((c) => (
             <div key={c} className="w-6 h-6 rounded-full border-2 border-white shadow" style={{ backgroundColor: c }} />
           ))}
         </div>
@@ -332,16 +332,11 @@ export default function PresentationPage() {
     <Slide key={5}>
       <SlideTitle>Feature: Face &amp; Emotion Detection</SlideTitle>
       <SlideSubtitle>Uses MediaPipe FaceMesh (468 landmarks per face) to detect faces and approximate emotional expressions.</SlideSubtitle>
-      <ThumbOverlay label="faces: 7 | smile: 0.71 | brow: 0.42">
-        {/* Face bounding boxes */}
-        <div className="absolute border-2 border-green-400 rounded" style={{ top: '8%', left: '2%', width: '22%', height: '70%' }}>
-          <span className="absolute -top-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">smile: 0.8</span>
-        </div>
-        <div className="absolute border-2 border-green-400 rounded" style={{ top: '5%', left: '25%', width: '14%', height: '45%' }}>
-          <span className="absolute -top-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">smile: 0.6</span>
-        </div>
-        <div className="absolute border-2 border-green-400 rounded" style={{ top: '8%', left: '35%', width: '18%', height: '55%' }}>
-          <span className="absolute -top-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">smile: 0.3</span>
+      <ThumbOverlay label="faces: 1 | mouth_open: 0.62 | brow: 0.71">
+        {/* Single face bounding box */}
+        <div className="absolute border-2 border-green-400 rounded" style={{ top: '3%', left: '25%', width: '45%', height: '60%' }}>
+          <span className="absolute -top-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">mouth_open: 0.62</span>
+          <span className="absolute -bottom-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">brow_raise: 0.71</span>
         </div>
       </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
@@ -373,14 +368,15 @@ export default function PresentationPage() {
     <Slide key={6}>
       <SlideTitle>Feature: Pose Detection</SlideTitle>
       <SlideSubtitle>Uses MediaPipe Pose (33 body landmarks) to measure how much of the frame a person occupies.</SlideSubtitle>
-      <ThumbOverlay label="body_coverage: 0.41 | people: 7">
+      <ThumbOverlay label="body_coverage: 0.38 | people: 1">
         {/* Body coverage bounding box */}
-        <div className="absolute border-2 border-blue-400 bg-blue-400/15 rounded" style={{ top: '5%', left: '2%', width: '55%', height: '90%' }}>
-          <span className="absolute top-1 left-1 text-[9px] bg-blue-500 text-white px-1 rounded">coverage: 41%</span>
+        <div className="absolute border-2 border-blue-400 bg-blue-400/15 rounded" style={{ top: '3%', left: '18%', width: '55%', height: '92%' }}>
+          <span className="absolute top-1 left-1 text-[9px] bg-blue-500 text-white px-1 rounded">coverage: 38%</span>
         </div>
-        {/* Hand markers */}
-        <div className="absolute w-3 h-3 rounded-full bg-yellow-400 border border-white" style={{ top: '50%', left: '8%' }} />
-        <div className="absolute w-3 h-3 rounded-full bg-yellow-400 border border-white" style={{ top: '48%', left: '20%' }} />
+        {/* Hand marker on torch hand */}
+        <div className="absolute w-3.5 h-3.5 rounded-full bg-yellow-400 border-2 border-white" style={{ top: '22%', left: '22%' }}>
+          <span className="absolute -top-4 -left-2 text-[8px] bg-yellow-500 text-white px-1 rounded">hand</span>
+        </div>
       </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
@@ -411,10 +407,10 @@ export default function PresentationPage() {
     <Slide key={7}>
       <SlideTitle>Feature: Text Detection</SlideTitle>
       <SlideSubtitle>Runs Tesseract OCR to detect and measure text overlays on thumbnails.</SlideSubtitle>
-      <ThumbOverlay label="text_area: 0.02 | boxes: 1">
-        {/* Text bounding box around "HOLLYWOOD" */}
-        <div className="absolute border-2 border-red-500 bg-red-500/10 rounded" style={{ top: '2%', right: '5%', width: '38%', height: '14%' }}>
-          <span className="absolute -top-4 right-0 text-[9px] bg-red-500 text-white px-1 rounded">&ldquo;HOLLYWOOD&rdquo;</span>
+      <ThumbOverlay label="text_area: 0.000 | boxes: 0">
+        {/* No text detected — show the empty state */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="bg-black/60 text-white text-sm px-3 py-1.5 rounded-lg font-mono">No text detected</span>
         </div>
       </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
@@ -485,14 +481,17 @@ export default function PresentationPage() {
       <SlideTitle>Feature: Title Analysis</SlideTitle>
       <SlideSubtitle>Parses video titles to detect MrBeast-style linguistic patterns using keyword matching and regex.</SlideSubtitle>
       <div className="bg-gray-900 rounded-lg px-6 py-4 mb-4 text-lg font-mono">
-        <span className="text-orange-400 font-bold">30</span>{' '}
-        <span className="text-white">Celebrities Fight For </span>
-        <span className="text-green-400 font-bold">$1,000,000</span>
+        <span className="text-white">I </span>
+        <span className="text-purple-400 font-bold underline">Survived</span>
+        <span className="text-white"> </span>
+        <span className="text-orange-400 font-bold">100</span>
+        <span className="text-white"> Hours In An Ancient Temple</span>
       </div>
       <div className="flex gap-3 mb-4 text-xs">
-        <span className="bg-orange-400/20 text-orange-400 px-2 py-1 rounded">has_number</span>
-        <span className="bg-green-400/20 text-green-400 px-2 py-1 rounded">has_money_reference</span>
+        <span className="bg-orange-400/20 text-orange-400 px-2 py-1 rounded">has_number (100)</span>
         <span className="bg-purple-400/20 text-purple-400 px-2 py-1 rounded">has_challenge_framing</span>
+        <span className="bg-blue-400/20 text-blue-400 px-2 py-1 rounded">first_person</span>
+        <span className="bg-pink-400/20 text-pink-400 px-2 py-1 rounded">has_superlative</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
