@@ -334,9 +334,9 @@ export default function PresentationPage() {
       <SlideSubtitle>Uses MediaPipe FaceMesh (468 landmarks per face) to detect faces and approximate emotional expressions.</SlideSubtitle>
       <ThumbOverlay label="faces: 1 | mouth_open: 0.62 | brow: 0.71">
         {/* Single face bounding box */}
-        <div className="absolute border-2 border-green-400 rounded" style={{ top: '3%', left: '25%', width: '45%', height: '60%' }}>
-          <span className="absolute -top-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">mouth_open: 0.62</span>
-          <span className="absolute -bottom-4 left-0 text-[9px] bg-green-500 text-white px-1 rounded">brow_raise: 0.71</span>
+        <div className="absolute border-2 border-green-400 rounded" style={{ top: '8%', left: '25%', width: '45%', height: '55%' }}>
+          <span className="absolute top-1 left-1 text-[9px] bg-green-500 text-white px-1 rounded">mouth_open: 0.62</span>
+          <span className="absolute bottom-1 left-1 text-[9px] bg-green-500 text-white px-1 rounded">brow_raise: 0.71</span>
         </div>
       </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
