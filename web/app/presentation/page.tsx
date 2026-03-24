@@ -27,11 +27,12 @@ import type {
   WeightedLikenessResponse,
 } from '@/lib/types';
 
-const TOTAL_SLIDES = 28;
+const TOTAL_SLIDES = 29;
 
 const CASE_STUDY_CHANNELS = ['Danny Duncan', 'ZHC', 'FaZe Rug', 'Sidemen'];
 const CASE_STUDY_COLORS = ['#e6194b', '#f58231', '#3cb44b', '#4363d8'];
 const MRBEAST_MEAN_LIKENESS = 5.42;
+const EXAMPLE_THUMB = 'http://localhost:8000/static/thumbnails/mrbeast/019_I%20Survived%20100%20Hours%20In%20An%20Ancient%20Temple.jpg';
 
 // ─── Slide wrapper ───────────────────────────────────────────────
 function Slide({ children }: { children: React.ReactNode }) {
@@ -56,6 +57,19 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
       <div className="text-2xl font-bold text-gray-900">{value}</div>
       <div className="text-sm text-gray-500 mt-1">{label}</div>
       {sub && <div className="text-xs text-gray-400 mt-1">{sub}</div>}
+    </div>
+  );
+}
+
+function ThumbOverlay({ children, label }: { children?: React.ReactNode; label?: string }) {
+  return (
+    <div className="relative inline-block rounded-lg overflow-hidden shadow-lg mb-4" style={{ width: 300 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={EXAMPLE_THUMB} alt="Example MrBeast thumbnail" className="w-full h-auto block" />
+      {children}
+      {label && (
+        <div className="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded font-mono">{label}</div>
+      )}
     </div>
   );
 }
@@ -261,8 +275,56 @@ export default function PresentationPage() {
       <p className="text-gray-500 mt-6 text-center text-lg italic">&ldquo;Big faces, big expressions, bright colors.&rdquo;</p>
     </Slide>,
 
-    // 3 — Dataset Overview
+    // 3 — Data Collection Methodology
     <Slide key={3}>
+      <SlideTitle>Data Collection</SlideTitle>
+      <SlideSubtitle>YouTube Data API v3 &mdash; top 15 most-viewed videos per channel per year, 2015&ndash;2025</SlideSubtitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+        <div>
+          <CodeBlock lines={[
+            { tokens: [{ text: '# YouTube API search by channel + year', color: '#6c7086' }] },
+            { tokens: [{ text: 'response', color: '#cdd6f4' }, { text: ' = ', color: '#89dceb' }, { text: 'youtube.', color: '#cdd6f4' }, { text: 'search', color: '#89b4fa' }, { text: '().', color: '#cdd6f4' }, { text: 'list', color: '#89b4fa' }, { text: '(', color: '#cdd6f4' }] },
+            { tokens: [{ text: '  channelId', color: '#fab387' }, { text: '=', color: '#89dceb' }, { text: 'channel_id,', color: '#cdd6f4' }] },
+            { tokens: [{ text: '  publishedAfter', color: '#fab387' }, { text: '=', color: '#89dceb' }, { text: '"2020-01-01"', color: '#a6e3a1' }, { text: ',', color: '#cdd6f4' }] },
+            { tokens: [{ text: '  publishedBefore', color: '#fab387' }, { text: '=', color: '#89dceb' }, { text: '"2020-12-31"', color: '#a6e3a1' }, { text: ',', color: '#cdd6f4' }] },
+            { tokens: [{ text: '  order', color: '#fab387' }, { text: '=', color: '#89dceb' }, { text: '"viewCount"', color: '#a6e3a1' }, { text: ',', color: '#cdd6f4' }] },
+            { tokens: [{ text: '  maxResults', color: '#fab387' }, { text: '=', color: '#89dceb' }, { text: '15', color: '#fab387' }, { text: ')', color: '#cdd6f4' }] },
+          ]} />
+          <div className="mt-4">
+            <BulletList items={[
+              '15 thumbnails per channel per year (top by views, Shorts excluded)',
+              '22 panel channels tracked across all 11 years',
+              '309 MrBeast reference thumbnails (5 eras)',
+              'Downloaded at max resolution (1280\u00D7720)',
+            ]} />
+          </div>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 mb-3">Panel Channels (22)</h3>
+          <div className="space-y-2">
+            <div>
+              <span className="text-xs font-semibold text-gray-500 uppercase">Entertainment (14)</span>
+              <p className="text-sm text-gray-700">Dude Perfect, PewDiePie, Sidemen, FaZe Rug, Danny Duncan, Logan Paul, KSI, IShowSpeed, Ryan Trahan, Airrack, JiDion, Unspeakable, David Dobrik, Matt Stonie</p>
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-gray-500 uppercase">Gaming (3)</span>
+              <p className="text-sm text-gray-700">Markiplier, VanossGaming, Dream</p>
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-gray-500 uppercase">Art &amp; Other (3)</span>
+              <p className="text-sm text-gray-700">ZHC, Good Mythical Morning, Smosh</p>
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-gray-500 uppercase">Controls (2)</span>
+              <p className="text-sm text-gray-700">Kurzgesagt, CinemaSins</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Slide>,
+
+    // 4 — Dataset Overview
+    <Slide key={4}>
       <SlideTitle>Dataset Overview</SlideTitle>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total Thumbnails" value={overview ? overview.total_thumbnails.toLocaleString() : '...'} />
@@ -277,10 +339,19 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 4 — Color Analysis
-    <Slide key={4}>
+    // 5 — Color Analysis
+    <Slide key={5}>
       <SlideTitle>Feature: Color Analysis</SlideTitle>
       <SlideSubtitle>Converts each thumbnail to HSV color space to measure brightness, saturation, and color temperature.</SlideSubtitle>
+      <ThumbOverlay label="brightness: 0.58 | warm_cool: 0.31">
+        {/* Color palette swatches */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {['#4a6e3a', '#8b7355', '#c8a44e', '#5b8c6e', '#2d3b2a'].map((c) => (
+            <div key={c} className="w-6 h-6 rounded-full border-2 border-white shadow" style={{ backgroundColor: c }} />
+          ))}
+        </div>
+        <div className="absolute inset-0 border-4 border-yellow-400/40 rounded-lg pointer-events-none" />
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">Each pixel&apos;s hue is classified as warm (reds, oranges: 0&ndash;30 and 150&ndash;179) or cool (greens, blues: 30&ndash;150). The ratio gives a single warm/cool score.</p>
@@ -305,10 +376,17 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 5 — Face & Emotion Detection
-    <Slide key={5}>
+    // 6 — Face & Emotion Detection
+    <Slide key={6}>
       <SlideTitle>Feature: Face &amp; Emotion Detection</SlideTitle>
       <SlideSubtitle>Uses MediaPipe FaceMesh (468 landmarks per face) to detect faces and approximate emotional expressions.</SlideSubtitle>
+      <ThumbOverlay label="faces: 1 | mouth_open: 0.62 | brow: 0.71">
+        {/* Single face bounding box */}
+        <div className="absolute border-2 border-green-400 rounded" style={{ top: '8%', left: '25%', width: '45%', height: '55%' }}>
+          <span className="absolute top-1 left-1 text-[9px] bg-green-500 text-white px-1 rounded">mouth_open: 0.62</span>
+          <span className="absolute bottom-1 left-1 text-[9px] bg-green-500 text-white px-1 rounded">brow_raise: 0.71</span>
+        </div>
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">Smile is measured by comparing mouth corner height to lip center height, normalized by mouth width. Higher values indicate upturned corners (smiling).</p>
@@ -334,10 +412,20 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 6 — Pose Detection
-    <Slide key={6}>
+    // 7 — Pose Detection
+    <Slide key={7}>
       <SlideTitle>Feature: Pose Detection</SlideTitle>
       <SlideSubtitle>Uses MediaPipe Pose (33 body landmarks) to measure how much of the frame a person occupies.</SlideSubtitle>
+      <ThumbOverlay label="body_coverage: 0.38 | people: 1">
+        {/* Body coverage bounding box */}
+        <div className="absolute border-2 border-blue-400 bg-blue-400/15 rounded" style={{ top: '3%', left: '18%', width: '55%', height: '92%' }}>
+          <span className="absolute top-1 left-1 text-[9px] bg-blue-500 text-white px-1 rounded">coverage: 38%</span>
+        </div>
+        {/* Hand marker on torch hand */}
+        <div className="absolute w-3.5 h-3.5 rounded-full bg-yellow-400 border-2 border-white" style={{ top: '22%', left: '22%' }}>
+          <span className="absolute -top-4 -left-2 text-[8px] bg-yellow-500 text-white px-1 rounded">hand</span>
+        </div>
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">Body coverage is the bounding box area of all visible pose landmarks divided by total image area. Higher values mean the subject dominates the thumbnail.</p>
@@ -363,10 +451,16 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 7 — Text Detection
-    <Slide key={7}>
+    // 8 — Text Detection
+    <Slide key={8}>
       <SlideTitle>Feature: Text Detection</SlideTitle>
       <SlideSubtitle>Runs Tesseract OCR to detect and measure text overlays on thumbnails.</SlideSubtitle>
+      <ThumbOverlay label="text_area: 0.000 | boxes: 0">
+        {/* No text detected — show the empty state */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="bg-black/60 text-white text-sm px-3 py-1.5 rounded-lg font-mono">No text detected</span>
+        </div>
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">OCR scans each thumbnail, filters results by confidence (&gt;30%), then measures total text bounding box area as a fraction of the image. MrBeast thumbnails average near-zero text.</p>
@@ -391,10 +485,19 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 8 — Depth Estimation
-    <Slide key={8}>
+    // 9 — Depth Estimation
+    <Slide key={9}>
       <SlideTitle>Feature: Depth Estimation</SlideTitle>
       <SlideSubtitle>Uses MiDaS (monocular depth) to estimate foreground/background separation without stereo cameras.</SlideSubtitle>
+      <ThumbOverlay label="depth_contrast: 0.34 | fg_ratio: 0.42">
+        {/* Depth gradient overlay simulating depth map */}
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(to right, rgba(255,0,0,0.25) 0%, rgba(255,165,0,0.2) 30%, rgba(0,100,255,0.25) 70%, rgba(0,0,180,0.3) 100%)',
+        }} />
+        <div className="absolute top-2 right-2 text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded font-mono">
+          <span className="text-red-400">near</span> &rarr; <span className="text-blue-400">far</span>
+        </div>
+      </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">A pre-trained MiDaS model produces a per-pixel depth map from a single image. We then analyze the depth distribution to measure subject isolation and depth contrast.</p>
@@ -421,10 +524,23 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 9 — Title Analysis
-    <Slide key={9}>
+    // 10 — Title Analysis
+    <Slide key={10}>
       <SlideTitle>Feature: Title Analysis</SlideTitle>
       <SlideSubtitle>Parses video titles to detect MrBeast-style linguistic patterns using keyword matching and regex.</SlideSubtitle>
+      <div className="bg-gray-900 rounded-lg px-6 py-4 mb-4 text-lg font-mono">
+        <span className="text-white">I </span>
+        <span className="text-purple-400 font-bold underline">Survived</span>
+        <span className="text-white"> </span>
+        <span className="text-orange-400 font-bold">100</span>
+        <span className="text-white"> Hours In An Ancient Temple</span>
+      </div>
+      <div className="flex gap-3 mb-4 text-xs">
+        <span className="bg-orange-400/20 text-orange-400 px-2 py-1 rounded">has_number (100)</span>
+        <span className="bg-purple-400/20 text-purple-400 px-2 py-1 rounded">has_challenge_framing</span>
+        <span className="bg-blue-400/20 text-blue-400 px-2 py-1 rounded">first_person</span>
+        <span className="bg-pink-400/20 text-pink-400 px-2 py-1 rounded">has_superlative</span>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
           <p className="text-gray-700 mb-4">Titles are tokenized, lowercased, then checked against curated word lists for money references (&ldquo;$10,000&rdquo;), superlatives (&ldquo;craziest&rdquo;), and challenge framing (&ldquo;survive&rdquo;, &ldquo;last to&rdquo;).</p>
@@ -450,8 +566,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 10 — Methodology: Scoring Systems
-    <Slide key={10}>
+    // 11 — Methodology: Scoring Systems
+    <Slide key={11}>
       <SlideTitle>Scoring Systems</SlideTitle>
       <div className="space-y-6 max-w-3xl">
         <div className="bg-white rounded-lg shadow p-5 border-l-4 border-red-500">
@@ -469,8 +585,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 11 — The MrBeast Formula
-    <Slide key={11}>
+    // 12 — The MrBeast Formula
+    <Slide key={12}>
       <SlideTitle>The MrBeast Formula vs. 2015 Baseline</SlideTitle>
       <div className="overflow-x-auto w-full max-w-3xl">
         <table className="w-full text-left border-collapse">
@@ -504,8 +620,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 12 — Weighted Likeness Over Time (PRIMARY METRIC)
-    <Slide key={12}>
+    // 13 — Weighted Likeness Over Time (PRIMARY METRIC)
+    <Slide key={13}>
       <SlideTitle>Weighted Likeness Over Time (Panel Only)</SlideTitle>
       <SlideSubtitle>Normalized weighted score by year. Features weighted by discriminative power &mdash; captures gradual convergence that binary scoring misses.</SlideSubtitle>
       {weightedChartData.length > 0 ? (
@@ -536,8 +652,8 @@ export default function PresentationPage() {
       )}
     </Slide>,
 
-    // 13 — Binary Likeness (secondary reference)
-    <Slide key={13}>
+    // 14 — Binary Likeness (secondary reference)
+    <Slide key={14}>
       <SlideTitle>Binary Likeness Score (Reference)</SlideTitle>
       <SlideSubtitle>Simple 0&ndash;8 threshold scoring. Shows the same upward trend but with less sensitivity to gradual change.</SlideSubtitle>
       {likenessChartData.length > 0 ? (
@@ -563,8 +679,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 14 — Continuous Similarity Trend
-    <Slide key={14}>
+    // 15 — Continuous Similarity Trend
+    <Slide key={15}>
       <SlideTitle>Continuous Similarity Trend (Panel Only)</SlideTitle>
       <SlideSubtitle>Mean z-score similarity to MrBeast centroid (0&ndash;100%)</SlideSubtitle>
       {similarityChartData.length > 0 ? (
@@ -586,8 +702,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 15 — Feature-Level Convergence
-    <Slide key={15}>
+    // 16 — Feature-Level Convergence
+    <Slide key={16}>
       <SlideTitle>Feature-Level Convergence</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
@@ -621,8 +737,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 16 — Gap Closure
-    <Slide key={16}>
+    // 17 — Gap Closure
+    <Slide key={17}>
       <SlideTitle>Gap Closure: How Far Has the Industry Moved?</SlideTitle>
       <SlideSubtitle>Percentage of the 2015-to-MrBeast gap that has been closed by 2024 and 2025 (panel only)</SlideSubtitle>
       {gapClosureData.length > 0 ? (
@@ -644,8 +760,8 @@ export default function PresentationPage() {
       </p>
     </Slide>,
 
-    // 17 — Clustering Analysis
-    <Slide key={17}>
+    // 18 — Clustering Analysis
+    <Slide key={18}>
       <SlideTitle>Clustering Analysis</SlideTitle>
       <SlideSubtitle>K-means clustering with PCA 2D projection (12 signal-bearing features, depth noise removed). PCA explains 43.2% of variance (up from 33.4% with depth).</SlideSubtitle>
       {clusterPoints.length > 0 ? (
@@ -673,8 +789,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 18 — Channel-Level Evolution (slopes)
-    <Slide key={18}>
+    // 19 — Channel-Level Evolution (slopes)
+    <Slide key={19}>
       <SlideTitle>Channel-Level Evolution</SlideTitle>
       <SlideSubtitle>Per-channel likeness trends over time (panel channels, &ge;3 years)</SlideSubtitle>
       {topConvergers.length > 0 ? (
@@ -696,8 +812,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 19 — Danny Duncan
-    <Slide key={19}>
+    // 20 — Danny Duncan
+    <Slide key={20}>
       <SlideTitle>Case Study: Danny Duncan</SlideTitle>
       <SlideSubtitle>Fastest converger &mdash; surpassed MrBeast&apos;s average by 2022</SlideSubtitle>
       {caseStudyData.length > 0 ? (
@@ -722,8 +838,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 20 — ZHC
-    <Slide key={20}>
+    // 21 — ZHC
+    <Slide key={21}>
       <SlideTitle>Case Study: ZHC</SlideTitle>
       <SlideSubtitle>Peaked at 7.40 in 2024 &mdash; highest single-year score of any panel channel</SlideSubtitle>
       {caseStudyData.length > 0 ? (
@@ -748,8 +864,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 21 — FaZe Rug
-    <Slide key={21}>
+    // 22 — FaZe Rug
+    <Slide key={22}>
       <SlideTitle>Case Study: FaZe Rug</SlideTitle>
       <SlideSubtitle>Slow start, rapid adoption &mdash; jumped from 3.1 to 6.6 in three years</SlideSubtitle>
       {caseStudyData.length > 0 ? (
@@ -774,8 +890,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 22 — Sidemen
-    <Slide key={22}>
+    // 23 — Sidemen
+    <Slide key={23}>
       <SlideTitle>Case Study: Sidemen</SlideTitle>
       <SlideSubtitle>Steady climb from 1.3 to 5.1 &mdash; now approaching MrBeast&apos;s average</SlideSubtitle>
       {caseStudyData.length > 0 ? (
@@ -800,8 +916,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 23 — Weighted Feature Importance
-    <Slide key={23}>
+    // 24 — Weighted Feature Importance
+    <Slide key={24}>
       <SlideTitle>Weighted Feature Importance</SlideTitle>
       <SlideSubtitle>Data-derived weights: how discriminative is each feature?</SlideSubtitle>
       {weightFeatureChartData.length > 0 ? (
@@ -820,8 +936,8 @@ export default function PresentationPage() {
       <p className="text-gray-500 mt-3 text-center">Smile (0.442) + Brightness (0.441) = <strong>53%</strong> of total discriminative weight</p>
     </Slide>,
 
-    // 24 — Statistical Validation
-    <Slide key={24}>
+    // 25 — Statistical Validation
+    <Slide key={25}>
       <SlideTitle>Statistical Validation</SlideTitle>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard
@@ -863,8 +979,8 @@ export default function PresentationPage() {
       )}
     </Slide>,
 
-    // 25 — Title Convergence
-    <Slide key={25}>
+    // 26 — Title Convergence
+    <Slide key={26}>
       <SlideTitle>Title Convergence</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
@@ -898,8 +1014,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 26 — Diffusion of Innovation
-    <Slide key={26}>
+    // 27 — Diffusion of Innovation
+    <Slide key={27}>
       <SlideTitle>Diffusion of Innovation Model</SlideTitle>
       <div className="max-w-3xl w-full space-y-4">
         {[
@@ -923,8 +1039,8 @@ export default function PresentationPage() {
       </div>
     </Slide>,
 
-    // 27 — Limitations & Conclusions
-    <Slide key={27}>
+    // 28 — Limitations & Conclusions
+    <Slide key={28}>
       <SlideTitle>Limitations &amp; Conclusions</SlideTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
         <div>
