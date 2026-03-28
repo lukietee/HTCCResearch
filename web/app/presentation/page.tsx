@@ -466,13 +466,61 @@ export default function PresentationPage() {
       <SlideSubtitle>Uses MediaPipe Pose (33 body landmarks) to measure how much of the frame a person occupies.</SlideSubtitle>
       <ThumbOverlay label="body_coverage: 0.38 | people: 1">
         {/* Body coverage bounding box */}
-        <div className="absolute border-2 border-blue-400 bg-blue-400/15 rounded" style={{ top: '3%', left: '18%', width: '55%', height: '92%' }}>
+        <div className="absolute border-2 border-blue-400/30 rounded" style={{ top: '3%', left: '18%', width: '55%', height: '92%' }}>
           <span className="absolute top-1 left-1 text-[9px] bg-blue-500 text-white px-1 rounded">coverage: 38%</span>
         </div>
-        {/* Hand marker on torch hand */}
-        <div className="absolute w-3.5 h-3.5 rounded-full bg-yellow-400 border-2 border-white" style={{ top: '22%', left: '22%' }}>
-          <span className="absolute -top-4 -left-2 text-[8px] bg-yellow-500 text-white px-1 rounded">hand</span>
-        </div>
+        {/* MediaPipe Pose skeleton */}
+        <svg className="absolute inset-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {/* Connections - torso */}
+          <line x1="44" y1="18" x2="56" y2="18" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="44" y1="18" x2="42" y2="42" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="56" y1="18" x2="54" y2="42" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="42" y1="42" x2="54" y2="42" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          {/* Left arm: shoulder → elbow → wrist */}
+          <line x1="44" y1="18" x2="32" y2="30" stroke="#4ade80" strokeWidth="0.6" opacity="0.8" />
+          <line x1="32" y1="30" x2="28" y2="22" stroke="#4ade80" strokeWidth="0.6" opacity="0.8" />
+          {/* Right arm: shoulder → elbow → wrist */}
+          <line x1="56" y1="18" x2="66" y2="28" stroke="#4ade80" strokeWidth="0.6" opacity="0.8" />
+          <line x1="66" y1="28" x2="72" y2="38" stroke="#4ade80" strokeWidth="0.6" opacity="0.8" />
+          {/* Left leg: hip → knee → ankle */}
+          <line x1="42" y1="42" x2="38" y2="62" stroke="#f472b6" strokeWidth="0.6" opacity="0.8" />
+          <line x1="38" y1="62" x2="36" y2="82" stroke="#f472b6" strokeWidth="0.6" opacity="0.8" />
+          {/* Right leg: hip → knee → ankle */}
+          <line x1="54" y1="42" x2="56" y2="62" stroke="#f472b6" strokeWidth="0.6" opacity="0.8" />
+          <line x1="56" y1="62" x2="58" y2="82" stroke="#f472b6" strokeWidth="0.6" opacity="0.8" />
+          {/* Nose / head */}
+          <line x1="50" y1="8" x2="50" y2="14" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="50" y1="14" x2="44" y2="18" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="50" y1="14" x2="56" y2="18" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+
+          {/* Landmark dots */}
+          {/* Head */}
+          <circle cx="50" cy="8" r="1.2" fill="#22d3ee" />
+          <circle cx="47" cy="10" r="0.8" fill="#22d3ee" opacity="0.7" />
+          <circle cx="53" cy="10" r="0.8" fill="#22d3ee" opacity="0.7" />
+          <circle cx="45" cy="11" r="0.8" fill="#22d3ee" opacity="0.7" />
+          <circle cx="55" cy="11" r="0.8" fill="#22d3ee" opacity="0.7" />
+          {/* Neck */}
+          <circle cx="50" cy="14" r="1" fill="#22d3ee" />
+          {/* Shoulders */}
+          <circle cx="44" cy="18" r="1.2" fill="#4ade80" />
+          <circle cx="56" cy="18" r="1.2" fill="#4ade80" />
+          {/* Elbows */}
+          <circle cx="32" cy="30" r="1.2" fill="#4ade80" />
+          <circle cx="66" cy="28" r="1.2" fill="#4ade80" />
+          {/* Wrists */}
+          <circle cx="28" cy="22" r="1.2" fill="#facc15" />
+          <circle cx="72" cy="38" r="1.2" fill="#facc15" />
+          {/* Hips */}
+          <circle cx="42" cy="42" r="1.2" fill="#f472b6" />
+          <circle cx="54" cy="42" r="1.2" fill="#f472b6" />
+          {/* Knees */}
+          <circle cx="38" cy="62" r="1.2" fill="#f472b6" />
+          <circle cx="56" cy="62" r="1.2" fill="#f472b6" />
+          {/* Ankles */}
+          <circle cx="36" cy="82" r="1.2" fill="#f472b6" />
+          <circle cx="58" cy="82" r="1.2" fill="#f472b6" />
+        </svg>
       </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
