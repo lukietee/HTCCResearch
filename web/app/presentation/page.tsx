@@ -381,11 +381,59 @@ export default function PresentationPage() {
       <SlideTitle>Feature: Face &amp; Emotion Detection</SlideTitle>
       <SlideSubtitle>Uses MediaPipe FaceMesh (468 landmarks per face) to detect faces and approximate emotional expressions.</SlideSubtitle>
       <ThumbOverlay label="faces: 1 | mouth_open: 0.62 | brow: 0.71">
-        {/* Single face bounding box */}
-        <div className="absolute border-2 border-green-400 rounded" style={{ top: '8%', left: '25%', width: '45%', height: '55%' }}>
+        {/* Face bounding box */}
+        <div className="absolute border-2 border-green-400/60 rounded" style={{ top: '8%', left: '25%', width: '45%', height: '55%' }}>
           <span className="absolute top-1 left-1 text-[9px] bg-green-500 text-white px-1 rounded">mouth_open: 0.62</span>
           <span className="absolute bottom-1 left-1 text-[9px] bg-green-500 text-white px-1 rounded">brow_raise: 0.71</span>
         </div>
+        {/* FaceMesh landmark dots */}
+        <svg className="absolute pointer-events-none" style={{ top: '8%', left: '25%', width: '45%', height: '55%' }} viewBox="0 0 100 100" preserveAspectRatio="none">
+          {/* Jaw outline */}
+          {[[10,85],[14,82],[18,78],[22,72],[24,65],[25,57],[26,50],[28,44],[32,40],[38,38],[44,37],[50,38],[56,37],[62,38],[68,40],[72,44],[74,50],[75,57],[76,65],[78,72],[82,78],[86,82],[90,85]].map(([x,y],i) => (
+            <circle key={`j${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Left eyebrow */}
+          {[[22,28],[28,24],[35,22],[42,23],[48,26]].map(([x,y],i) => (
+            <circle key={`lb${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Right eyebrow */}
+          {[[52,26],[58,23],[65,22],[72,24],[78,28]].map(([x,y],i) => (
+            <circle key={`rb${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Left eye */}
+          {[[28,35],[32,32],[37,31],[42,32],[44,35],[42,37],[37,38],[32,37]].map(([x,y],i) => (
+            <circle key={`le${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Right eye */}
+          {[[56,35],[58,32],[63,31],[68,32],[72,35],[68,37],[63,38],[58,37]].map(([x,y],i) => (
+            <circle key={`re${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Nose */}
+          {[[50,32],[50,38],[50,44],[50,50],[44,52],[47,54],[50,55],[53,54],[56,52]].map(([x,y],i) => (
+            <circle key={`n${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Outer mouth */}
+          {[[34,62],[38,58],[43,56],[50,57],[57,56],[62,58],[66,62],[62,68],[57,72],[50,73],[43,72],[38,68]].map(([x,y],i) => (
+            <circle key={`mo${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Inner mouth */}
+          {[[38,62],[43,60],[50,61],[57,60],[62,62],[57,66],[50,68],[43,66]].map(([x,y],i) => (
+            <circle key={`mi${i}`} cx={x} cy={y} r="0.8" fill="#22d3ee" opacity="0.9" />
+          ))}
+          {/* Mesh fill - forehead, cheeks, chin area */}
+          {[
+            [30,30],[35,28],[40,28],[45,28],[55,28],[60,28],[65,28],[70,30],
+            [26,40],[30,42],[34,44],[38,46],[42,46],[46,46],[54,46],[58,46],[62,46],[66,44],[70,42],[74,40],
+            [28,50],[32,52],[36,54],[40,56],[60,56],[64,54],[68,52],[72,50],
+            [30,60],[34,60],[66,60],[70,60],
+            [32,70],[36,72],[40,74],[44,76],[50,78],[56,76],[60,74],[64,72],[68,70],
+            [36,80],[42,82],[50,84],[58,82],[64,80],
+            [25,34],[75,34],[26,44],[74,44],[50,46],
+            [34,48],[66,48],[40,64],[60,64],[45,68],[55,68],
+          ].map(([x,y],i) => (
+            <circle key={`f${i}`} cx={x} cy={y} r="0.6" fill="#4ade80" opacity="0.6" />
+          ))}
+        </svg>
       </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
