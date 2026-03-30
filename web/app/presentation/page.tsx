@@ -381,11 +381,59 @@ export default function PresentationPage() {
       <SlideTitle>Feature: Face &amp; Emotion Detection</SlideTitle>
       <SlideSubtitle>Uses MediaPipe FaceMesh (468 landmarks per face) to detect faces and approximate emotional expressions.</SlideSubtitle>
       <ThumbOverlay label="faces: 1 | mouth_open: 0.62 | brow: 0.71">
-        {/* Single face bounding box */}
-        <div className="absolute border-2 border-green-400 rounded" style={{ top: '8%', left: '25%', width: '45%', height: '55%' }}>
+        {/* Face bounding box */}
+        <div className="absolute border-2 border-green-400/60 rounded" style={{ top: '8%', left: '25%', width: '45%', height: '55%' }}>
           <span className="absolute top-1 left-1 text-[9px] bg-green-500 text-white px-1 rounded">mouth_open: 0.62</span>
           <span className="absolute bottom-1 left-1 text-[9px] bg-green-500 text-white px-1 rounded">brow_raise: 0.71</span>
         </div>
+        {/* FaceMesh landmark dots */}
+        <svg className="absolute pointer-events-none" style={{ top: '8%', left: '25%', width: '45%', height: '55%' }} viewBox="0 0 100 100" preserveAspectRatio="none">
+          {/* Jaw outline */}
+          {[[10,85],[14,82],[18,78],[22,72],[24,65],[25,57],[26,50],[28,44],[32,40],[38,38],[44,37],[50,38],[56,37],[62,38],[68,40],[72,44],[74,50],[75,57],[76,65],[78,72],[82,78],[86,82],[90,85]].map(([x,y],i) => (
+            <circle key={`j${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Left eyebrow */}
+          {[[22,28],[28,24],[35,22],[42,23],[48,26]].map(([x,y],i) => (
+            <circle key={`lb${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Right eyebrow */}
+          {[[52,26],[58,23],[65,22],[72,24],[78,28]].map(([x,y],i) => (
+            <circle key={`rb${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Left eye */}
+          {[[28,35],[32,32],[37,31],[42,32],[44,35],[42,37],[37,38],[32,37]].map(([x,y],i) => (
+            <circle key={`le${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Right eye */}
+          {[[56,35],[58,32],[63,31],[68,32],[72,35],[68,37],[63,38],[58,37]].map(([x,y],i) => (
+            <circle key={`re${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Nose */}
+          {[[50,32],[50,38],[50,44],[50,50],[44,52],[47,54],[50,55],[53,54],[56,52]].map(([x,y],i) => (
+            <circle key={`n${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Outer mouth */}
+          {[[34,62],[38,58],[43,56],[50,57],[57,56],[62,58],[66,62],[62,68],[57,72],[50,73],[43,72],[38,68]].map(([x,y],i) => (
+            <circle key={`mo${i}`} cx={x} cy={y} r="0.8" fill="#4ade80" opacity="0.9" />
+          ))}
+          {/* Inner mouth */}
+          {[[38,62],[43,60],[50,61],[57,60],[62,62],[57,66],[50,68],[43,66]].map(([x,y],i) => (
+            <circle key={`mi${i}`} cx={x} cy={y} r="0.8" fill="#22d3ee" opacity="0.9" />
+          ))}
+          {/* Mesh fill - forehead, cheeks, chin area */}
+          {[
+            [30,30],[35,28],[40,28],[45,28],[55,28],[60,28],[65,28],[70,30],
+            [26,40],[30,42],[34,44],[38,46],[42,46],[46,46],[54,46],[58,46],[62,46],[66,44],[70,42],[74,40],
+            [28,50],[32,52],[36,54],[40,56],[60,56],[64,54],[68,52],[72,50],
+            [30,60],[34,60],[66,60],[70,60],
+            [32,70],[36,72],[40,74],[44,76],[50,78],[56,76],[60,74],[64,72],[68,70],
+            [36,80],[42,82],[50,84],[58,82],[64,80],
+            [25,34],[75,34],[26,44],[74,44],[50,46],
+            [34,48],[66,48],[40,64],[60,64],[45,68],[55,68],
+          ].map(([x,y],i) => (
+            <circle key={`f${i}`} cx={x} cy={y} r="0.6" fill="#4ade80" opacity="0.6" />
+          ))}
+        </svg>
       </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
@@ -418,13 +466,61 @@ export default function PresentationPage() {
       <SlideSubtitle>Uses MediaPipe Pose (33 body landmarks) to measure how much of the frame a person occupies.</SlideSubtitle>
       <ThumbOverlay label="body_coverage: 0.38 | people: 1">
         {/* Body coverage bounding box */}
-        <div className="absolute border-2 border-blue-400 bg-blue-400/15 rounded" style={{ top: '3%', left: '18%', width: '55%', height: '92%' }}>
+        <div className="absolute border-2 border-blue-400/30 rounded" style={{ top: '3%', left: '18%', width: '55%', height: '92%' }}>
           <span className="absolute top-1 left-1 text-[9px] bg-blue-500 text-white px-1 rounded">coverage: 38%</span>
         </div>
-        {/* Hand marker on torch hand */}
-        <div className="absolute w-3.5 h-3.5 rounded-full bg-yellow-400 border-2 border-white" style={{ top: '22%', left: '22%' }}>
-          <span className="absolute -top-4 -left-2 text-[8px] bg-yellow-500 text-white px-1 rounded">hand</span>
-        </div>
+        {/* MediaPipe Pose skeleton */}
+        <svg className="absolute inset-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {/* Connections - torso */}
+          <line x1="44" y1="18" x2="56" y2="18" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="44" y1="18" x2="42" y2="42" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="56" y1="18" x2="54" y2="42" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="42" y1="42" x2="54" y2="42" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          {/* Left arm: shoulder → elbow → wrist */}
+          <line x1="44" y1="18" x2="32" y2="30" stroke="#4ade80" strokeWidth="0.6" opacity="0.8" />
+          <line x1="32" y1="30" x2="28" y2="22" stroke="#4ade80" strokeWidth="0.6" opacity="0.8" />
+          {/* Right arm: shoulder → elbow → wrist */}
+          <line x1="56" y1="18" x2="66" y2="28" stroke="#4ade80" strokeWidth="0.6" opacity="0.8" />
+          <line x1="66" y1="28" x2="72" y2="38" stroke="#4ade80" strokeWidth="0.6" opacity="0.8" />
+          {/* Left leg: hip → knee → ankle */}
+          <line x1="42" y1="42" x2="38" y2="62" stroke="#f472b6" strokeWidth="0.6" opacity="0.8" />
+          <line x1="38" y1="62" x2="36" y2="82" stroke="#f472b6" strokeWidth="0.6" opacity="0.8" />
+          {/* Right leg: hip → knee → ankle */}
+          <line x1="54" y1="42" x2="56" y2="62" stroke="#f472b6" strokeWidth="0.6" opacity="0.8" />
+          <line x1="56" y1="62" x2="58" y2="82" stroke="#f472b6" strokeWidth="0.6" opacity="0.8" />
+          {/* Nose / head */}
+          <line x1="50" y1="8" x2="50" y2="14" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="50" y1="14" x2="44" y2="18" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+          <line x1="50" y1="14" x2="56" y2="18" stroke="#22d3ee" strokeWidth="0.6" opacity="0.8" />
+
+          {/* Landmark dots */}
+          {/* Head */}
+          <circle cx="50" cy="8" r="1.2" fill="#22d3ee" />
+          <circle cx="47" cy="10" r="0.8" fill="#22d3ee" opacity="0.7" />
+          <circle cx="53" cy="10" r="0.8" fill="#22d3ee" opacity="0.7" />
+          <circle cx="45" cy="11" r="0.8" fill="#22d3ee" opacity="0.7" />
+          <circle cx="55" cy="11" r="0.8" fill="#22d3ee" opacity="0.7" />
+          {/* Neck */}
+          <circle cx="50" cy="14" r="1" fill="#22d3ee" />
+          {/* Shoulders */}
+          <circle cx="44" cy="18" r="1.2" fill="#4ade80" />
+          <circle cx="56" cy="18" r="1.2" fill="#4ade80" />
+          {/* Elbows */}
+          <circle cx="32" cy="30" r="1.2" fill="#4ade80" />
+          <circle cx="66" cy="28" r="1.2" fill="#4ade80" />
+          {/* Wrists */}
+          <circle cx="28" cy="22" r="1.2" fill="#facc15" />
+          <circle cx="72" cy="38" r="1.2" fill="#facc15" />
+          {/* Hips */}
+          <circle cx="42" cy="42" r="1.2" fill="#f472b6" />
+          <circle cx="54" cy="42" r="1.2" fill="#f472b6" />
+          {/* Knees */}
+          <circle cx="38" cy="62" r="1.2" fill="#f472b6" />
+          <circle cx="56" cy="62" r="1.2" fill="#f472b6" />
+          {/* Ankles */}
+          <circle cx="36" cy="82" r="1.2" fill="#f472b6" />
+          <circle cx="58" cy="82" r="1.2" fill="#f472b6" />
+        </svg>
       </ThumbOverlay>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
         <div>
