@@ -132,9 +132,9 @@ Score: **3.33** (2015) → **6.47** (2025) | Slope: **+0.355/yr** | Plateaued fo
 
 Score: **1.29** (2016) → **5.07** (2025) | Slope: **+0.314/yr** | Now at 94% of MrBeast's average
 
-| 2015 | 2023 |
+| 2016 | 2025 |
 |------|------|
-| ![Sidemen 2015](assets/sidemen_0.jpg) | ![Sidemen 2023](assets/sidemen_1.jpg) |
+| ![Sidemen 2016](assets/sidemen_0.jpg) | ![Sidemen 2025](assets/sidemen_1.jpg) |
 
 ### Channel-Level Convergence Rates
 
